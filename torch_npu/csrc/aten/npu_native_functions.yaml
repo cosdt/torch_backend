@@ -1,0 +1,89 @@
+backend: NPU
+cpp_namespace: at_npu::native
+
+supported:
+  - _local_scalar_dense
+  - _pin_memory
+  - _reshape_alias
+  - as_strided
+  - as_strided_
+  - bartlett_window
+  - bartlett_window.periodic
+  - blackman_window
+  - blackman_window.periodic
+  - func: clone
+    op_api: True
+  - contiguous
+  - func: copy_
+    op_api: True
+  - copy_memory_
+  - empty.memory_format
+  - empty_like
+  - empty_strided
+  - empty_with_format
+  - empty_with_format.names
+  - full
+  - full.names
+  - full.out
+  - hamming_window
+  - hamming_window.periodic
+  - hamming_window.periodic_alpha
+  - hamming_window.periodic_alpha_beta
+  - hann_window
+  - hann_window.periodic
+  - is_pinned
+  - is_set_to
+  - isnan
+  - new_empty_strided
+  - record_stream
+  - resize_
+  - resize_as_
+  - scalar_tensor
+  - set_
+  - set_.source_Storage
+  - set_.source_Storage_storage_offset
+  - set_.source_Tensor
+  - squeeze
+  - squeeze.dim
+  - to.device
+  - to.dtype
+  - to.dtype_layout
+  - to.other
+  - tril_indices
+  - triu_indices
+  - unfold
+  - unsqueeze
+  - view
+  - _copy_from_and_resize
+  - flatten_dense_tensors
+
+custom:
+  - func: npu_change_data_ptr(Tensor dst, Tensor src, int index) -> int
+  - func: get_npu_format(Tensor self) -> int
+  - func: npu_format_cast.Tensor(Tensor self, Tensor dst) -> Tensor
+    exposed: True
+  - func: npu_format_cast_.acl_format(Tensor(a!) self, int acl_format) -> Tensor(a!)
+    exposed: True
+  - func: npu_format_cast_(Tensor(a!) self, Tensor src) -> Tensor(a!)
+    exposed: True
+  - func: empty_with_format(int[] size, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None, int acl_format=2) -> Tensor
+    dispatch:
+      CompositeExplicitAutograd: empty_with_format
+    exposed: True
+  - func: unsafe_empty_with_format(int[] size, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None, int acl_format=2, bool keep_format=False) -> Tensor
+    dispatch:
+      CompositeExplicitAutograd: empty_with_format
+  - func: empty_with_format.names(int[] size, Dimname[]? names, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None, int acl_format=2) -> Tensor
+    dispatch:
+      CompositeExplicitAutograd: empty_with_format
+    exposed: True
+  - func: copy_memory_(Tensor(a!) self, Tensor src, bool non_blocking=False) -> Tensor(a!)
+    exposed: True
+  - func: get_storage_size(Tensor self) -> int
+  - func: npu_format_cast(Tensor self, int acl_format) -> Tensor
+    exposed: True
+  - func: _npu_format_cast(Tensor self, int acl_format) -> Tensor
+
+symint:
+  - as_strided_
+  - new_empty_strided
