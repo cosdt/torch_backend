@@ -23,7 +23,6 @@ from torch.nn.parallel.scatter_gather import gather, scatter_kwargs
 from torch.nn.parallel.replicate import replicate
 
 import torch_npu
-from torch_npu.npu.amp.autocast_mode import autocast
 from torch_npu.utils.syncbatchnorm import SyncBatchNorm as sync_batch_norm
 from torch_npu.utils.error_code import ErrCode, pta_error
 

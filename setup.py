@@ -515,8 +515,6 @@ def main():
             ],
         },
         install_requires=install_requires,
-        url="https://pytorch.org/",
-        download_url="https://github.com/pytorch/pytorch/tags",
         classifiers=[
             "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Developers",
