@@ -1,14 +1,15 @@
 import glob
+import shutil
 import multiprocessing
 import multiprocessing.pool
 import os
 import re
-import shutil
 import stat
 import subprocess
 import sys
 import traceback
 import platform
+import setuptools
 import time
 from pathlib import Path
 from typing import Union
@@ -17,45 +18,39 @@ import distutils.ccompiler
 import distutils.command.clean
 from sysconfig import get_paths
 from distutils.version import LooseVersion
-from distutils.command.build_py import build_py
-from setuptools.command.build_ext import build_ext
-from setuptools.command.install import install
 from setuptools import setup, distutils, Extension
-from setuptools.command.build_clib import build_clib
-from setuptools.command.egg_info import egg_info
-from wheel.bdist_wheel import bdist_wheel
+from setuptools.dist import Distribution
+from setuptools import Extension, find_packages, setup
 
 from codegen.utils import PathManager
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-THIRD_PARTY_PATH = os.path.join(BASE_DIR, "third_party")
 PathManager.check_directory_path_readable(os.path.join(BASE_DIR, "version.txt"))
+
 with open(os.path.join(BASE_DIR, "version.txt")) as version_f:
     VERSION = version_f.read().strip()
 UNKNOWN = "Unknown"
-BUILD_PERMISSION = stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP
 
+cwd = os.path.dirname(os.path.abspath(__file__))
 
 
 def get_submodule_folders():
-    git_modules_path = os.path.join(BASE_DIR, ".gitmodules")
-    default_modules_path = [
-        os.path.join(THIRD_PARTY_PATH, name)
-        for name in [
-            "op-plugin",
-        ]
-    ]
-    if not os.path.exists(git_modules_path):
-        return default_modules_path
+    git_modules_path = os.path.join(cwd, ".gitmodules")
     with open(git_modules_path) as f:
         return [
-            os.path.join(BASE_DIR, line.split("=", 1)[1].strip())
-            for line in f.readlines()
+            os.path.join(cwd, line.split("=", 1)[1].strip())
+            for line in f
             if line.strip().startswith("path")
         ]
 
 
 def check_submodules():
+    def check_for_files(folder, files):
+        if not any(os.path.exists(os.path.join(folder, f)) for f in files):
+            print("Could not find any of {} in {}".format(", ".join(files), folder))
+            print("Did you run 'git submodule update --init --recursive'?")
+            sys.exit(1)
+
     def not_exists_or_empty(folder):
         return not os.path.exists(folder) or (
             os.path.isdir(folder) and len(os.listdir(folder)) == 0
@@ -67,22 +62,33 @@ def check_submodules():
         try:
             print(" --- Trying to initialize submodules")
             start = time.time()
-            subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"], cwd=BASE_DIR)  # Compliant
+            subprocess.check_call(
+                ["git", "submodule", "update", "--init", "--recursive"], cwd=cwd
+            )
             end = time.time()
             print(f" --- Submodule initialization took {end - start:.2f} sec")
         except Exception:
             print(" --- Submodule initalization failed")
-            print("Please run:\n\tgit submodule init && git submodule update")
+            print("Please run:\n\tgit submodule update --init --recursive")
             sys.exit(1)
+    for folder in folders:
+        check_for_files(
+            folder,
+            [
+                "CMakeLists.txt",
+                "Makefile",
+                "setup.py",
+                "LICENSE",
+                "LICENSE.md",
+                "LICENSE.txt",
+            ],
+        )
 
 
-check_submodules()
-
-
-def get_sha(pytorch_root: Union[str, Path]) -> str:
+def get_sha(root: Union[str, Path]) -> str:
     try:
         return (
-            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=pytorch_root)  # Compliant
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root)
             .decode("ascii")
             .strip()
         )
@@ -90,24 +96,20 @@ def get_sha(pytorch_root: Union[str, Path]) -> str:
         return UNKNOWN
 
 
-def generate_torch_npu_version():
-    torch_npu_root = Path(__file__).parent
-    version_path = torch_npu_root / "torch_npu" / "version.py"
-    if version_path.exists():
-        version_path.unlink()
+def generate_version(path: Union[str, Path]):
+    root = Path(__file__).parent
+    path = root.joinpath(path)
+    if path.exists():
+        path.unlink()
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
     modes = stat.S_IWUSR | stat.S_IRUSR
-    sha = get_sha(torch_npu_root)
+    sha = get_sha(root)
     if os.getenv("BUILD_WITHOUT_SHA") is None:
         global VERSION
         VERSION += "+git" + sha[:7]
-    with os.fdopen(os.open(version_path, flags, modes), 'w') as f:
+    with os.fdopen(os.open(path, flags, modes), "w") as f:
         f.write("__version__ = '{version}'\n".format(version=VERSION))
         f.write("git_version = {}\n".format(repr(sha)))
-    os.chmod(version_path, mode=stat.S_IRUSR | stat.S_IEXEC | stat.S_IRGRP | stat.S_IXGRP)
-
-
-generate_torch_npu_version()
 
 
 def which(thefile):
@@ -115,8 +117,8 @@ def which(thefile):
     for d in path:
         fname = os.path.join(d, thefile)
         fnames = [fname]
-        if sys.platform == 'win32':
-            exts = os.environ.get('PATHEXT', '').split(os.pathsep)
+        if sys.platform == "win32":
+            exts = os.environ.get("PATHEXT", "").split(os.pathsep)
             fnames += [fname + ext for ext in exts]
         for name in fnames:
             if os.access(name, os.F_OK | os.X_OK) and not os.path.isdir(name):
@@ -126,47 +128,49 @@ def which(thefile):
 
 def get_cmake_command():
     def _get_version(cmd):
-        for line in subprocess.check_output([cmd, '--version']).decode('utf-8').split('\n'):
-            if 'version' in line:
-                return LooseVersion(line.strip().split(' ')[2])
-        raise RuntimeError('no version found')
+        for line in (
+            subprocess.check_output([cmd, "--version"]).decode("utf-8").split("\n")
+        ):
+            if "version" in line:
+                return LooseVersion(line.strip().split(" ")[2])
+        raise RuntimeError("no version found")
+
     "Returns cmake command."
-    cmake_command = 'cmake'
-    if platform.system() == 'Windows':
+    cmake_command = "cmake"
+    if platform.system() == "Windows":
         return cmake_command
-    cmake3 = which('cmake3')
-    cmake = which('cmake')
+    cmake3 = which("cmake3")
+    cmake = which("cmake")
     if cmake3 is not None and _get_version(cmake3) >= LooseVersion("3.18.0"):
-        cmake_command = 'cmake3'
+        cmake_command = "cmake3"
         return cmake_command
     elif cmake is not None and _get_version(cmake) >= LooseVersion("3.18.0"):
         return cmake_command
     else:
-        raise RuntimeError('no cmake or cmake3 with version >= 3.18.0 found')
+        raise RuntimeError("no cmake or cmake3 with version >= 3.18.0 found")
 
 
 def get_build_type():
-    build_type = 'Release'
-    if os.getenv('DEBUG', default='0').upper() in ['ON', '1', 'YES', 'TRUE', 'Y']:
-        build_type = 'Debug'
+    build_type = "Release"
+    if os.getenv("DEBUG", default="0").upper() in ["ON", "1", "YES", "TRUE", "Y"]:
+        build_type = "Debug"
 
-    if os.getenv('REL_WITH_DEB_INFO', default='0').upper() in ['ON', '1', 'YES', 'TRUE', 'Y']:
-        build_type = 'RelWithDebInfo'
+    if os.getenv("REL_WITH_DEB_INFO", default="0").upper() in [
+        "ON",
+        "1",
+        "YES",
+        "TRUE",
+        "Y",
+    ]:
+        build_type = "RelWithDebInfo"
 
     return build_type
-
-
-def _get_build_mode():
-    for i in range(1, len(sys.argv)):
-        if not sys.argv[i].startswith('-'):
-            return sys.argv[i]
-
-    raise RuntimeError("Run setup.py without build mode.")
 
 
 def get_pytorch_dir():
     try:
         import torch
+
         return os.path.dirname(os.path.realpath(torch.__file__))
     except Exception:
         _, _, exc_traceback = sys.exc_info()
@@ -176,86 +180,66 @@ def get_pytorch_dir():
 
 def generate_bindings_code(base_dir):
     python_execute = sys.executable
-    generate_code_cmd = ["bash", os.path.join(base_dir, 'generate_code.sh'), python_execute, VERSION]
+    generate_code_cmd = [
+        "bash",
+        os.path.join(base_dir, "generate_code.sh"),
+        python_execute,
+        VERSION,
+    ]
     if subprocess.call(generate_code_cmd) != 0:  # Compliant
         print(
-            'Failed to generate ATEN bindings: {}'.format(generate_code_cmd),
-            file=sys.stderr)
+            "Failed to generate ATEN bindings: {}".format(generate_code_cmd),
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 
 def build_stub(base_dir):
-    build_stub_cmd = ["sh", os.path.join(base_dir, 'third_party/acl/libs/build_stub.sh')]
+    build_stub_cmd = [
+        "sh",
+        os.path.join(base_dir, "third_party/acl/libs/build_stub.sh"),
+    ]
     if subprocess.call(build_stub_cmd) != 0:
-        print(
-            'Failed to build stub: {}'.format(build_stub_cmd),
-            file=sys.stderr)
+        print("Failed to build stub: {}".format(build_stub_cmd), file=sys.stderr)
         sys.exit(1)
 
 
-def check_torchair_valid(base_dir):
-    # build with submodule of torchair, if path of torchair is valid
-    torchair_path = os.path.join(base_dir, 'third_party/torchair/torchair')
-    return os.path.exists(torchair_path) and (
-        os.path.isdir(torchair_path) and len(os.listdir(torchair_path)) != 0
-    )
-
-
-def check_tensorpipe_valid(base_dir):
-    tensorpipe_path = os.path.join(base_dir, 'third_party/Tensorpipe/tensorpipe')
-    return os.path.exists(tensorpipe_path)
-
-
-def generate_dbg_files_and_strip():
-    library_dir = Path(BASE_DIR).joinpath("build/packages/torch_npu")
-    dbg_dir = Path(BASE_DIR).joinpath("build/dbg")
-    os.makedirs(dbg_dir, exist_ok=True)
-    library_files = [Path(i) for i in library_dir.rglob('*.so')]
-    for library_file in library_files:
-        subprocess.check_call(["eu-strip", library_file, "-f",
-                                str(dbg_dir.joinpath(library_file.name)) + ".debug"], cwd=BASE_DIR)  # Compliant
-
-
-def patchelf_dynamic_library():
-    library_dir = Path(BASE_DIR).joinpath("build/packages/torch_npu/lib")
-    library_files = [str(i) for i in library_dir.rglob('*.so')]
-    for library_file in library_files:
-        subprocess.check_call(["patchelf", "--remove-needed", "libgomp.so.1", library_file], cwd=BASE_DIR)  # Compliant
-
-
 def CppExtension(name, sources, *args, **kwargs):
-    r'''
+    r"""
     Creates a :class:`setuptools.Extension` for C++.
-    '''
+    """
     pytorch_dir = get_pytorch_dir()
-    temp_include_dirs = kwargs.get('include_dirs', [])
-    temp_include_dirs.append(os.path.join(pytorch_dir, 'include'))
-    temp_include_dirs.append(os.path.join(pytorch_dir, 'include/torch/csrc/api/include'))
-    kwargs['include_dirs'] = temp_include_dirs
+    temp_include_dirs = kwargs.get("include_dirs", [])
+    temp_include_dirs.append(os.path.join(pytorch_dir, "include"))
+    temp_include_dirs.append(
+        os.path.join(pytorch_dir, "include/torch/csrc/api/include")
+    )
+    kwargs["include_dirs"] = temp_include_dirs
 
-    temp_library_dirs = kwargs.get('library_dirs', [])
-    temp_library_dirs.append(os.path.join(pytorch_dir, 'lib'))
+    temp_library_dirs = kwargs.get("library_dirs", [])
+    temp_library_dirs.append(os.path.join(pytorch_dir, "lib"))
     temp_library_dirs.append(os.path.join(BASE_DIR, "third_party/acl/libs"))
-    kwargs['library_dirs'] = temp_library_dirs
+    temp_library_dirs.append(os.path.join(BASE_DIR, "torch_npu/lib"))
+    kwargs["library_dirs"] = temp_library_dirs
 
-    libraries = kwargs.get('libraries', [])
-    libraries.append('c10')
-    libraries.append('torch')
-    libraries.append('torch_cpu')
-    libraries.append('torch_python')
-    libraries.append('hccl')
-    kwargs['libraries'] = libraries
-    kwargs['language'] = 'c++'
+    libraries = kwargs.get("libraries", [])
+    libraries.append("c10")
+    libraries.append("torch")
+    libraries.append("torch_cpu")
+    libraries.append("torch_python")
+    libraries.append("hccl")
+    kwargs["libraries"] = libraries
+    kwargs["language"] = "c++"
     return Extension(name, sources, *args, **kwargs)
 
 
 class Clean(distutils.command.clean.clean):
 
     def run(self):
-        f_ignore = open('.gitignore', 'r')
+        f_ignore = open(".gitignore", "r")
         ignores = f_ignore.read()
-        pat = re.compile(r'^#( BEGIN NOT-CLEAN-FILES )?')
-        for wildcard in filter(None, ignores.split('\n')):
+        pat = re.compile(r"^#( BEGIN NOT-CLEAN-FILES )?")
+        for wildcard in filter(None, ignores.split("\n")):
             match = pat.match(wildcard)
             if match:
                 if match.group(1):
@@ -270,21 +254,23 @@ class Clean(distutils.command.clean.clean):
                         try:
                             shutil.rmtree(filename, ignore_errors=True)
                         except Exception as err:
-                            raise RuntimeError(f"Failed to remove path: {filename}") from err
+                            raise RuntimeError(
+                                f"Failed to remove path: {filename}"
+                            ) from err
         f_ignore.close()
 
         # It's an old-style class in Python 2.7...
         distutils.command.clean.clean.run(self)
 
         remove_files = [
-            'torch_npu/csrc/aten/RegisterCPU.cpp',
-            'torch_npu/csrc/aten/RegisterNPU.cpp',
-            'torch_npu/csrc/aten/RegisterAutogradNPU.cpp',
-            'torch_npu/csrc/aten/NPUNativeFunctions.h',
-            'torch_npu/csrc/aten/CustomRegisterSchema.cpp',
-            'torch_npu/csrc/aten/ForeachRegister.cpp',
-            'torch_npu/utils/custom_ops.py',
-            'torch_npu/version.py',
+            "torch_npu/csrc/aten/RegisterCPU.cpp",
+            "torch_npu/csrc/aten/RegisterNPU.cpp",
+            "torch_npu/csrc/aten/RegisterAutogradNPU.cpp",
+            "torch_npu/csrc/aten/NPUNativeFunctions.h",
+            "torch_npu/csrc/aten/CustomRegisterSchema.cpp",
+            "torch_npu/csrc/aten/ForeachRegister.cpp",
+            "torch_npu/utils/custom_ops.py",
+            "torch_npu/version.py",
         ]
         for remove_file in remove_files:
             file_path = os.path.join(BASE_DIR, remove_file)
@@ -292,91 +278,33 @@ class Clean(distutils.command.clean.clean):
                 os.remove(file_path)
 
 
-class CPPLibBuild(build_clib, object):
-    def run(self):
-        cmake = get_cmake_command()
-
-        if cmake is None:
-            raise RuntimeError(
-                "CMake must be installed to build the following extensions: " +
-                ", ".join(e.name for e in self.extensions))
-        self.cmake = cmake
-
-        build_dir = os.path.join(BASE_DIR, "build")
-        build_type_dir = os.path.join(build_dir)
-        output_lib_path = os.path.join(build_type_dir, "packages/torch_npu/lib")
-        os.makedirs(build_type_dir, exist_ok=True)
-        os.chmod(build_type_dir, mode=BUILD_PERMISSION)
-        os.makedirs(output_lib_path, exist_ok=True)
-        self.build_lib = os.path.relpath(os.path.join(build_dir, "packages/torch_npu"))
-        self.build_temp = os.path.relpath(build_type_dir)
-
-        cmake_args = [
-            '-DCMAKE_BUILD_TYPE=' + get_build_type(),
-            '-DCMAKE_INSTALL_PREFIX=' + os.path.realpath(output_lib_path),
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.realpath(output_lib_path),
-            '-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=' + os.path.realpath(output_lib_path),
-            '-DTORCHNPU_INSTALL_LIBDIR=' + os.path.realpath(output_lib_path),
-            '-DPYTHON_INCLUDE_DIR=' + get_paths().get('include'),
-            '-DTORCH_VERSION=' + VERSION,
-            '-DPYTORCH_INSTALL_DIR=' + get_pytorch_dir()]
-
-
-        build_args = ['-j', str(multiprocessing.cpu_count())]
-
-        subprocess.check_call([self.cmake, BASE_DIR] + cmake_args, cwd=build_type_dir, env=os.environ)
-        for base_dir, dirs, files in os.walk(build_type_dir):
-            for dir_name in dirs:
-                dir_path = os.path.join(base_dir, dir_name)
-                os.chmod(dir_path, mode=BUILD_PERMISSION)
-            for file_name in files:
-                file_path = os.path.join(base_dir, file_name)
-                os.chmod(file_path, mode=BUILD_PERMISSION)
-
-        subprocess.check_call(['make'] + build_args, cwd=build_type_dir, env=os.environ)
-
-
-class Build(build_ext, object):
-
-    def run(self):
-        self.run_command('build_clib')
-        self.build_lib = os.path.relpath(os.path.join(BASE_DIR, "build/packages"))
-        self.build_temp = os.path.relpath(os.path.join(BASE_DIR, "build"))
-        self.library_dirs.append(
-            os.path.relpath(os.path.join(BASE_DIR, "build/packages/torch_npu/lib")))
-        super(Build, self).run()
-
-
-class InstallCmd(install):
-
-    def finalize_options(self) -> None:
-        self.build_lib = os.path.relpath(os.path.join(BASE_DIR, "build/packages"))
-        return super(InstallCmd, self).finalize_options()
-
-
-def add_ops_files(base_dir, file_list):
-    # add ops header files
-    plugin_path = os.path.join(base_dir, 'third_party/op-plugin/op_plugin/include')
-    if os.path.exists(plugin_path):
-        file_list.append('third_party/op-plugin/op_plugin/include/*.h')
-    return
-
-
 def get_src_py_and_dst():
     ret = []
-    generated_python_files = glob.glob(
-        os.path.join(BASE_DIR, "torch_npu", '**/*.py'),
-        recursive=True) + glob.glob(
-        os.path.join(BASE_DIR, "torch_npu", '**/*.yaml'),
-        recursive=True) + glob.glob(
-        os.path.join(BASE_DIR, "torch_npu", 'acl.json'),
-        recursive=True) + glob.glob(
-        os.path.join(BASE_DIR, "torch_npu", 'contrib/apis_config.json'),
-        recursive=True)
-    for src in generated_python_files:
+
+    # ret = glob.glob(
+    #     os.path.join(BASE_DIR, "torch_npu", '**/*.yaml'),
+    #     recursive=True) + glob.glob(
+    #     os.path.join(BASE_DIR, "torch_npu", 'acl.json'),
+    #     recursive=True) + glob.glob(
+    #     os.path.join(BASE_DIR, "torch_npu", 'contrib/apis_config.json'),
+    #     recursive=True)
+
+    header_files = [
+        "third_party/acl/inc/*/*.h",
+        "third_party/acl/inc/*/*/*.h",
+        "third_party/op-plugin/op_plugin/include/*.h",
+    ]
+    glob_header_files = []
+    for regex_pattern in header_files:
+        glob_header_files += glob.glob(
+            os.path.join(BASE_DIR, regex_pattern), recursive=True
+        )
+
+    for src in glob_header_files:
         dst = os.path.join(
-            os.path.join(BASE_DIR, "build/packages/torch_npu"),
-            os.path.relpath(src, os.path.join(BASE_DIR, "torch_npu")))
+            os.path.join(BASE_DIR, "torch_npu/include/third_party"),
+            os.path.relpath(src, os.path.join(BASE_DIR, "third_party")),
+        )
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         ret.append((src, dst))
 
@@ -386,215 +314,228 @@ def get_src_py_and_dst():
         "torch_npu/csrc/*/*/*.h",
         "torch_npu/csrc/*/*/*/*.h",
         "torch_npu/csrc/*/*/*/*/*.h",
-        "third_party/acl/inc/*/*.h",
-        "third_party/acl/inc/*/*/*.h"
     ]
-    add_ops_files(BASE_DIR, header_files)
     glob_header_files = []
     for regex_pattern in header_files:
-        glob_header_files += glob.glob(os.path.join(BASE_DIR, regex_pattern), recursive=True)
+        glob_header_files += glob.glob(
+            os.path.join(BASE_DIR, regex_pattern), recursive=True
+        )
 
     for src in glob_header_files:
         dst = os.path.join(
-            os.path.join(BASE_DIR, "build/packages/torch_npu/include/torch_npu"),
-            os.path.relpath(src, os.path.join(BASE_DIR, "torch_npu")))
+            os.path.join(BASE_DIR, "torch_npu/include/torch_npu"),
+            os.path.relpath(src, os.path.join(BASE_DIR, "torch_npu")),
+        )
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         ret.append((src, dst))
 
-    torch_header_files = [
-        "*/*.h",
-        "*/*/*.h",
-        "*/*/*/*.h",
-        "*/*/*/*/*.h",
-        "*/*/*/*/*/*.h"
-    ]
-    torch_glob_header_files = []
-    for regex_pattern in torch_header_files:
-        torch_glob_header_files += glob.glob(os.path.join(BASE_DIR, "patch/include", regex_pattern), recursive=True)
-
-    for src in torch_glob_header_files:
-        dst = os.path.join(
-            os.path.join(BASE_DIR, "build/packages/torch_npu/include"),
-            os.path.relpath(src, os.path.join(BASE_DIR, "patch/include")))
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        ret.append((src, dst))
-    return ret
+    for src, dst in ret:
+        shutil.copyfile(src, dst)
 
 
-class EggInfoBuild(egg_info, object):
-    def finalize_options(self):
-        self.egg_base = os.path.relpath(os.path.join(BASE_DIR, "build/packages"))
-        ret = get_src_py_and_dst()
-        for src, dst in ret:
-            self.copy_file(src, dst)
-        super(EggInfoBuild, self).finalize_options()
+def build_deps():
+    check_submodules()
 
-
-class PythonPackageBuild(build_py, object):
-    def run(self) -> None:
-        ret = get_src_py_and_dst()
-        for src, dst in ret:
-            self.copy_file(src, dst)
-        super(PythonPackageBuild, self).finalize_options()
-
-
-class BdistWheelBuild(bdist_wheel):
-    def run(self):
-        if which('patchelf') is not None:
-            patchelf_dynamic_library()
-
-        if not DEBUG and which('eu-strip') is not None:
-            generate_dbg_files_and_strip()
-
-        torch_dependencies = ["libc10.so", "libtorch.so", "libtorch_cpu.so", "libtorch_python.so"]
-        cann_dependencies = ["libhccl.so", "libascendcl.so", "libacl_op_compiler.so", "libge_runner.so",
-                             "libgraph.so", "libacl_tdt_channel.so", "libfmk_parser.so", "libascend_protobuf.so"]
-        other_dependencies = ["libtorch_npu.so", "libnpu_profiler.so", "libgomp.so.1"]
-
-        dependencies = torch_dependencies + cann_dependencies + other_dependencies
-
-        self.run_command('egg_info')
-        bdist_wheel.run(self)
-
-        if is_manylinux:
-            file = glob.glob(os.path.join(self.dist_dir, "*linux*.whl"))[0]
-
-            auditwheel_cmd = ["auditwheel", "-v", "repair", "-w", self.dist_dir, file]
-            for i in dependencies:
-                auditwheel_cmd += ["--exclude", i]
-
-            try:
-                subprocess.run(auditwheel_cmd, check=True, stdout=subprocess.PIPE)
-            finally:
-                os.remove(file)
-
-
-build_mode = _get_build_mode()
-if build_mode not in ['clean']:
-    # Generate bindings code, including RegisterNPU.cpp & NPUNativeFunctions.h.
     generate_bindings_code(BASE_DIR)
-    if Path(BASE_DIR).joinpath("third_party/Tensorpipe/third_party/acl/libs").exists():
-        build_stub(Path(BASE_DIR).joinpath("third_party/Tensorpipe"))
     build_stub(BASE_DIR)
 
-# Setup include directories folders.
-include_directories = [
-    BASE_DIR,
-    os.path.join(BASE_DIR, 'patch/include'),
-    os.path.join(BASE_DIR, 'third_party/hccl/inc'),
-    os.path.join(BASE_DIR, 'third_party/acl/inc')
-]
+    cmake = get_cmake_command()
 
-extra_link_args = []
+    if cmake is None:
+        raise RuntimeError(
+            "CMake must be installed to build the following extensions: "
+            + ", ".join(e.name for e in self.extensions)
+        )
 
-DEBUG = (os.getenv('DEBUG', default='').upper() in ['ON', '1', 'YES', 'TRUE', 'Y'])
+    build_dir = os.path.join(BASE_DIR, "build")
+    build_type_dir = os.path.join(build_dir)
+    os.makedirs(build_type_dir, exist_ok=True)
 
-extra_compile_args = [
-    '-std=c++17',
-    '-Wno-sign-compare',
-    '-Wno-deprecated-declarations',
-    '-Wno-return-type'
-]
+    output_lib_path = os.path.join(BASE_DIR, "torch_npu")
+    os.makedirs(output_lib_path, exist_ok=True)
 
-if re.match(r'clang', os.getenv('CC', '')):
-    extra_compile_args += [
-        '-Wno-macro-redefined',
-        '-Wno-return-std-move',
+    cmake_args = [
+        "-DCMAKE_BUILD_TYPE=" + get_build_type(),
+        "-DCMAKE_INSTALL_PREFIX=" + os.path.realpath(output_lib_path),
+        "-DPYTHON_INCLUDE_DIR=" + get_paths().get("include"),
+        "-DTORCH_VERSION=" + VERSION,
+        "-DPYTORCH_INSTALL_DIR=" + get_pytorch_dir(),
     ]
 
-if DEBUG:
-    extra_compile_args += ['-O0', '-g']
-    extra_link_args += ['-O0', '-g', '-Wl,-z,now']
+    subprocess.check_call(
+        [cmake, BASE_DIR] + cmake_args, cwd=build_type_dir, env=os.environ
+    )
+
+    build_args = [
+        "--build",
+        ".",
+        "--target",
+        "install",
+        "--",
+    ]
+
+    build_args += ["-j", str(multiprocessing.cpu_count())]
+
+    command = [cmake] + build_args
+    subprocess.check_call(command, cwd=build_type_dir, env=os.environ)
+
+    get_src_py_and_dst()
+
+
+def configure_extension_build():
+    include_directories = [
+        BASE_DIR,
+        os.path.join(BASE_DIR, "patch/include"),
+        os.path.join(BASE_DIR, "third_party/hccl/inc"),
+        os.path.join(BASE_DIR, "third_party/acl/inc"),
+    ]
+
+    extra_link_args = []
+
+    DEBUG = os.getenv("DEBUG", default="").upper() in ["ON", "1", "YES", "TRUE", "Y"]
+
+    extra_compile_args = [
+        "-std=c++17",
+        "-Wno-sign-compare",
+        "-Wno-deprecated-declarations",
+        "-Wno-return-type",
+    ]
+
+    if re.match(r"clang", os.getenv("CC", "")):
+        extra_compile_args += [
+            "-Wno-macro-redefined",
+            "-Wno-return-std-move",
+        ]
+
+    if DEBUG:
+        extra_compile_args += ["-O0", "-g"]
+        extra_link_args += ["-O0", "-g", "-Wl,-z,now"]
+    else:
+        extra_compile_args += ["-DNDEBUG"]
+        extra_link_args += ["-Wl,-z,now"]
+
+    excludes = ["codegen", "codegen.*"]
+    packages = find_packages(exclude=excludes)
+
+    extension = []
+    C = CppExtension(
+        "torch_npu._C",
+        sources=["torch_npu/csrc/InitNpuBindings.cpp"],
+        libraries=["torch_npu"],
+        include_dirs=include_directories,
+        extra_compile_args=extra_compile_args
+        + ["-fstack-protector-all"]
+        + ['-D__FILENAME__="InitNpuBindings.cpp"'],
+        library_dirs=["lib"],
+        extra_link_args=extra_link_args + ["-Wl,-rpath,$ORIGIN/lib"],
+        define_macros=[("_GLIBCXX_USE_CXX11_ABI", "0"), ("GLIBCXX_USE_CXX11_ABI", "0")],
+    )
+    extension.append(C)
+
+    cmdclass = {
+        "clean": Clean,
+    }
+
+    return extension, cmdclass, packages
+
+
+VERBOSE_SCRIPT = True
+RUN_BUILD_DEPS = True
+
+filtered_args = []
+for i, arg in enumerate(sys.argv):
+    if arg == "--":
+        filtered_args += sys.argv[i:]
+        break
+    if arg == "-q" or arg == "--quiet":
+        VERBOSE_SCRIPT = False
+    if arg in ["clean", "egg_info", "sdist"]:
+        RUN_BUILD_DEPS = False
+    filtered_args.append(arg)
+sys.argv = filtered_args
+
+if VERBOSE_SCRIPT:
+
+    def report(*args):
+        print(*args)
+
 else:
-    extra_compile_args += ['-DNDEBUG']
-    extra_link_args += ['-Wl,-z,now']
 
-# valid manylinux tags
-manylinux_tags = [
-    "manylinux1_x86_64",
-    "manylinux2010_x86_64",
-    "manylinux2014_x86_64",
-    "manylinux2014_aarch64",
-    "manylinux_2_5_x86_64",
-    "manylinux_2_12_x86_64",
-    "manylinux_2_17_x86_64",
-    "manylinux_2_17_aarch64",
-    "manylinux_2_24_x86_64",
-    "manylinux_2_24_aarch64",
-    "manylinux_2_27_x86_64",
-    "manylinux_2_27_aarch64",
-    "manylinux_2_28_x86_64",
-    "manylinux_2_28_aarch64",
-    "manylinux_2_31_x86_64",
-    "manylinux_2_31_aarch64",
-    "manylinux_2_34_x86_64",
-    "manylinux_2_34_aarch64",
-    "manylinux_2_35_x86_64"
-    "manylinux_2_35_aarch64",
-]
-is_manylinux = os.environ.get("AUDITWHEEL_PLAT", None) in manylinux_tags
+    def report(*args):
+        pass
 
-readme = os.path.join(BASE_DIR, "README.md")
-if not os.path.exists(readme):
-    raise FileNotFoundError("Unable to find 'README.md'")
-with open(readme, encoding="utf-8") as fdesc:
-    long_description = fdesc.read()
-
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
-    "Operating System :: POSIX :: Linux",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-]
+    # setuptools.distutils.log.warn = report
 
 
-setup(
-    name=os.environ.get('TORCH_NPU_PACKAGE_NAME', 'torch_npu'),
-    version=VERSION,
-    description='NPU bridge for PyTorch',
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    license="BSD License",
-    classifiers=classifiers,
-    packages=["torch_npu"],
-    libraries=[('torch_npu', {'sources': list()})],
-    package_dir={'': os.path.relpath(os.path.join(BASE_DIR, "build/packages"))},
-    ext_modules=[
-            CppExtension(
-                'torch_npu._C',
-                sources=["torch_npu/csrc/InitNpuBindings.cpp"],
-                libraries=["torch_npu"],
-                include_dirs=include_directories,
-                extra_compile_args=extra_compile_args + ['-fstack-protector-all'] + ['-D__FILENAME__=\"InitNpuBindings.cpp\"'],
-                library_dirs=["lib"],
-                extra_link_args=extra_link_args + ['-Wl,-rpath,$ORIGIN/lib'],
-                define_macros=[('_GLIBCXX_USE_CXX11_ABI', '0'), ('GLIBCXX_USE_CXX11_ABI', '0')]
-            ),
-    ],
-    extras_require={
-    },
-    package_data={
-        'torch_npu': [
-            '*.so', 'lib/*.so*',
+def main():
+    install_requires = ["pyyaml"]
+
+    if sys.version_info >= (3, 12, 0):
+        install_requires.append("setuptools")
+
+    dist = Distribution()
+    dist.script_name = os.path.basename(sys.argv[0])
+    dist.script_args = sys.argv[1:]
+    try:
+        dist.parse_command_line()
+    except setuptools.distutils.errors.DistutilsArgError as e:
+        report(e)
+        sys.exit(1)
+
+    generate_version("torch_npu/version.py")
+
+    if RUN_BUILD_DEPS:
+        build_deps()
+
+    (
+        extensions,
+        cmdclass,
+        packages,
+    ) = configure_extension_build()
+
+    readme = os.path.join(BASE_DIR, "README.md")
+    if not os.path.exists(readme):
+        raise FileNotFoundError("Unable to find 'README.md'")
+    with open(readme, encoding="utf-8") as fdesc:
+        long_description = fdesc.read()
+
+    setup(
+        name=os.environ.get("TORCH_NPU_PACKAGE_NAME", "torch_npu"),
+        version=VERSION,
+        description="NPU bridge for PyTorch",
+        long_description=long_description,
+        long_description_content_type="text/markdown",
+        ext_modules=extensions,
+        cmdclass=cmdclass,
+        packages=packages,
+        package_data={
+            "torch_npu": [
+                "*.so",
+                "lib/*.so*",
+            ],
+        },
+        install_requires=install_requires,
+        url="https://pytorch.org/",
+        download_url="https://github.com/pytorch/pytorch/tags",
+        classifiers=[
+            "Development Status :: 5 - Production/Stable",
+            "Intended Audience :: Developers",
+            "Intended Audience :: Education",
+            "Intended Audience :: Science/Research",
+            "License :: OSI Approved :: BSD License",
+            "Topic :: Scientific/Engineering",
+            "Topic :: Scientific/Engineering :: Mathematics",
+            "Topic :: Scientific/Engineering :: Artificial Intelligence",
+            "Topic :: Software Development",
+            "Topic :: Software Development :: Libraries",
+            "Topic :: Software Development :: Libraries :: Python Modules",
+            "Programming Language :: C++",
+            "Programming Language :: Python :: 3",
         ],
-    },
-    cmdclass={
-        'build_clib': CPPLibBuild,
-        'build_ext': Build,
-        'build_py': PythonPackageBuild,
-        'bdist_wheel': BdistWheelBuild,
-        'egg_info': EggInfoBuild,
-        'install': InstallCmd,
-        'clean': Clean
-    })
+        license="BSD License",
+        keywords="pytorch, machine learning",
+    )
+
+
+if __name__ == "__main__":
+    main()
