@@ -464,7 +464,7 @@ else:
     def report(*args):
         pass
 
-    # setuptools.distutils.log.warn = report
+    setuptools.distutils.log.warn = report
 
 
 def main():

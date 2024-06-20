@@ -12,6 +12,7 @@ import torch_npu._C
 
 from torch_npu.utils.exposed_api import public_npu_functions
 from torch_npu.utils.error_code import ErrCode, pta_error, _except_handler
+from .meta import _meta_registrations
 from . import _op_plugin_docs
 
 del _op_plugin_docs
