@@ -1,7 +1,6 @@
 import glob
 import shutil
 import multiprocessing
-import multiprocessing.pool
 import os
 import re
 import stat
@@ -14,13 +13,10 @@ import time
 from pathlib import Path
 from typing import Union
 
-import distutils.ccompiler
 import distutils.command.clean
 from sysconfig import get_paths
 from distutils.version import LooseVersion
-from setuptools import setup, distutils, Extension
-from setuptools.dist import Distribution
-from setuptools import Extension, find_packages, setup
+from setuptools import setup, distutils, Extension, find_packages, setup
 
 from codegen.utils import PathManager
 
@@ -194,16 +190,6 @@ def generate_bindings_code(base_dir):
         sys.exit(1)
 
 
-def build_stub(base_dir):
-    build_stub_cmd = [
-        "sh",
-        os.path.join(base_dir, "third_party/acl/libs/build_stub.sh"),
-    ]
-    if subprocess.call(build_stub_cmd) != 0:
-        print("Failed to build stub: {}".format(build_stub_cmd), file=sys.stderr)
-        sys.exit(1)
-
-
 def CppExtension(name, sources, *args, **kwargs):
     r"""
     Creates a :class:`setuptools.Extension` for C++.
@@ -218,16 +204,14 @@ def CppExtension(name, sources, *args, **kwargs):
 
     temp_library_dirs = kwargs.get("library_dirs", [])
     temp_library_dirs.append(os.path.join(pytorch_dir, "lib"))
-    temp_library_dirs.append(os.path.join(BASE_DIR, "third_party/acl/libs"))
-    temp_library_dirs.append(os.path.join(BASE_DIR, "torch_npu/lib"))
     kwargs["library_dirs"] = temp_library_dirs
 
     libraries = kwargs.get("libraries", [])
     libraries.append("c10")
-    libraries.append("torch")
+    # libraries.append("torch")
     libraries.append("torch_cpu")
     libraries.append("torch_python")
-    libraries.append("hccl")
+    # libraries.append("hccl")
     kwargs["libraries"] = libraries
     kwargs["language"] = "c++"
     return Extension(name, sources, *args, **kwargs)
@@ -263,12 +247,12 @@ class Clean(distutils.command.clean.clean):
         distutils.command.clean.clean.run(self)
 
         remove_files = [
-            "torch_npu/csrc/aten/RegisterCPU.cpp",
-            "torch_npu/csrc/aten/RegisterNPU.cpp",
-            "torch_npu/csrc/aten/RegisterAutogradNPU.cpp",
-            "torch_npu/csrc/aten/NPUNativeFunctions.h",
-            "torch_npu/csrc/aten/CustomRegisterSchema.cpp",
-            "torch_npu/csrc/aten/ForeachRegister.cpp",
+            "aten/RegisterCPU.cpp",
+            "aten/RegisterNPU.cpp",
+            "aten/RegisterAutogradNPU.cpp",
+            "aten/NPUNativeFunctions.h",
+            "aten/CustomRegisterSchema.cpp",
+            "aten/ForeachRegister.cpp",
             "torch_npu/utils/custom_ops.py",
             "torch_npu/version.py",
         ]
@@ -335,9 +319,7 @@ def get_src_py_and_dst():
 
 def build_deps():
     check_submodules()
-
     generate_bindings_code(BASE_DIR)
-    build_stub(BASE_DIR)
 
     cmake = get_cmake_command()
 
@@ -385,9 +367,7 @@ def build_deps():
 def configure_extension_build():
     include_directories = [
         BASE_DIR,
-        os.path.join(BASE_DIR, "patch/include"),
-        os.path.join(BASE_DIR, "third_party/hccl/inc"),
-        os.path.join(BASE_DIR, "third_party/acl/inc"),
+        os.path.join(BASE_DIR, "npu/acl/include"),
     ]
 
     extra_link_args = []
@@ -420,13 +400,13 @@ def configure_extension_build():
     extension = []
     C = CppExtension(
         "torch_npu._C",
-        sources=["torch_npu/csrc/InitNpuBindings.cpp"],
+        sources=["torch_npu/csrc/stub.c"],
         libraries=["torch_npu"],
         include_dirs=include_directories,
         extra_compile_args=extra_compile_args
         + ["-fstack-protector-all"]
-        + ['-D__FILENAME__="InitNpuBindings.cpp"'],
-        library_dirs=["lib"],
+        + ['-D__FILENAME__="stub.c"'],
+        library_dirs=["lib", os.path.join(BASE_DIR, "torch_npu/lib")],
         extra_link_args=extra_link_args + ["-Wl,-rpath,$ORIGIN/lib"],
         define_macros=[("_GLIBCXX_USE_CXX11_ABI", "0"), ("GLIBCXX_USE_CXX11_ABI", "0")],
     )
@@ -473,7 +453,7 @@ def main():
     if sys.version_info >= (3, 12, 0):
         install_requires.append("setuptools")
 
-    dist = Distribution()
+    dist = setuptools.dist.Distribution()
     dist.script_name = os.path.basename(sys.argv[0])
     dist.script_args = sys.argv[1:]
     try:

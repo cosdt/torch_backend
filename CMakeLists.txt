@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 include(GNUInstallDirs)
+include(CheckCXXCompilerFlag)
 
 find_program(CCACHE ccache)
 if(${CCACHE} STREQUAL "CCACHE-NOTFOUND")
@@ -153,9 +154,9 @@ set(CMAKE_CXX_FLAGS "-fabi-version=11 ${CMAKE_CXX_FLAGS}")
 
 
 include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/torch_npu/csrc/aten)
-include_directories(${PROJECT_SOURCE_DIR}/third_party/hccl/inc)
-include_directories(${PROJECT_SOURCE_DIR}/third_party/acl/inc)
+include_directories(${PROJECT_SOURCE_DIR}/aten)
+include_directories(${PROJECT_SOURCE_DIR}/npu/acl/include)
+include_directories(${PROJECT_SOURCE_DIR}/npu/acl/include)
 
 # Set installed PyTorch dir
 if(DEFINED PYTORCH_INSTALL_DIR)
@@ -177,16 +178,16 @@ endif()
 set(ATEN_SRCS)
 set(CORE_SRCS)
 set(FRAMEWORK_SRCS)
-
 set(DIST_SRCS)
 set(NPU_SRCS)
 set(PROF_SRCS)
 set(UTILS_SRCS)
 set(SAN_SRCS)
 
-add_subdirectory(${TORCHNPU_ROOT}/aten)
-add_subdirectory(${TORCHNPU_ROOT}/core)
-add_subdirectory(${TORCHNPU_ROOT}/framework)
+add_subdirectory(${PROJECT_SOURCE_DIR}/npu/acl/libs)
+add_subdirectory(${PROJECT_SOURCE_DIR}/aten)
+add_subdirectory(${PROJECT_SOURCE_DIR}/npu/core)
+add_subdirectory(${PROJECT_SOURCE_DIR}/npu/framework)
 
 add_subdirectory(${TORCHNPU_ROOT}/distributed)
 add_subdirectory(${TORCHNPU_ROOT}/npu)
@@ -199,27 +200,15 @@ set(OPS_PLUGIN_SRCS)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/op-plugin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/op-plugin/op_plugin)
 
-set(CPP_SRCS ${ATEN_SRCS} ${CORE_SRCS} ${OPS_PLUGIN_SRCS} ${DIST_SRCS} ${FRAMEWORK_SRCS} ${NPU_SRCS} ${PROF_SRCS} ${UTILS_SRCS} ${SAN_SRCS})
-
-add_library(${PLUGIN_NAME} SHARED ${CPP_SRCS})
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-fvisibility=hidden" COMPILER_SUPPORTS_HIDDEN_VISIBILITY)
-if(${COMPILER_SUPPORTS_HIDDEN_VISIBILITY})
-  target_compile_options(${PLUGIN_NAME} PRIVATE "-fvisibility=hidden")
-endif()
+set(CPP_SRCS ${ATEN_SRCS} ${CORE_SRCS} ${OPS_PLUGIN_SRCS} ${DIST_SRCS} ${FRAMEWORK_SRCS} ${NPU_SRCS} ${PROF_SRCS} ${UTILS_SRCS} ${SAN_SRCS} ${TORCHNPU_ROOT}/Module.cpp)
 
 link_directories(${PYTORCH_INSTALL_DIR}/lib)
-link_directories(${TORCHNPU_THIRD_PARTY_ROOT}/acl/libs)
+link_directories(${PROJECT_SOURCE_DIR}/npu/acl/libs)
 
-target_link_libraries(${PLUGIN_NAME} PUBLIC ${TORCHNPU_THIRD_PARTY_ROOT}/acl/libs/libhccl.so)
+add_library(${PLUGIN_NAME} SHARED ${CPP_SRCS})
 
+target_link_libraries(${PLUGIN_NAME} PUBLIC hccl ascendcl acl_op_compiler ge_runner graph)
 target_link_libraries(${PLUGIN_NAME} PUBLIC ${PYTORCH_INSTALL_DIR}/lib/libtorch_python.so)
-
-target_link_libraries(${PLUGIN_NAME} PUBLIC ${TORCHNPU_THIRD_PARTY_ROOT}/acl/libs/libascendcl.so)
-target_link_libraries(${PLUGIN_NAME} PUBLIC ${TORCHNPU_THIRD_PARTY_ROOT}/acl/libs/libacl_op_compiler.so)
-target_link_libraries(${PLUGIN_NAME} PUBLIC ${TORCHNPU_THIRD_PARTY_ROOT}/acl/libs/libge_runner.so)
-target_link_libraries(${PLUGIN_NAME} PUBLIC ${TORCHNPU_THIRD_PARTY_ROOT}/acl/libs/libgraph.so)
-
 target_link_libraries(${PLUGIN_NAME} PUBLIC torch torch_cpu c10)
 
 set(ATEN_THREADING "OMP" CACHE STRING "ATen parallel backend")

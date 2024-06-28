@@ -1,7 +1,7 @@
 #pragma once
 
 #include <c10/core/Device.h>
-#include "torch_npu/csrc/core/npu/NPUMacros.h"
+#include "npu/core/npu/NPUMacros.h"
 
 namespace torch_npu {
 
@@ -15,7 +15,6 @@ TORCH_NPU_API void finalize_npu();
 
 } // namespace torch_npu
 
-
 namespace torch {
 namespace npu {
 
@@ -24,7 +23,6 @@ TORCH_NPU_API void synchronize(int64_t device_index = -1);
 
 } // namespace npu
 } // namespace torch
-
 
 namespace c10 {
 namespace npu {
