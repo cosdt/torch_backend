@@ -16,20 +16,15 @@
 
 namespace c10_npu {
 namespace impl {
+struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
+  NPUGuardImpl() = default;
 
-struct NPUGuardImpl final : public c10::impl::DeviceGuardImplInterface {
-  static constexpr c10::DeviceType static_type = c10::DeviceType::PrivateUse1;
-
-  NPUGuardImpl() {}
   explicit NPUGuardImpl(c10::DeviceType t) {
     TORCH_INTERNAL_ASSERT(
         t == c10::DeviceType::PrivateUse1,
-        "DeviceType must be NPU. Actual DeviceType is: ",
+        "DeviceType must be 'c10::DeviceType::PrivateUse1'. Actual DeviceType is: ",
         t,
         PTA_ERROR(ErrCode::PARAM));
-  }
-  c10::DeviceType type() const override {
-    return c10::DeviceType::PrivateUse1;
   }
   c10::Device exchangeDevice(c10::Device d) const override {
     TORCH_INTERNAL_ASSERT(
