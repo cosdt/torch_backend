@@ -213,14 +213,14 @@ link_directories(${PROJECT_SOURCE_DIR}/npu/acl/libs)
 
 set(NPULIB_SRCS ${NPU_SRCS} ${UTILS_SRCS} ${GENERATED_SRCS} ${TORCHNPU_CSRC_ROOT}/Module.cpp)
 add_library(torch_npu_python SHARED ${NPULIB_SRCS})
-target_link_libraries(torch_npu_python PUBLIC torch_npu)
+target_link_libraries(torch_npu_python PRIVATE torch_npu torch_python)
 install(TARGETS torch_npu_python LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 set(CPP_SRCS ${BACKEND_SRCS} ${ATEN_SRCS} ${CORE_SRCS} ${OPS_PLUGIN_SRCS} ${FRAMEWORK_SRCS})
 add_library(${PLUGIN_NAME} SHARED ${CPP_SRCS})
 
 target_link_libraries(${PLUGIN_NAME} PUBLIC hccl ascendcl acl_op_compiler ge_runner graph)
-target_link_libraries(${PLUGIN_NAME} PUBLIC torch_cpu c10)
+target_link_libraries(${PLUGIN_NAME} PUBLIC torch torch_cpu c10)
 
 set(ATEN_THREADING "OMP" CACHE STRING "ATen parallel backend")
 message(STATUS "Using ATen parallel backend: ${ATEN_THREADING}")
