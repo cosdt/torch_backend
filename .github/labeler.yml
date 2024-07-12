@@ -1,0 +1,18 @@
+documentation:
+  - '**/*.md'
+
+ci/cd:
+  - '.github/actions/**/*.yml'
+  - '.github/workflows/**/*.yml'
+
+backend:
+  - '**/*.h'
+  - '**/*.cpp'
+  - '**/*.cmake'
+  - '**/CMakeLists.txt'
+
+frontend:
+  - '**/*.py'
+
+'unit test':
+  - 'test/**/*'
