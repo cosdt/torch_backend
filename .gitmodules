@@ -1,7 +1,8 @@
 [submodule "third_party/googletest"]
-	path = third_party/googletest
-	url = https://gitee.com/mirrors/googletest.git
+    path = third_party/googletest
+    url = https://github.com/google/googletest.git
+    ignore = dirty
 [submodule "third_party/op-plugin"]
-	path = third_party/op-plugin
-	url = https://github.com/cosdt/op-plugin.git
-	ignore = dirty
+    path = third_party/op-plugin
+    url = https://github.com/cosdt/op-plugin.git
+    ignore = dirty

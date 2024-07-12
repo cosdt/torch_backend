@@ -1,18 +1,29 @@
+---
 documentation:
-  - '**/*.md'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
 
-ci/cd:
-  - '.github/actions/**/*.yml'
-  - '.github/workflows/**/*.yml'
+'ci/cd':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/actions/**/*.yml'
+          - '.github/workflows/**/*.yml'
 
 backend:
-  - '**/*.h'
-  - '**/*.cpp'
-  - '**/*.cmake'
-  - '**/CMakeLists.txt'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.h'
+          - '**/*.cpp'
+          - '**/*.cmake'
+          - '**/CMakeLists.txt'
 
 frontend:
-  - '**/*.py'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.py'
 
 'unit test':
-  - 'test/**/*'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'test/**/*'
