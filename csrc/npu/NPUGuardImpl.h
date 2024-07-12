@@ -8,9 +8,10 @@
 #include <npu/acl/include/acl/acl_base.h>
 #include <npu/acl/include/acl/acl_rt.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "npu/core/NPUException.h"
+#include "csrc/core/impl/PrivateUse1GuardImpl.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
+#include "npu/core/NPUException.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
@@ -21,7 +22,7 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
 
   explicit NPUGuardImpl(c10::DeviceType t) {
     TORCH_INTERNAL_ASSERT(
-        t == c10::DeviceType::PrivateUse1,
+        t == static_type,
         "DeviceType must be 'c10::DeviceType::PrivateUse1'. Actual DeviceType is: ",
         t,
         PTA_ERROR(ErrCode::PARAM));
