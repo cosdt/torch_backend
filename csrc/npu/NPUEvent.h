@@ -2,9 +2,8 @@
 
 #include <cstdint>
 #include <utility>
-#include "npu/core/NPUMacros.h"
 #include "csrc/npu/NPUStream.h"
-#include "npu/acl/include/acl/acl.h"
+#include "npu/core/NPUMacros.h"
 
 namespace c10_npu {
 /*
@@ -14,17 +13,22 @@ namespace c10_npu {
 struct C10_NPU_API NPUEvent {
   // Constructors
   // Default value for `flags` is specified below
-  NPUEvent();
+  NPUEvent() : flags_(defaultFlags()) {}
   NPUEvent(unsigned int flags) : flags_(flags) {}
   ~NPUEvent();
 
   NPUEvent(const NPUEvent&) = delete;
   NPUEvent& operator=(const NPUEvent&) = delete;
 
-  NPUEvent(NPUEvent&& other);
-  NPUEvent& operator=(NPUEvent&& other);
+  NPUEvent(NPUEvent&& other) {
+    moveHelper(std::move(other));
+  }
+  NPUEvent& operator=(NPUEvent&& other) {
+    moveHelper(std::move(other));
+    return *this;
+  }
 
-  operator aclrtEvent() const {
+  operator void*() const {
     return event();
   }
 
@@ -44,13 +48,18 @@ struct C10_NPU_API NPUEvent {
   c10::DeviceIndex device_index() const {
     return device_index_;
   }
-  aclrtEvent event() const {
+  void* event() const {
     return event_;
   }
 
   bool query() const;
-  void record();
-  void recordOnce(const NPUStream& stream);
+  void record() {
+    record(getCurrentNPUStream());
+  }
+  void recordOnce(const NPUStream& stream) {
+    if (!was_recorded_)
+      record(stream);
+  }
   void record(const NPUStream& stream);
   void block(const NPUStream& stream);
   float elapsed_time(const NPUEvent& other) const;
@@ -63,10 +72,17 @@ struct C10_NPU_API NPUEvent {
   bool is_created_ = false;
   bool was_recorded_ = false;
   c10::DeviceIndex device_index_ = -1;
-  aclrtEvent event_ = nullptr;
+  void* event_ = nullptr;
 
   void createEvent(c10::DeviceIndex device_index);
-  void moveHelper(NPUEvent&& other);
+  unsigned int defaultFlags();
+  void moveHelper(NPUEvent&& other) {
+    flags_ = defaultFlags();
+    std::swap(is_created_, other.is_created_);
+    std::swap(was_recorded_, other.was_recorded_);
+    std::swap(device_index_, other.device_index_);
+    std::swap(event_, other.event_);
+  }
 };
 
 } // namespace c10_npu

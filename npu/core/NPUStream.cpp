@@ -9,14 +9,14 @@
 #include <sstream>
 #include <vector>
 
-#include "npu/core/NPUException.h"
 #include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/NPUStream.h"
+#include "npu/acl/include/acl/acl_rt.h"
+#include "npu/core/NPUException.h"
 #include "npu/core/NPUGuard.h"
 #include "npu/core/NPUQueue.h"
-#include "csrc/npu/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
-#include "npu/acl/include/acl/acl_rt.h"
 
 namespace c10_npu {
 namespace {
@@ -471,4 +471,15 @@ aclrtStream NPUStream::stream(const bool need_empty) const {
   return stream();
 }
 
+bool NPUStream::query() const {
+  c10::DeviceGuard guard{stream_.device()};
+  acl::aclrtStreamStatus status = acl::ACL_STREAM_STATUS_RESERVED;
+  NPU_CHECK_ERROR(acl::AclrtStreamQuery(stream(), &status));
+  return status == acl::ACL_STREAM_STATUS_COMPLETE;
+}
+
+void NPUStream::synchronize() const {
+  c10::DeviceGuard guard{stream_.device()};
+  NPU_CHECK_ERROR(c10_npu::acl::AclrtSynchronizeStreamWithTimeout(stream()));
+}
 } // namespace c10_npu

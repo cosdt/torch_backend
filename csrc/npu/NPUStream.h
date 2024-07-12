@@ -6,13 +6,10 @@
 #include <cstdint>
 #include <mutex>
 
-#include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUMacros.h"
 #include "npu/core/NPUQueue.h"
 #include "npu/core/npu_log.h"
-#include "npu/acl/include/acl/acl.h"
-#include "npu/acl/include/acl/acl_op.h"
 
 namespace c10_npu {
 
@@ -39,7 +36,7 @@ class C10_NPU_API NPUStream {
   }
 
   // Implicit conversion to rtStream_t.
-  operator aclrtStream() const {
+  operator void*() const {
     return stream();
   }
 
@@ -68,23 +65,12 @@ class C10_NPU_API NPUStream {
     return stream_.id();
   }
 
-  bool query() const {
-    c10::DeviceGuard guard{stream_.device()};
-    acl::aclrtStreamStatus status = acl::ACL_STREAM_STATUS_RESERVED;
-    NPU_CHECK_ERROR(acl::AclrtStreamQuery(stream(), &status));
-    if (status == acl::ACL_STREAM_STATUS_COMPLETE) {
-      return true;
-    }
-    return false;
-  }
+  bool query() const;
 
-  void synchronize() const {
-    c10::DeviceGuard guard{stream_.device()};
-    NPU_CHECK_ERROR(c10_npu::acl::AclrtSynchronizeStreamWithTimeout(stream()));
-  }
+  void synchronize() const;
 
   // Explicit conversion to rtStream_t.
-  aclrtStream stream() const;
+  void* stream() const;
 
   // Explicit conversion to Stream.
   c10::Stream unwrap() const {
@@ -110,7 +96,7 @@ class C10_NPU_API NPUStream {
   bool isDataPreprocessStream();
 
   // Explicit conversion to rtStream_t， with out empty taskQ.
-  aclrtStream stream(const bool need_empty) const;
+  void* stream(const bool need_empty) const;
 
  private:
   c10::Stream stream_;
@@ -128,7 +114,7 @@ C10_NPU_API NPUStream getCurrentNPUStream(c10::DeviceIndex device_index = -1);
 
 NPUStream getCurrentSecondaryStream(c10::DeviceIndex device_index = -1);
 
-aclrtStream getCurrentNPUStreamNoWait(c10::DeviceIndex device_index = -1);
+void* getCurrentNPUStreamNoWait(c10::DeviceIndex device_index = -1);
 
 NPUStatus emptyAllNPUStream();
 

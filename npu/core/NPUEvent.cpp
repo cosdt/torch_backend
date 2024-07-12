@@ -7,10 +7,9 @@
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace c10_npu {
-
-NPUEvent::NPUEvent() {
-  flags_ = c10_npu::acl::IsExistCreateEventExWithFlag() ? ACL_EVENT_SYNC
-                                                        : ACL_EVENT_DEFAULT;
+unsigned int NPUEvent::defaultFlags() {
+  return c10_npu::acl::IsExistCreateEventExWithFlag() ? ACL_EVENT_SYNC
+                                                      : ACL_EVENT_DEFAULT;
 }
 
 NPUEvent::~NPUEvent() {
@@ -25,15 +24,6 @@ NPUEvent::~NPUEvent() {
   } catch (...) {
     // stay consistent with pytorch, no throw
   }
-}
-
-NPUEvent::NPUEvent(NPUEvent&& other) {
-  moveHelper(std::move(other));
-}
-
-NPUEvent& NPUEvent::operator=(NPUEvent&& other) {
-  moveHelper(std::move(other));
-  return *this;
 }
 
 bool NPUEvent::query() const {
@@ -52,15 +42,6 @@ bool NPUEvent::query() const {
     return true;
   }
   return false;
-}
-
-void NPUEvent::record() {
-  record(getCurrentNPUStream());
-}
-
-void NPUEvent::recordOnce(const NPUStream& stream) {
-  if (!was_recorded_)
-    record(stream);
 }
 
 void NPUEvent::record(const NPUStream& stream) {
@@ -133,14 +114,4 @@ void NPUEvent::createEvent(c10::DeviceIndex device_index) {
       event_);
   is_created_ = true;
 }
-
-void NPUEvent::moveHelper(NPUEvent&& other) {
-  flags_ = c10_npu::acl::IsExistCreateEventExWithFlag() ? ACL_EVENT_SYNC
-                                                        : ACL_EVENT_DEFAULT;
-  std::swap(is_created_, other.is_created_);
-  std::swap(was_recorded_, other.was_recorded_);
-  std::swap(device_index_, other.device_index_);
-  std::swap(event_, other.event_);
-}
-
 } // namespace c10_npu
