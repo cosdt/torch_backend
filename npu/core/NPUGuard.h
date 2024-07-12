@@ -4,6 +4,7 @@
 #include <c10/core/impl/InlineDeviceGuard.h>
 #include <c10/core/impl/InlineStreamGuard.h>
 #include "npu/core/NPUMacros.h"
+#include "csrc/core/PrivateUse1Guard.h"
 #include "csrc/npu/NPUGuardImpl.h"
 
 #include <cstddef>

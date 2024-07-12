@@ -4,7 +4,7 @@
 #include <c10/core/impl/InlineDeviceGuard.h>
 #include <c10/core/impl/InlineStreamGuard.h>
 
-#include "backend/core/impl/PrivateUse1GuardImpl.h"
+#include "csrc/core/impl/PrivateUse1GuardImpl.h"
 
 namespace c10_backend {
 
