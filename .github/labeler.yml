@@ -1,23 +1,23 @@
 documentation:
   - changed-files:
-    - '**/*.md'
+      - '**/*.md'
 
-ci/cd:
+'ci/cd':
   - changed-files:
-    - '.github/actions/**/*.yml'
-    - '.github/workflows/**/*.yml'
+      - '.github/actions/**/*.yml'
+      - '.github/workflows/**/*.yml'
 
 backend:
   - changed-files:
-    - '**/*.h'
-    - '**/*.cpp'
-    - '**/*.cmake'
-    - '**/CMakeLists.txt'
+      - '**/*.h'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
 
 frontend:
   - changed-files:
-    - '**/*.py'
+      - '**/*.py'
 
 'unit test':
   - changed-files:
-    - 'test/**/*'
+      - 'test/**/*'
