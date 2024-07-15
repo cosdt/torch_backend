@@ -19,11 +19,12 @@ C10_NPU_API std::mutex* getFreeMutex();
 // block inside of already allocated area.
 class FreeMemoryCallback {
  public:
-  virtual ~FreeMemoryCallback(){};
+  virtual ~FreeMemoryCallback() {};
   virtual bool Execute() = 0;
 };
 
 C10_DECLARE_REGISTRY(FreeNPUMemoryCallbacksRegistry, FreeMemoryCallback);
+
 #define REGISTER_FREE_MEMORY_CALLBACK(name, ...) \
   C10_REGISTER_CLASS(FreeNPUMemoryCallbacksRegistry, name, __VA_ARGS__);
 
