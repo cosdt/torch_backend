@@ -3,6 +3,7 @@
 #include <mutex>
 #include <unordered_map>
 #include "csrc/npu/NPUStream.h"
+#include "npu/core/NPUDevice.h"
 #include "npu/core/register/OptionsManager.h"
 
 namespace c10_npu {
@@ -15,12 +16,7 @@ std::mutex mtx;
 c10::DeviceIndex device_count() noexcept {
   // initialize number of devices only once
   if (dev_count == 0) {
-    aclError error = aclrtGetDeviceCount(&dev_count);
-    if (error != ACL_ERROR_NONE) {
-      ASCEND_LOGE("get device count of NPU failed");
-      return 0;
-    }
-    return static_cast<c10::DeviceIndex>(dev_count);
+    return c10_npu::acl::device_count_impl(&dev_count);
   }
   return static_cast<c10::DeviceIndex>(dev_count);
 }
