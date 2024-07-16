@@ -2,7 +2,6 @@
 #include <ATen/ATen.h>
 #include <ATen/Tensor.h>
 #include <c10/core/TensorOptions.h>
-#include <torch/csrc/utils/device_lazy_init.h>
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace torch_npu {
@@ -55,7 +54,6 @@ inline void maybe_initialize_npu(const at::TensorOptions& options) {
           " init failed.",
           PTA_ERROR(ErrCode::INTERNAL));
     }
-    torch::utils::device_lazy_init(at::kPrivateUse1);
   }
 }
 
@@ -69,7 +67,6 @@ inline void maybe_initialize_npu(const at::Device& device) {
           " init failed.",
           PTA_ERROR(ErrCode::INTERNAL));
     }
-    torch::utils::device_lazy_init(at::kPrivateUse1);
   }
 }
 

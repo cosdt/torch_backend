@@ -7,10 +7,6 @@
 #include "npu/core/register/OptionsManager.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
-#ifndef BUILD_LIBTORCH
-#include <Python.h>
-#endif
-
 #include <cstdint>
 #include <deque>
 #include <memory>
@@ -313,18 +309,7 @@ void THNPUCachingHostAllocator_emptyCache() {
 }
 
 static void THNPUCachingHostDeleter(void* ptr) {
-#ifndef BUILD_LIBTORCH
-  // check the current thread have hold GIL Lock.
-  if (PyGILState_Check()) {
-    // the current thread should not hold GIL.
-    Py_BEGIN_ALLOW_THREADS allocator.free(ptr);
-    Py_END_ALLOW_THREADS
-  } else {
-    allocator.free(ptr);
-  }
-#else
   allocator.free(ptr);
-#endif
 }
 
 struct THNPUCachingHostAllocator final : public at::Allocator {
