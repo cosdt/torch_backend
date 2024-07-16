@@ -11,10 +11,6 @@
 #include "npu/framework/utils/CalcuOpUtil.h"
 #include "npu/framework/utils/NpuUtils.h"
 
-#ifndef BUILD_LIBTORCH
-#include <Python.h>
-#endif
-
 namespace at_npu {
 namespace native {
 void OpAttrMaker::Set(aclopAttr* attr, const string& name, bool value) {
@@ -123,24 +119,9 @@ void OpCommandImpl::Run(
     c10::SmallVector<at::Tensor, N>& outputTensor) {
   ASCEND_LOGD("Op %s Run.", opName.c_str());
   RECORD_FUNCTION(opName, std::vector<c10::IValue>({}));
-#ifndef BUILD_LIBTORCH
-  if (PyGILState_Check()) {
-    // we need to release GIL for NPU to compile op.
-    Py_BEGIN_ALLOW_THREADS;
-    ACL_REQUIRE_OK_OP(
-        InnerRun(opName, execParam, sync, sync_index, outputTensor),
-        opName.c_str());
-    Py_END_ALLOW_THREADS;
-  } else {
-    ACL_REQUIRE_OK_OP(
-        InnerRun(opName, execParam, sync, sync_index, outputTensor),
-        opName.c_str());
-  }
-#else
   ACL_REQUIRE_OK_OP(
       InnerRun(opName, execParam, sync, sync_index, outputTensor),
       opName.c_str());
-#endif
 }
 
 aclError OpCommandImpl::InnerRun(

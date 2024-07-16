@@ -5,10 +5,6 @@
 #include "npu/framework/OpParamMaker.h"
 #include "npu/framework/utils/NpuUtils.h"
 
-#ifndef BUILD_LIBTORCH
-#include <Python.h>
-#endif
-
 #include <ATen/record_function.h>
 #include <sys/eventfd.h>
 #include <sys/prctl.h>
@@ -235,13 +231,6 @@ NPUStatus Repository::MakeSureQueueEmpty() {
   // the TE module attempts to obtain the GIL.
   // If the current thread does not release the GIL, a deadlock will
   // occur.
-#ifndef BUILD_LIBTORCH
-  PyThreadState* gilState = nullptr;
-  if (PyGILState_Check()) {
-    gilState = PyEval_SaveThread();
-  }
-#endif
-
   if (consumer.joinable()) {
     ssize_t s;
     uint64_t u = 1;
@@ -257,12 +246,6 @@ NPUStatus Repository::MakeSureQueueEmpty() {
           }
           ASCEND_LOGE(
               "eventfd_read failed. s=%zd, errno=%s.", s, strerror(errno));
-#ifndef BUILD_LIBTORCH
-          // Get the GIL
-          if (gilState) {
-            PyEval_RestoreThread(gilState);
-          }
-#endif
           return INTERNEL_ERROR;
         }
       }
@@ -273,11 +256,6 @@ NPUStatus Repository::MakeSureQueueEmpty() {
   if (GetStatus() == RepoStatus::ERROR_EXIT) {
     // Avoid repeatedly throwing exceptions
     SetStatus(CAN_EXIT);
-#ifndef BUILD_LIBTORCH
-    if (gilState) {
-      PyEval_RestoreThread(gilState);
-    }
-#endif
     read_idx.idx = write_idx.idx;
     throw std::runtime_error(
         "The Inner error is reported as above. "
@@ -288,13 +266,6 @@ NPUStatus Repository::MakeSureQueueEmpty() {
         "pleace set the environment variable ASCEND_LAUNCH_BLOCKING=1." +
         PTA_ERROR(ErrCode::ACL));
   }
-
-#ifndef BUILD_LIBTORCH
-  // Get the GIL
-  if (gilState) {
-    PyEval_RestoreThread(gilState);
-  }
-#endif
 
   return SUCCESS;
 }
@@ -387,17 +358,7 @@ void Repository::Enqueue(void* cur_paras) {
       SetWriteWorking(false);
       __sync_synchronize();
       if (IsFullQueue()) {
-#ifndef BUILD_LIBTORCH
-        // double check the current thread hold a Gil lock
-        if (PyGILState_Check()) {
-          Py_BEGIN_ALLOW_THREADS s = eventfd_read(efd_write, &u);
-          Py_END_ALLOW_THREADS
-        } else {
-          s = eventfd_read(efd_write, &u);
-        }
-#else
         s = eventfd_read(efd_write, &u);
-#endif
         if (s != 0) {
           if (errno == EINTR) {
             continue;

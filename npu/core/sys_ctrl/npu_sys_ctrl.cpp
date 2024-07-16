@@ -1,12 +1,3 @@
-#ifndef BUILD_LIBTORCH
-#include <torch/csrc/THP.h>
-#include <torch/csrc/python_headers.h>
-#include <torch/csrc/utils/pybind.h>
-#include <torch/csrc/utils/python_arg_parser.h>
-#include <torch/csrc/utils/python_numbers.h>
-#include <torch/csrc/utils/python_strings.h>
-#endif
-
 #include "csrc/npu/NPUCachingAllocator.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
@@ -126,31 +117,6 @@ void SetHF32DefaultValue() {
   }
 }
 
-#ifndef BUILD_LIBTORCH
-std::string GetTorchNpuFile() {
-  PyObject* file_attr = nullptr;
-  {
-    pybind11::gil_scoped_acquire get_gil;
-    auto torch = THPObjectPtr(PyImport_ImportModule("torch"));
-    if (!torch) {
-      throw python_error();
-    }
-    file_attr = PyObject_GetAttrString(torch, "__file__");
-  }
-  if (file_attr) {
-    const char* file_path = PyUnicode_AsUTF8(file_attr);
-    std::string file_path_str = std::string(file_path);
-    std::string key_word = "torch";
-    size_t pos = file_path_str.rfind(key_word);
-    if (pos != std::string::npos) {
-      return file_path_str.substr(0, pos);
-    }
-  }
-  ASCEND_LOGW("Failed to get __file__ attribute.");
-  return "";
-}
-#endif
-
 std::string RealPath(const std::string& path) {
   if (path.empty() || path.size() > PATH_MAX) {
     return "";
@@ -163,21 +129,7 @@ std::string RealPath(const std::string& path) {
 }
 
 std::string GetAclConfigJsonPath() {
-#ifndef BUILD_LIBTORCH
-  std::string npu_path = GetTorchNpuFile();
-  if (npu_path == "") {
-    ASCEND_LOGW("Failed to get npu path!");
-    return "";
-  }
-  std::string json_path = npu_path.append("torch_npu/acl.json");
-  std::string json_path_str = RealPath(json_path);
-  if (json_path_str == "") {
-    ASCEND_LOGW("this path:%s is not exist!", json_path.c_str());
-  }
-  return json_path_str;
-#else
   return "";
-#endif
 }
 } // namespace
 
