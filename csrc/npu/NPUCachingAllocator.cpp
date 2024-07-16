@@ -13,14 +13,14 @@
 #include <c10/util/flat_hash_map.h>
 #include <c10/util/irange.h>
 
-#include "Memory.h"
-#include "NPUBlockHandle.h"
 #include "csrc/npu/CachingAllocatorHelper.h"
 #include "csrc/npu/NPUCachingAllocator.h"
-#include "npu/acl/include/acl/acl_base.h"
-#include "npu/core/NPUGuard.h"
+#include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/Memory.h"
+
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
+#include "npu/acl/include/acl/acl_base.h"
 
 namespace c10_npu {
 namespace NPUCachingAllocator {
@@ -128,7 +128,7 @@ struct BlockPool {
 };
 
 struct Block {
-  int device; // npu
+  int device;
   void* stream; // allocation stream
   stream_set stream_uses; // streams on which the block was used
   size_t size; // block size in bytes
@@ -2257,46 +2257,6 @@ REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &caching_allocator);
 
 void local_raw_delete(void* ptr) {
   caching_allocator.free(ptr);
-}
-
-void* MallocBlock(size_t size, void* stream, int device) {
-  if (device == -1) {
-    NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
-  }
-  if ((device < 0) ||
-      (device > static_cast<int>(caching_allocator.device_allocator.size()))) {
-    return nullptr;
-  }
-  AT_ASSERT(
-      caching_allocator.device_allocator[device],
-      PTA_ERROR(ErrCode::NOT_FOUND));
-  AT_ASSERT(stream, PTA_ERROR(ErrCode::NOT_FOUND));
-  auto block =
-      caching_allocator.device_allocator[device]->malloc(device, size, stream);
-  AT_ASSERT(block, PTA_ERROR(ErrCode::NOT_FOUND));
-  return reinterpret_cast<void*>(block);
-}
-
-void FreeBlock(void* handle) {
-  Block* block = reinterpret_cast<Block*>(handle);
-  AT_ASSERT(block, PTA_ERROR(ErrCode::PTR));
-  caching_allocator.assertValidDevice(block->device);
-  AT_ASSERT(
-      caching_allocator.device_allocator[block->device],
-      PTA_ERROR(ErrCode::NOT_FOUND));
-  caching_allocator.device_allocator[block->device]->free(block);
-}
-
-void* GetBlockPtr(const void* handle) {
-  const Block* block = reinterpret_cast<const Block*>(handle);
-  AT_ASSERT(block, PTA_ERROR(ErrCode::PTR));
-  return block->ptr;
-}
-
-size_t GetBlockSize(const void* handle) {
-  const Block* block = reinterpret_cast<const Block*>(handle);
-  AT_ASSERT(block, PTA_ERROR(ErrCode::PTR));
-  return block->size;
 }
 
 struct BackendStaticInitializer {
