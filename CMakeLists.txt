@@ -156,8 +156,7 @@ else()
   set(CXXFLAGS "-fstack-protector-all -Wl,-z,relro,-z,now,-z,noexecstack -fPIE -pie ${CXXFLAGS}")
 endif()
 
-set(_GLIBCXX_USE_CXX11_ABI 0)
-set(CMAKE_CXX_FLAGS "-fabi-version=11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 ${CMAKE_CXX_FLAGS}")
 
 
 include_directories(${PROJECT_SOURCE_DIR})
