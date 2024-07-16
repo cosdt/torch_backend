@@ -1,11 +1,11 @@
 #pragma once
 
-// This header provides C++ wrappers around commonly used CUDA API functions.
+// This header provides C++ wrappers around commonly used AscendCL API functions.
 // The benefit of using C++ here is that we can raise an exception in the
 // event of an error, rather than explicitly pass around error codes.  This
 // leads to more natural APIs.
 //
-// The naming convention used here matches the naming convention of torch.cuda
+// The naming convention used here matches the naming convention of torch.npu
 
 #include <c10/core/Device.h>
 #include <c10/macros/Macros.h>
@@ -19,46 +19,8 @@ namespace c10_npu {
 
 C10_NPU_API c10::DeviceIndex device_count() noexcept;
 
+// Version of device_count that throws is no devices are detected
 C10_NPU_API c10::DeviceIndex device_count_ensure_non_zero();
-
-/**
- * @ingroup torch_npu
- * @brief get device id from local thread cache preferentially for performance.
- * If the thread cache has not been initialized, it will get from ACL interface:
- * aclrtGetDevice, and initialize the local thread cache.
- * If the context is empty, it will set device 0.
- *
- * @param device [IN]           device id
- * @retval ACL_ERROR_NONE The function is successfully executed.
- * @retval OtherValues Failure
- */
-C10_NPU_API aclError GetDevice(int32_t* device);
-
-/**
- * @ingroup torch_npu
- * @brief set device id by ACL interface: aclrtSetDevice,
- * and update the local thread cache
- *
- * @param device [IN]           device id
- * @retval ACL_ERROR_NONE The function is successfully executed.
- * @retval OtherValues Failure
- */
-C10_NPU_API aclError SetDevice(c10::DeviceIndex device);
-
-/**
- * @ingroup torch_npu
- * @brief reset all device id by ACL interface: aclrtResetDevice.
- *
- * @retval ACL_ERROR_NONE The function is successfully executed.
- * @retval OtherValues Failure
- */
-aclError ResetUsedDevices();
-
-aclError DestroyUsedStreams();
-
-aclError SynchronizeUsedDevices();
-
-aclrtContext GetDeviceContext(int32_t device);
 
 C10_NPU_API c10::DeviceIndex current_device();
 
@@ -66,7 +28,18 @@ C10_NPU_API void set_device(c10::DeviceIndex device);
 
 C10_NPU_API void device_synchronize();
 
-C10_NPU_API int ExchangeDevice(int device);
+// this function has to be called from callers performing npu synchronizing
+// operations, to raise proper error or warning
+C10_NPU_API void warn_or_error_on_sync();
+
+// Raw CUDA device management functions
+C10_NPU_API aclError GetDeviceCount(int* dev_count);
+
+C10_NPU_API aclError GetDevice(c10::DeviceIndex* device);
+
+C10_NPU_API aclError SetDevice(c10::DeviceIndex device);
+
+C10_NPU_API aclrtContext GetDeviceContext(int32_t device);
 
 C10_NPU_API int GetLocalDevice();
 
@@ -76,8 +49,8 @@ enum class SyncDebugMode { L_DISABLED = 0, L_WARN, L_ERROR };
 // through this global state to determine the synchronization debug mode
 class WarningState {
  public:
-  void set_sync_debug_mode(SyncDebugMode level) {
-    sync_debug_mode = level;
+  void set_sync_debug_mode(SyncDebugMode l) {
+    sync_debug_mode = l;
   }
 
   SyncDebugMode get_sync_debug_mode() {
@@ -88,20 +61,9 @@ class WarningState {
   SyncDebugMode sync_debug_mode = SyncDebugMode::L_DISABLED;
 };
 
-C10_NPU_API inline WarningState& warning_state() {
+C10_NPU_API __inline__ WarningState& warning_state() {
   static WarningState warning_state_;
   return warning_state_;
-}
-
-// this function has to be called from callers performing npu synchronizing
-// operations, to raise proper error or warning
-C10_NPU_API inline void warn_or_error_on_sync() {
-  if (warning_state().get_sync_debug_mode() == SyncDebugMode::L_ERROR) {
-    TORCH_CHECK(
-        false, "called a synchronizing NPU operation", PTA_ERROR(ErrCode::ACL));
-  } else if (warning_state().get_sync_debug_mode() == SyncDebugMode::L_WARN) {
-    TORCH_NPU_WARN("called a synchronizing NPU operation");
-  }
 }
 
 } // namespace c10_npu
