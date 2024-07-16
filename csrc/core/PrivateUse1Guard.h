@@ -31,13 +31,12 @@ struct PrivateUse1Guard {
 
   // Copy is not allowed
   PrivateUse1Guard(const PrivateUse1Guard&) = delete;
-
   PrivateUse1Guard& operator=(const PrivateUse1Guard&) = delete;
 
   // Move is not allowed (there is no uninitialized state)
   PrivateUse1Guard(PrivateUse1Guard&& other) = delete;
-
   PrivateUse1Guard& operator=(PrivateUse1Guard&& other) = delete;
+
   /// Sets the PrivateUse1 device to the given device.  Errors if the given
   /// device is not a PrivateUse1 device.
   void set_device(c10::Device device) {
@@ -92,12 +91,10 @@ struct OptionalPrivateUse1Guard {
 
   // Copy is not allowed
   OptionalPrivateUse1Guard(const OptionalPrivateUse1Guard&) = delete;
-
   OptionalPrivateUse1Guard& operator=(const OptionalPrivateUse1Guard&) = delete;
 
   // See Note [Move construction for RAII guards is tricky]
   OptionalPrivateUse1Guard(OptionalPrivateUse1Guard&& other) = delete;
-
   // See Note [Move assignment for RAII guards is tricky]
   OptionalPrivateUse1Guard& operator=(OptionalPrivateUse1Guard&& other) =
       delete;
