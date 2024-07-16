@@ -316,24 +316,6 @@ PyObject* THNPModule_npuCanDeviceAccessPeer_wrap(
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_getDeviceUtilizationRate_wrap(
-    PyObject* self,
-    PyObject* device_index) {
-  HANDLE_TH_ERRORS
-  TORCH_CHECK(
-      THPUtils_checkLong(device_index),
-      "invalid argument to getDeviceUtilizationRate",
-      PTA_ERROR(ErrCode::VALUE));
-  int32_t device = THPUtils_unpackInt(device_index);
-  int32_t util_rate = c10_npu::GetDeviceUtilizationRate(device);
-  TORCH_CHECK(
-      util_rate <= 100 && util_rate >= 0,
-      "invalid result to util_rate",
-      PTA_ERROR(ErrCode::VALUE));
-  return THPUtils_packInt32(util_rate);
-  END_HANDLE_TH_ERRORS
-}
-
 PyObject* THNPModule_getCurrentStream_wrap(
     PyObject* /* unused */,
     PyObject* device_index) {
@@ -1054,10 +1036,6 @@ static struct PyMethodDef THNPModule_methods[] = {
     {"_npu_canDeviceAccessPeer",
      (PyCFunction)THNPModule_npuCanDeviceAccessPeer_wrap,
      METH_VARARGS,
-     nullptr},
-    {"_npu_getDeviceUtilizationRate",
-     (PyCFunction)THNPModule_getDeviceUtilizationRate_wrap,
-     METH_O,
      nullptr},
     {"_npu_getCurrentStream",
      (PyCFunction)THNPModule_getCurrentStream_wrap,

@@ -46,7 +46,6 @@ struct OptionalNPUGuard
 
   // See Note [Move construction for RAII guards is tricky]
   OptionalNPUGuard(OptionalNPUGuard&& other) = delete;
-
   // See Note [Move assignment for RAII guards is tricky]
   OptionalNPUGuard& operator=(OptionalNPUGuard&& other) = delete;
 };
