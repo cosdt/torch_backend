@@ -47,7 +47,7 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
   void setDevice(c10::Device d) const override {
     TORCH_INTERNAL_ASSERT(
         d.type() == c10::DeviceType::PrivateUse1,
-        "DeviceType must be NPU. Actual DeviceType is: ",
+        "DeviceType must be 'c10::DeviceType::PrivateUse1'. Actual DeviceType is: ",
         d.type(),
         PTA_ERROR(ErrCode::PARAM));
     NPU_CHECK_ERROR(c10_npu::SetDevice(d.index()));
