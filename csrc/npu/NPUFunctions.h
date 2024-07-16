@@ -43,6 +43,12 @@ C10_NPU_API aclrtContext GetDeviceContext(int32_t device);
 
 C10_NPU_API int GetLocalDevice();
 
+aclError ResetUsedDevices();
+
+aclError DestroyUsedStreams();
+
+aclError SynchronizeUsedDevices();
+
 enum class SyncDebugMode { L_DISABLED = 0, L_WARN, L_ERROR };
 
 // it's used to store npu synchronization state

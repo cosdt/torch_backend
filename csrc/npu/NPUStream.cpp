@@ -143,7 +143,7 @@ static void initGlobalStreamState() {
       "). Increase that and recompile.",
       PTA_ERROR(ErrCode::VALUE));
 
-  int device_id = 0;
+  c10::DeviceIndex device_id = 0;
   auto ret = c10_npu::GetDevice(&device_id);
   if (ret != ACL_ERROR_NONE) {
     ASCEND_LOGE("Device has not been set");

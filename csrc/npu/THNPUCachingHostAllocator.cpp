@@ -246,7 +246,7 @@ struct HostAllocator {
   aclError insertEvents(Block& block) {
     aclError err = ACL_ERROR_NONE;
 
-    int prev_device = 0;
+    c10::DeviceIndex prev_device = 0;
     err = c10_npu::GetDevice(&prev_device);
     if (err != ACL_ERROR_NONE) {
       return err;

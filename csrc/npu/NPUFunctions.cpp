@@ -1,13 +1,14 @@
 #include "csrc/npu/NPUFunctions.h"
 #include <mutex>
 #include <unordered_map>
+#include "csrc/npu/NPUStream.h"
 #include "npu/core/register/OptionsManager.h"
 
 namespace c10_npu {
 
 static thread_local c10::DeviceIndex local_device = -1;
 // TODO: remove used_devices
-static std::unordered_map<int8_t, aclrtContext> used_devices;
+static std::unordered_map<c10::DeviceIndex, aclrtContext> used_devices;
 std::mutex mtx;
 
 int device_count_impl() {
@@ -125,6 +126,46 @@ aclError SetDevice(c10::DeviceIndex device) {
     }
   }
   return err;
+}
+
+aclError ResetUsedDevices() {
+  for (const auto it : used_devices) {
+    aclError err = aclrtResetDevice(it.first);
+    if (err != ACL_ERROR_NONE) {
+      return err;
+    }
+  }
+  used_devices.clear();
+  return ACL_ERROR_NONE;
+}
+
+aclError DestroyUsedStreams() {
+  c10::DeviceIndex cur_device = 0;
+  NPU_CHECK_ERROR(GetDevice(&cur_device));
+  for (const auto it : used_devices) {
+    NPU_CHECK_ERROR(SetDevice(it.first));
+    NPUStream stream = getCurrentNPUStream(it.first);
+    aclError acl_ret = acl::AclrtDestroyStreamForce(stream);
+    if (acl_ret != ACL_ERROR_NONE) {
+      return acl_ret;
+    }
+  }
+  NPU_CHECK_ERROR(SetDevice(cur_device));
+  return ACL_ERROR_NONE;
+}
+
+aclError SynchronizeUsedDevices() {
+  c10::DeviceIndex cur_device = 0;
+  NPU_CHECK_ERROR(GetDevice(&cur_device));
+  for (const auto it : used_devices) {
+    NPU_CHECK_ERROR(SetDevice(it.first));
+    aclError acl_ret = aclrtSynchronizeDevice();
+    if (acl_ret != ACL_ERROR_NONE) {
+      return acl_ret;
+    }
+  }
+  NPU_CHECK_ERROR(SetDevice(cur_device));
+  return ACL_ERROR_NONE;
 }
 
 aclrtContext GetDeviceContext(int32_t device) {

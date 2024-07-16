@@ -38,7 +38,7 @@ void warn_(const ::c10::Warning& warning) {
 
 std::string formatErrorCode(SubModule submodule, ErrCode errorCode) {
   std::ostringstream oss;
-  int deviceIndex = -1;
+  c10::DeviceIndex deviceIndex = -1;
   c10_npu::GetDevice(&deviceIndex);
   auto rank_id = c10_npu::option::OptionsManager::GetRankId();
   oss << "\n[ERROR] " << getCurrentTimestamp() << " (PID:" << getpid()

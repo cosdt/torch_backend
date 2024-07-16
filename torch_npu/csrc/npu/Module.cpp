@@ -259,13 +259,13 @@ void THNPModule_setDevice(int device) {
 
 PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
   HANDLE_TH_ERRORS
-  int device = THPUtils_unpackInt(arg);
+  c10::DeviceIndex device = THPUtils_unpackDeviceIndex(arg);
   {
     pybind11::gil_scoped_release no_gil;
     at::globalContext().lazyInitPrivateUse1();
   }
 
-  int pre_device = 0;
+  c10::DeviceIndex pre_device = 0;
   auto ret = c10_npu::GetDevice(&pre_device);
   if (ret != ACL_ERROR_NONE) {
     NPU_CHECK_ERROR(c10_npu::SetDevice(device));
@@ -279,7 +279,7 @@ PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
 
 PyObject* THNPModule_getDevice_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  int device;
+  c10::DeviceIndex device;
   torch::utils::device_lazy_init(at::kPrivateUse1);
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
   return THPUtils_packInt32(device);
@@ -391,7 +391,7 @@ PyObject* THNPModule_setStream_wrap(
   auto stream = c10_npu::NPUStream::unpack3(
       stream_id, device_index, static_cast<c10::DeviceType>(device_type));
 
-  int device;
+  c10::DeviceIndex device;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
   if (device != stream.device_index()) {
     THNPModule_setDevice(stream.device_index());

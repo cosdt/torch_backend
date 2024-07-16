@@ -40,7 +40,7 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
     return old_device;
   }
   c10::Device getDevice() const override {
-    int device = 0;
+    c10::DeviceIndex device = 0;
     NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
     return c10::Device(c10::DeviceType::PrivateUse1, device);
   }
