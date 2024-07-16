@@ -1,12 +1,9 @@
+#include "NPUGeneratorImpl.h"
 #include <ATen/Utils.h>
 #include <ATen/core/GeneratorForPrivateuseone.h>
 #include <c10/core/StreamGuard.h>
-
-#include "csrc/npu/NPUFunctions.h"
-
-#include "BaseGeneratorImpl.h"
-#include "NPUGeneratorImpl.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/npu/NPUFunctions.h"
 
 namespace at_npu {
 namespace detail {
