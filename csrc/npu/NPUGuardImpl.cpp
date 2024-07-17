@@ -9,8 +9,6 @@ namespace c10_npu {
 
 namespace impl {
 
-constexpr c10::DeviceType NPUGuardImpl::static_type;
-
 C10_REGISTER_GUARD_IMPL(PrivateUse1, NPUGuardImpl);
 
 #define REGISTER_PRIVATEUSE1_BACKEND(name)                                \

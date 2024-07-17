@@ -128,7 +128,7 @@ struct BlockPool {
 };
 
 struct Block {
-  int device;
+  c10::DeviceIndex device;
   void* stream; // allocation stream
   stream_set stream_uses; // streams on which the block was used
   size_t size; // block size in bytes
@@ -155,7 +155,7 @@ struct Block {
   // memory out from our cache.
   std::shared_ptr<c10::GatheredContext> context_when_segment_allocated;
 
-  Block(int device, void* stream, size_t size, BlockPool* pool, void* ptr)
+  Block(c10::DeviceIndex device, void* stream, size_t size, BlockPool* pool, void* ptr)
       : device(device),
         stream(stream),
         stream_uses(),
@@ -170,7 +170,7 @@ struct Block {
         gc_count(0) {}
 
   // constructor for search key
-  Block(int device, void* stream, size_t size)
+  Block(c10::DeviceIndex device, void* stream, size_t size)
       : device(device),
         stream(stream),
         stream_uses(),
@@ -244,7 +244,7 @@ static std::string format_size(uint64_t size) {
 
 struct AllocParams {
   AllocParams(
-      int device,
+      c10::DeviceIndex device,
       size_t size,
       void* stream,
       BlockPool* pool,
@@ -256,7 +256,7 @@ struct AllocParams {
         block(nullptr),
         err(ACL_ERROR_NONE) {}
 
-  int device() const {
+  c10::DeviceIndex device() const {
     return search_key.device;
   }
   void* stream() const {
@@ -641,7 +641,7 @@ class DeviceCachingAllocator {
   // All public methods (except the above) acquire the allocator mutex.
   // Thus, do not call a public method from another public method.
 
-  Block* malloc(int device, size_t orig_size, void* stream) {
+  Block* malloc(c10::DeviceIndex device, size_t orig_size, void* stream) {
     // done outside the lock because we don't know what locks the recorder needs
     // to have...
     auto context = maybeGatherContext(RecordContext::STATE);
@@ -2012,7 +2012,7 @@ class NpuCachingAllocator : public NPUAllocator {
     return !device_allocator.empty();
   }
   /** allocates a block which is safe to use from the provided stream */
-  void malloc(void** devPtr, int device, size_t size, void* stream) {
+  void malloc(void** devPtr, c10::DeviceIndex device, size_t size, void* stream) {
     Block* block = device_allocator[device]->malloc(device, size, stream);
     add_allocated_block(block);
     *devPtr = static_cast<void*>(block->ptr);
@@ -2060,7 +2060,7 @@ class NpuCachingAllocator : public NPUAllocator {
   }
 
   bool isHistoryEnabled() override {
-    int device = 0;
+    c10::DeviceIndex device = 0;
     NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
     return device_allocator[device]->isHistoryEnabled();
   }
@@ -2154,7 +2154,7 @@ class NpuCachingAllocator : public NPUAllocator {
   }
 
   c10::DataPtr allocate(size_t size) override {
-    int device = 0;
+    c10::DeviceIndex device = 0;
     NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
     void* devPtr = nullptr;
     void (*deleteFunc)(void*) = &local_raw_delete;
@@ -2215,7 +2215,7 @@ class NpuCachingAllocator : public NPUAllocator {
     if (nbytes == 0) {
       return nullptr;
     }
-    int device = 0;
+    c10::DeviceIndex device = 0;
     NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
     void* r = nullptr;
     malloc(&r, device, nbytes, getCurrentStream(device));
@@ -2226,7 +2226,7 @@ class NpuCachingAllocator : public NPUAllocator {
     if (nbytes == 0) {
       return nullptr;
     }
-    int device;
+    c10::DeviceIndex device;
     NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
     void* r = nullptr;
     malloc(&r, device, nbytes, stream);

@@ -10,7 +10,7 @@ import torch_npu._C
 from torch_npu.utils.error_code import ErrCode, pta_error
 
 __all__ = ["synchronize", "device_count", "can_device_access_peer", "set_device", "current_device", "get_device_name",
-           "get_device_properties", "mem_get_info", "get_device_capability", "utilization", "device", "device_of",
+           "get_device_properties", "mem_get_info", "get_device_capability", "device", "device_of",
            "_get_device_index"]
 
 
@@ -85,16 +85,6 @@ def get_device_capability(device=None):
     """
     warnings.warn("torch.npu.get_device_capability isn't implemented!")
     return None
-
-
-def utilization(device=None):
-    r"""Query the comprehensive utilization rate of device
-    """
-    device_id = _get_device_index(device, optional=True)
-    if device_id < 0 or device_id >= device_count():
-        raise AssertionError("Invalid device id" + pta_error(ErrCode.VALUE))
-    torch_npu.npu._lazy_init()
-    return torch_npu._C._npu_getDeviceUtilizationRate(device_id)
 
 
 class device(object):

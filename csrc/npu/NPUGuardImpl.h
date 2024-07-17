@@ -8,28 +8,24 @@
 #include <npu/acl/include/acl/acl_base.h>
 #include <npu/acl/include/acl/acl_rt.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "npu/core/NPUException.h"
+#include "csrc/core/impl/PrivateUse1GuardImpl.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
+#include "npu/core/NPUException.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace c10_npu {
 namespace impl {
+struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
+  NPUGuardImpl() = default;
 
-struct NPUGuardImpl final : public c10::impl::DeviceGuardImplInterface {
-  static constexpr c10::DeviceType static_type = c10::DeviceType::PrivateUse1;
-
-  NPUGuardImpl() {}
   explicit NPUGuardImpl(c10::DeviceType t) {
     TORCH_INTERNAL_ASSERT(
-        t == c10::DeviceType::PrivateUse1,
-        "DeviceType must be NPU. Actual DeviceType is: ",
+        t == static_type,
+        "DeviceType must be 'c10::DeviceType::PrivateUse1'. Actual DeviceType is: ",
         t,
         PTA_ERROR(ErrCode::PARAM));
-  }
-  c10::DeviceType type() const override {
-    return c10::DeviceType::PrivateUse1;
   }
   c10::Device exchangeDevice(c10::Device d) const override {
     TORCH_INTERNAL_ASSERT(
@@ -44,14 +40,14 @@ struct NPUGuardImpl final : public c10::impl::DeviceGuardImplInterface {
     return old_device;
   }
   c10::Device getDevice() const override {
-    int device = 0;
+    c10::DeviceIndex device = 0;
     NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
     return c10::Device(c10::DeviceType::PrivateUse1, device);
   }
   void setDevice(c10::Device d) const override {
     TORCH_INTERNAL_ASSERT(
         d.type() == c10::DeviceType::PrivateUse1,
-        "DeviceType must be NPU. Actual DeviceType is: ",
+        "DeviceType must be 'c10::DeviceType::PrivateUse1'. Actual DeviceType is: ",
         d.type(),
         PTA_ERROR(ErrCode::PARAM));
     NPU_CHECK_ERROR(c10_npu::SetDevice(d.index()));

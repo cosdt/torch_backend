@@ -17,14 +17,13 @@ from .device import (
     get_device_properties,
     get_device_capability,
     _get_device_index,
-    utilization,
     device,
     device_of,
     mem_get_info,
 )
 
 __all__ = ["synchronize", "device_count", "can_device_access_peer", "set_device", "current_device", "get_device_name",
-           "get_device_properties", "mem_get_info", "get_device_capability", "utilization", "device", "device_of",
+           "get_device_properties", "mem_get_info", "get_device_capability", "device", "device_of",
            "stream", "set_stream", "current_stream", "default_stream", "set_sync_debug_mode", "get_sync_debug_mode",
            "init_dump", "set_dump", "finalize_dump", "get_soc_version", "is_support_inf_nan", "is_bf16_supported",
            "get_npu_overflow_flag", "npu_check_overflow", "clear_npu_overflow_flag", "current_blas_handle"]

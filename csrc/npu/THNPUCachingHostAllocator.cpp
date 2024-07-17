@@ -246,7 +246,7 @@ struct HostAllocator {
   aclError insertEvents(Block& block) {
     aclError err = ACL_ERROR_NONE;
 
-    int prev_device = 0;
+    c10::DeviceIndex prev_device = 0;
     err = c10_npu::GetDevice(&prev_device);
     if (err != ACL_ERROR_NONE) {
       return err;
@@ -338,9 +338,7 @@ at::Allocator* getTHNPUCachingHostAllocator() {
 
 c10::Allocator* getPinnedMemoryAllocator() {
   C10_LOG_API_USAGE_ONCE("aten.init.npu");
-  c10_npu::NpuSysCtrl::SysStatus status =
-      c10_npu::NpuSysCtrl::GetInstance().Initialize();
-  if (status != c10_npu::NpuSysCtrl::SysStatus::INIT_SUCC) {
+  if (!c10_npu::NpuSysCtrl::IsInitializeSuccess()) {
     ASCEND_LOGE("Npu init fail.");
   }
   return getTHNPUCachingHostAllocator();

@@ -45,13 +45,6 @@ class ErrCode(Enum):
 
 
 def _format_error_msg(submodule, error_code):
-    def get_device_id():
-        try:
-            import torch_npu._C
-            return torch_npu._C._npu_getLocalDevice()
-        except Exception:
-            return -1
-
     def get_rank_id():
         try:
             import torch.distributed as dist
@@ -60,12 +53,11 @@ def _format_error_msg(submodule, error_code):
         except Exception:
             return -1
 
-    error_msg = "\n[ERROR] {time} (PID:{pid}, Device:{device}, RankID:{rank}) {error_code} {submodule_name} {error_code_msg}"
+    error_msg = "\n[ERROR] {time} (PID:{pid}, RankID:{rank}) {error_code} {submodule_name} {error_code_msg}"
 
     return error_msg.format(
             time=time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime()),
             pid=os.getpid(),
-            device=get_device_id(),
             rank=get_rank_id(),
             error_code="ERR{:0>2d}{:0>3d}".format(submodule.value, error_code.code,),
             submodule_name=submodule.name,

@@ -177,7 +177,7 @@ ExpandableSegment* createExpandableSegment(
   return new NPUExpandableSegment(device, stream, size);
 }
 
-void insertEventWrapper(int device, std::function<void()> fn) {
+void insertEventWrapper(c10::DeviceIndex device, std::function<void()> fn) {
   aclrtContext compiler_ctx = aclrtContext();
   aclError ret_ctx = aclrtGetCurrentContext(&compiler_ctx);
   NPU_CHECK_ERROR(aclrtSetCurrentContext(c10_npu::GetDeviceContext(device)));

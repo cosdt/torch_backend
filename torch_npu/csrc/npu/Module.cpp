@@ -3,15 +3,11 @@
 #include <thread>
 #include <unordered_map>
 
-#include <ATen/ATen.h>
 #include <torch/csrc/Exceptions.h>
 #include <torch/csrc/Generator.h>
 #include <torch/csrc/THP.h>
 #include <torch/csrc/autograd/generated/VariableType.h>
-#include <torch/csrc/autograd/generated/variable_factories.h>
-#include <torch/csrc/autograd/utils/wrap_outputs.h>
 #include <torch/csrc/profiler/python/combined_traceback.h>
-#include <torch/csrc/python_headers.h>
 #include <torch/csrc/utils/device_lazy_init.h>
 #include <torch/csrc/utils/pybind.h>
 #include <torch/csrc/utils/python_arg_parser.h>
@@ -30,11 +26,9 @@
 #include "npu/core/NpuVariables.h"
 #include "npu/core/register/OptionRegister.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
-#include "npu/framework/StorageDescHelper.h"
 #include "npu/acl/include/acl/acl.h"
 #include "torch_npu/csrc/npu/Module.h"
 #include "torch_npu/csrc/npu/NPUPluggableAllocator.h"
-#include "torch_npu/csrc/npu/Stream.h"
 #include "torch_npu/csrc/npu/memory_snapshot.h"
 
 struct NPUDeviceProp {
@@ -107,7 +101,7 @@ void RegisterNPUDeviceMemories(PyObject* module) {
       .def_readonly("free_memory", &NPUDeviceMem::freeMem);
 }
 
-NPUDeviceMem* GetDeviceMemories(int64_t deviceid) {
+NPUDeviceMem* GetDeviceMemories(c10::DeviceIndex deviceid) {
   c10_npu::NPUGuard guard(deviceid);
   size_t device_free;
   size_t device_total;
@@ -121,7 +115,7 @@ void BindGetDeviceMemories(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   m.def(
       "_npu_getDeviceMemories",
-      [](int deviceid) -> NPUDeviceMem* { return GetDeviceMemories(deviceid); },
+      [](c10::DeviceIndex deviceid) -> NPUDeviceMem* { return GetDeviceMemories(deviceid); },
       py::return_value_policy::reference);
 }
 
@@ -230,9 +224,9 @@ static PyObject* THNPModule_initExtension(PyObject* self, PyObject* noargs) {
       throw python_error();
     }
   };
-  auto num_npus = c10_npu::device_count();
+  c10::DeviceIndex num_npus = c10_npu::device_count();
   auto default_npu_generators = PyTuple_New(static_cast<Py_ssize_t>(num_npus));
-  for (int i = 0; i < num_npus; i++) {
+  for (c10::DeviceIndex i = 0; i < num_npus; i++) {
     auto gen = at_npu::detail::getDefaultNPUGenerator(i);
     auto cast_gen = (THPGenerator*)THPGenerator_initDefaultGenerator(gen);
     // This reference is meant to be given away, so no need to incref here.
@@ -259,13 +253,13 @@ void THNPModule_setDevice(int device) {
 
 PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
   HANDLE_TH_ERRORS
-  int device = THPUtils_unpackLong(arg);
+  c10::DeviceIndex device = THPUtils_unpackDeviceIndex(arg);
   {
     pybind11::gil_scoped_release no_gil;
     at::globalContext().lazyInitPrivateUse1();
   }
 
-  int pre_device = 0;
+  c10::DeviceIndex pre_device = 0;
   auto ret = c10_npu::GetDevice(&pre_device);
   if (ret != ACL_ERROR_NONE) {
     NPU_CHECK_ERROR(c10_npu::SetDevice(device));
@@ -279,22 +273,16 @@ PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
 
 PyObject* THNPModule_getDevice_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  int device;
+  c10::DeviceIndex device;
   torch::utils::device_lazy_init(at::kPrivateUse1);
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
-  return PyLong_FromLong(device);
+  return THPUtils_packInt32(device);
   END_HANDLE_TH_ERRORS
 }
 
 PyObject* THNPModule_getDeviceCount_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  return PyLong_FromLong(c10_npu::device_count());
-  END_HANDLE_TH_ERRORS
-}
-
-PyObject* THNPModule_getLocalDevice_wrap(PyObject* self, PyObject* noargs) {
-  HANDLE_TH_ERRORS
-  return PyLong_FromLong(c10_npu::GetLocalDevice());
+  return THPUtils_packInt32(c10_npu::device_count());
   END_HANDLE_TH_ERRORS
 }
 
@@ -308,50 +296,11 @@ PyObject* THNPModule_npuCanDeviceAccessPeer_wrap(
     throw torch::TypeError(
         "Pybind failed to parse parameters." + PTA_ERROR(ErrCode::TYPE));
   }
-  int32_t device_id = THPUtils_unpackInt(value_1);
-  int32_t peer_device_id = THPUtils_unpackInt(value_2);
+  c10::DeviceIndex device_id = THPUtils_unpackDeviceIndex(value_1);
+  c10::DeviceIndex peer_device_id = THPUtils_unpackDeviceIndex(value_2);
   auto can_access_peer =
       c10_npu::acl::can_device_access_peer(device_id, peer_device_id);
   return PyBool_FromLong(can_access_peer);
-  END_HANDLE_TH_ERRORS
-}
-
-PyObject* THNPModule_getDeviceUtilizationRate_wrap(
-    PyObject* self,
-    PyObject* device_index) {
-  HANDLE_TH_ERRORS
-  TORCH_CHECK(
-      THPUtils_checkLong(device_index),
-      "invalid argument to getDeviceUtilizationRate",
-      PTA_ERROR(ErrCode::VALUE));
-  int32_t device = static_cast<int32_t>(THPUtils_unpackUInt32(device_index));
-  aclrtUtilizationInfo util_info;
-  util_info.cubeUtilization = 0;
-  util_info.vectorUtilization = 0;
-  util_info.utilizationExtend = nullptr;
-  NPU_CHECK_ERROR(
-      c10_npu::acl::AclrtGetDeviceUtilizationRate(device, &util_info));
-  int32_t cube = util_info.cubeUtilization;
-  int32_t vector = util_info.vectorUtilization;
-  int32_t util_rate = 0;
-  // 如果vector和cube谁支持,就返回谁的使用率，如果都支持计算(vector*1+cube*1)/2
-  if (cube == DEVICE_UTILIZATION_NOT_SUPPORT &&
-      vector != DEVICE_UTILIZATION_NOT_SUPPORT) {
-    util_rate = vector;
-  } else if (
-      cube != DEVICE_UTILIZATION_NOT_SUPPORT &&
-      vector == DEVICE_UTILIZATION_NOT_SUPPORT) {
-    util_rate = cube;
-  } else if (
-      cube != DEVICE_UTILIZATION_NOT_SUPPORT &&
-      vector != DEVICE_UTILIZATION_NOT_SUPPORT) {
-    util_rate = (cube + vector) / 2;
-  }
-  TORCH_CHECK(
-      util_rate <= 100 && util_rate >= 0,
-      "invalid result to util_rate",
-      PTA_ERROR(ErrCode::VALUE));
-  return PyLong_FromLong(util_rate);
   END_HANDLE_TH_ERRORS
 }
 
@@ -363,7 +312,7 @@ PyObject* THNPModule_getCurrentStream_wrap(
       THPUtils_checkLong(device_index),
       "invalid argument to getCurrentStream",
       PTA_ERROR(ErrCode::PARAM));
-  int64_t device = THPUtils_unpackLong(device_index);
+  c10::DeviceIndex device = THPUtils_unpackDeviceIndex(device_index);
   auto stream = c10_npu::getCurrentNPUStream(device);
   PyObject* output_tuple = PyTuple_New(3);
   PyTuple_SetItem(
@@ -388,7 +337,7 @@ PyObject* THNPModule_getDefaultStream_wrap(
       THPUtils_checkLong(device_index),
       "invalid argument to getDefaultStream",
       PTA_ERROR(ErrCode::PARAM));
-  int64_t device = THPUtils_unpackLong(device_index);
+  c10::DeviceIndex device = THPUtils_unpackDeviceIndex(device_index);
   auto stream = c10_npu::getDefaultNPUStream(device);
   PyObject* output_tuple = PyTuple_New(3);
   PyTuple_SetItem(
@@ -428,9 +377,11 @@ PyObject* THNPModule_setStream_wrap(
   }
 
   auto stream = c10_npu::NPUStream::unpack3(
-      stream_id, device_index, static_cast<c10::DeviceType>(device_type));
+      stream_id,
+      static_cast<c10::DeviceIndex>(device_index),
+      static_cast<c10::DeviceType>(device_type));
 
-  int device;
+  c10::DeviceIndex device;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
   if (device != stream.device_index()) {
     THNPModule_setDevice(stream.device_index());
@@ -1064,10 +1015,6 @@ static struct PyMethodDef THNPModule_methods[] = {
      (PyCFunction)THNPModule_getDevice_wrap,
      METH_NOARGS,
      nullptr},
-    {"_npu_getLocalDevice",
-     (PyCFunction)THNPModule_getLocalDevice_wrap,
-     METH_NOARGS,
-     nullptr},
     {"_npu_getDeviceCount",
      (PyCFunction)THNPModule_getDeviceCount_wrap,
      METH_NOARGS,
@@ -1075,10 +1022,6 @@ static struct PyMethodDef THNPModule_methods[] = {
     {"_npu_canDeviceAccessPeer",
      (PyCFunction)THNPModule_npuCanDeviceAccessPeer_wrap,
      METH_VARARGS,
-     nullptr},
-    {"_npu_getDeviceUtilizationRate",
-     (PyCFunction)THNPModule_getDeviceUtilizationRate_wrap,
-     METH_O,
      nullptr},
     {"_npu_getCurrentStream",
      (PyCFunction)THNPModule_getCurrentStream_wrap,

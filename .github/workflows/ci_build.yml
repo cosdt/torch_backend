@@ -34,9 +34,13 @@ on:
     types:
       - 'published'
 
+concurrency:
+  group: '${{ github.workflow }}-${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
+
 jobs:
   build:
-    name: Build for Python${{ matrix.python-version }}
+    name: Build with Python${{ matrix.python-version }}
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -46,9 +46,7 @@ inline c10::DeviceType get_npu_device_type() {
 
 inline void maybe_initialize_npu(const at::TensorOptions& options) {
   if (torch_npu::utils::is_npu(options)) {
-    c10_npu::NpuSysCtrl::SysStatus status =
-        c10_npu::NpuSysCtrl::GetInstance().Initialize(options.device().index());
-    if (status != c10_npu::NpuSysCtrl::SysStatus::INIT_SUCC) {
+    if (!c10_npu::NpuSysCtrl::IsInitializeSuccess(options.device().index())) {
       TORCH_CHECK(
           false,
           "npu device ",
@@ -61,9 +59,7 @@ inline void maybe_initialize_npu(const at::TensorOptions& options) {
 
 inline void maybe_initialize_npu(const at::Device& device) {
   if (torch_npu::utils::is_npu(device)) {
-    c10_npu::NpuSysCtrl::SysStatus status =
-        c10_npu::NpuSysCtrl::GetInstance().Initialize(device.index());
-    if (status != c10_npu::NpuSysCtrl::SysStatus::INIT_SUCC) {
+    if (!c10_npu::NpuSysCtrl::IsInitializeSuccess(device.index())) {
       TORCH_CHECK(
           false,
           "npu device ",

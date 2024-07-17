@@ -8,7 +8,7 @@
 
 namespace torch::npu::NPUPluggableAllocator {
 
-int device_count = 0;
+c10::DeviceIndex device_count = 0;
 
 void custom_raw_deleter(void* ptr);
 
@@ -17,7 +17,7 @@ _AllocationMetadata::_AllocationMetadata()
 
 _AllocationMetadata::_AllocationMetadata(
     size_t size,
-    int device_idx,
+    c10::DeviceIndex device_idx,
     aclrtStream stream)
     : size(size), device_idx(device_idx), stream(stream) {}
 
@@ -70,7 +70,7 @@ void NPUPluggableAllocator::set_erase_stream_fn(
 
 void* NPUPluggableAllocator::malloc(
     size_t size,
-    int device,
+    c10::DeviceIndex device,
     aclrtStream stream) {
   void* r = alloc_fn_(size, device, stream);
   {
@@ -81,7 +81,7 @@ void* NPUPluggableAllocator::malloc(
 }
 
 c10::DataPtr NPUPluggableAllocator::allocate(size_t size) {
-  int device = -1;
+  c10::DeviceIndex device = -1;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
   aclrtStream stream = c10_npu::getCurrentNPUStreamNoWait(device);
   void* r = this->malloc(size, device, stream);
@@ -89,8 +89,7 @@ c10::DataPtr NPUPluggableAllocator::allocate(size_t size) {
       r,
       r,
       raw_deleter(),
-      c10::Device(
-          c10::DeviceType::PrivateUse1, static_cast<c10::DeviceIndex>(device))};
+      c10::Device(c10::DeviceType::PrivateUse1, device)};
   return data_ptr;
 }
 
@@ -99,7 +98,7 @@ c10::DeleterFnPtr NPUPluggableAllocator::raw_deleter() const {
 }
 
 void* NPUPluggableAllocator::raw_alloc(size_t nbytes) {
-  int device = -1;
+  c10::DeviceIndex device = -1;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
   aclrtStream stream = c10_npu::getCurrentNPUStreamNoWait(device);
   return malloc(nbytes, device, stream);
@@ -108,14 +107,14 @@ void* NPUPluggableAllocator::raw_alloc(size_t nbytes) {
 void* NPUPluggableAllocator::raw_alloc_with_stream(
     size_t nbytes,
     aclrtStream stream) {
-  int device = -1;
+  c10::DeviceIndex device = -1;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
   return malloc(nbytes, device, stream);
 }
 
 void NPUPluggableAllocator::raw_delete(void* ptr) {
   aclrtStream stream{};
-  int device_idx = -1;
+  c10::DeviceIndex device_idx = -1;
   size_t size = 0;
   {
     const std::lock_guard<std::mutex> lock(allocator_mutex_);
