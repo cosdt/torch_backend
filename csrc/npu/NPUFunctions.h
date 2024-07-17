@@ -11,6 +11,7 @@
 #include <c10/macros/Macros.h>
 
 #include <npu/acl/include/acl/acl.h>
+#include <optional>
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUMacros.h"
 #include "npu/core/npu_log.h"
@@ -38,6 +39,14 @@ C10_NPU_API aclError GetDeviceCount(int* dev_count);
 C10_NPU_API aclError GetDevice(c10::DeviceIndex* device);
 
 C10_NPU_API aclError SetDevice(c10::DeviceIndex device);
+
+C10_NPU_API aclError MaybeSetDevice(c10::DeviceIndex device);
+
+C10_NPU_API c10::DeviceIndex ExchangeDevice(c10::DeviceIndex device);
+
+C10_NPU_API c10::DeviceIndex MaybeExchangeDevice(c10::DeviceIndex device);
+
+C10_NPU_API void SetTargetDevice();
 
 C10_NPU_API aclrtContext GetDeviceContext(c10::DeviceIndex device);
 
@@ -70,5 +79,8 @@ C10_NPU_API __inline__ WarningState& warning_state() {
   static WarningState warning_state_;
   return warning_state_;
 }
+
+C10_NPU_API bool hasPrimaryContext(c10::DeviceIndex device_index);
+C10_NPU_API std::optional<c10::DeviceIndex> getDeviceIndexWithPrimaryContext();
 
 } // namespace c10_npu
