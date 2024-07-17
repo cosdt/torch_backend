@@ -23,9 +23,9 @@ void changeCurrentAllocator(
 
 struct _AllocationMetadata {
   _AllocationMetadata();
-  _AllocationMetadata(size_t size, int device_idx, aclrtStream stream);
+  _AllocationMetadata(size_t size, c10::DeviceIndex device_idx, aclrtStream stream);
   size_t size;
-  int device_idx;
+  c10::DeviceIndex device_idx;
   aclrtStream stream;
 };
 
@@ -46,7 +46,7 @@ struct NPUPluggableAllocator
       std::function<void(void* ptr, aclrtStream stream)> record_stream_fn);
   void set_erase_stream_fn(
       std::function<void(void* ptr, aclrtStream stream)> erase_stream_fn);
-  void* malloc(size_t size, int device, aclrtStream stream);
+  void* malloc(size_t size, c10::DeviceIndex device, aclrtStream stream);
 
   c10::DataPtr allocate(size_t size) override;
   c10::DeleterFnPtr raw_deleter() const override;
@@ -79,8 +79,8 @@ struct NPUPluggableAllocator
       c10_npu::NPUCachingAllocator::OutOfMemoryObserver observer) override;
 
  protected:
-  std::function<void*(size_t, int, aclrtStream)> alloc_fn_;
-  std::function<void(void*, size_t, int, aclrtStream)> free_fn_;
+  std::function<void*(size_t, c10::DeviceIndex, aclrtStream)> alloc_fn_;
+  std::function<void(void*, size_t, c10::DeviceIndex, aclrtStream)> free_fn_;
   std::function<void(int)> init_fn_;
   std::function<void(bool)> reset_fn_;
   std::function<void(double, int)> memory_fraction_fn_;

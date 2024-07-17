@@ -19,7 +19,7 @@ static PyObject* THNPStream_pynew(
     PyObject* kwargs) {
   HANDLE_TH_ERRORS
 
-  int current_device;
+  c10::DeviceIndex current_device;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&current_device));
 
   int priority = 0;

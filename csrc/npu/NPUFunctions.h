@@ -43,6 +43,7 @@ C10_NPU_API aclrtContext GetDeviceContext(int32_t device);
 
 C10_NPU_API int GetLocalDevice();
 
+// TODO: remove the following three functions
 aclError ResetUsedDevices();
 
 aclError DestroyUsedStreams();

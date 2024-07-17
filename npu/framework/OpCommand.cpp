@@ -270,7 +270,7 @@ at::Tensor OpCommand::CopyHostToDevice(
 
 at::Tensor OpCommand::CopyHostToDevice(const at::Tensor& cpuTensor) {
   at::Tensor cpuPinMemTensor = cpuTensor.pin_memory();
-  int deviceIndex = 0;
+  c10::DeviceIndex deviceIndex = 0;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&deviceIndex));
   auto tensor = cpuPinMemTensor.to(
       c10::Device(c10::DeviceType::PrivateUse1, deviceIndex),
