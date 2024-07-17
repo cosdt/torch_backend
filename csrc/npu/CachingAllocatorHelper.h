@@ -129,7 +129,7 @@ ExpandableSegment* createExpandableSegment(
     size_t size);
 
 // Wraps the insert event function
-void insertEventWrapper(int device, std::function<void()> insertEventFn);
+void insertEventWrapper(c10::DeviceIndex device, std::function<void()> insertEventFn);
 
 // Returns the current stream for the given device
 void* getCurrentStream(c10::DeviceIndex);

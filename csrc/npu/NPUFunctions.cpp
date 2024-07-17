@@ -128,6 +128,15 @@ aclError SetDevice(c10::DeviceIndex device) {
   return err;
 }
 
+aclrtContext GetDeviceContext(c10::DeviceIndex device) {
+  if (used_devices.find(device) == used_devices.end()) {
+    ASCEND_LOGE(
+        "NPU device %d has been initialized! Can not get context", device);
+    return nullptr;
+  }
+  return used_devices[device];
+}
+
 aclError ResetUsedDevices() {
   for (const auto it : used_devices) {
     aclError err = aclrtResetDevice(it.first);
@@ -166,19 +175,6 @@ aclError SynchronizeUsedDevices() {
   }
   NPU_CHECK_ERROR(SetDevice(cur_device));
   return ACL_ERROR_NONE;
-}
-
-aclrtContext GetDeviceContext(int32_t device) {
-  if (used_devices.find(device) == used_devices.end()) {
-    ASCEND_LOGE(
-        "NPU device %d has been initialized! Can not get context", device);
-    return nullptr;
-  }
-  return used_devices[device];
-}
-
-int GetLocalDevice() {
-  return local_device;
 }
 
 } // namespace c10_npu
