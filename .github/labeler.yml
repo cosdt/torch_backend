@@ -3,6 +3,7 @@ documentation:
   - changed-files:
       - any-glob-to-any-file:
           - '**/*.md'
+          - '**/*.rst'
 
 'ci/cd':
   - changed-files:
@@ -21,7 +22,7 @@ backend:
 frontend:
   - changed-files:
       - any-glob-to-any-file:
-          - '**/*.py'
+          - '**/*.py*'
 
 'unit test':
   - changed-files:
