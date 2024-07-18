@@ -82,5 +82,12 @@ jobs:
 
       - name: Compile source
         run: |
+          export BUILD_TEST=1
+          export INSTALL_TEST=1
           export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
           python setup.py develop
+
+      - name: Run C++ test
+        working-directory: ./build
+        run: |
+          ctest --output-on-failure --verbose
