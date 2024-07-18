@@ -6,7 +6,6 @@
 #include "csrc/npu/THNPUCachingHostAllocator.h"
 #include "npu/core/npu_log.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
-#include "torch_npu/csrc/npu/Event.h"
 #include "torch_npu/csrc/npu/Module.h"
 #include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/core/AutocastMode.h"

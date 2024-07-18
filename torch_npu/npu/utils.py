@@ -25,7 +25,7 @@ from .device import (
 __all__ = ["synchronize", "device_count", "can_device_access_peer", "set_device", "current_device", "get_device_name",
            "get_device_properties", "mem_get_info", "get_device_capability", "device", "device_of",
            "stream", "set_stream", "current_stream", "default_stream", "set_sync_debug_mode", "get_sync_debug_mode",
-           "init_dump", "set_dump", "finalize_dump", "get_soc_version", "is_support_inf_nan", "is_bf16_supported",
+           "get_soc_version", "is_support_inf_nan", "is_bf16_supported",
            "get_npu_overflow_flag", "npu_check_overflow", "clear_npu_overflow_flag", "current_blas_handle"]
 
 
@@ -155,22 +155,6 @@ if not hasattr(torch_npu._C, '_NPUStreamBase'):
     # Define dummy base classes
     torch_npu._C.__dict__['_NPUStreamBase'] = _dummy_type('NPUStreamBase')
     torch_npu._C.__dict__['_NPUEventBase'] = _dummy_type('NPUEventBase')
-
-
-def init_dump():
-    torch_npu.npu._lazy_init()
-    return torch_npu._C._npu_initDump()
-
-
-def set_dump(cfg_file):
-    torch_npu.npu._lazy_init()
-    cfg_file_path = os.path.realpath(cfg_file)
-    return torch_npu._C._npu_setDump(cfg_file_path)
-
-
-def finalize_dump():
-    torch_npu.npu._lazy_init()
-    return torch_npu._C._npu_finalizeDump()
 
 
 def get_soc_version():

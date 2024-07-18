@@ -66,6 +66,7 @@ void BindGetDeviceProperties(PyObject* module) {
 }
 
 NPUDeviceMem memory;
+
 void RegisterNPUDeviceMemories(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   py::class_<NPUDeviceMem>(m, "_NPUDeviceMemories")

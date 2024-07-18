@@ -626,37 +626,6 @@ PyObject* THNPModule_npuUnlockMutex(PyObject* module, PyObject* noargs) {
   Py_RETURN_NONE;
 }
 
-PyObject* THNPModule_initDump(PyObject* _unused, PyObject* noargs) {
-  HANDLE_TH_ERRORS
-  pybind11::gil_scoped_release no_gil;
-  NPU_CHECK_ERROR(aclmdlInitDump());
-  Py_RETURN_NONE;
-  END_HANDLE_TH_ERRORS
-}
-
-PyObject* THNPModule_setDump(PyObject* _unused, PyObject* arg) {
-  HANDLE_TH_ERRORS
-  if (!THPUtils_checkString(arg)) {
-    THPUtils_setError("npu set dump error, cfg_file must string");
-  }
-  std::string cfg_file = THPUtils_unpackString(arg);
-  {
-    pybind11::gil_scoped_release no_gil;
-    NPU_CHECK_ERROR(aclmdlSetDump(cfg_file.c_str()));
-  }
-  Py_RETURN_NONE;
-  END_HANDLE_TH_ERRORS
-}
-
-PyObject* THNPModule_finalizeDump(PyObject* _unused, PyObject* noargs) {
-  c10_npu::npuSynchronizeDevice();
-  HANDLE_TH_ERRORS
-  pybind11::gil_scoped_release no_gil;
-  NPU_CHECK_ERROR(aclmdlFinalizeDump());
-  Py_RETURN_NONE;
-  END_HANDLE_TH_ERRORS
-}
-
 PyObject* THNPModule_setOption_wrap(PyObject* self, PyObject* arg) {
   HANDLE_TH_ERRORS
 
@@ -909,12 +878,6 @@ static struct PyMethodDef THNPModule_methods[] = {
      nullptr},
     {"_npu_unlock_mutex",
      (PyCFunction)THNPModule_npuUnlockMutex,
-     METH_NOARGS,
-     nullptr},
-    {"_npu_initDump", (PyCFunction)THNPModule_initDump, METH_NOARGS, nullptr},
-    {"_npu_setDump", (PyCFunction)THNPModule_setDump, METH_O, nullptr},
-    {"_npu_finalizeDump",
-     (PyCFunction)THNPModule_finalizeDump,
      METH_NOARGS,
      nullptr},
     {"_npu_setOption", (PyCFunction)THNPModule_setOption_wrap, METH_O, nullptr},
