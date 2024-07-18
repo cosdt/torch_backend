@@ -25,7 +25,6 @@
 #include "csrc/npu/NPUStream.h"
 #include "npu/core/NpuVariables.h"
 #include "npu/core/register/OptionRegister.h"
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 #include "npu/acl/include/acl/acl.h"
 #include "torch_npu/csrc/npu/Module.h"
 #include "torch_npu/csrc/npu/NPUPluggableAllocator.h"
@@ -247,25 +246,16 @@ PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
   END_HANDLE_TH_ERRORS
 }
 
-void THNPModule_setDevice(int device) {
-  NPU_CHECK_ERROR(c10_npu::SetDevice(device));
-}
-
 PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
   HANDLE_TH_ERRORS
-  c10::DeviceIndex device = THPUtils_unpackDeviceIndex(arg);
+  TORCH_CHECK(THPUtils_checkLong(arg), "invalid argument to setDevice");
   {
     pybind11::gil_scoped_release no_gil;
     at::globalContext().lazyInitPrivateUse1();
   }
 
-  c10::DeviceIndex pre_device = 0;
-  auto ret = c10_npu::GetDevice(&pre_device);
-  if (ret != ACL_ERROR_NONE) {
-    NPU_CHECK_ERROR(c10_npu::SetDevice(device));
-  } else if (pre_device != device) {
-    c10_npu::NpuSysCtrl::GetInstance().ExchangeDevice(pre_device, device);
-  }
+  auto device = THPUtils_unpackLong(arg);
+  c10_npu::set_device(static_cast<c10::DeviceIndex>(device));
 
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
@@ -273,16 +263,16 @@ PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
 
 PyObject* THNPModule_getDevice_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  c10::DeviceIndex device;
   torch::utils::device_lazy_init(at::kPrivateUse1);
-  NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
+  // NOLINTNEXTLINE(bugprone-signed-char-misuse)
+  auto device = static_cast<int32_t>(c10_npu::current_device());
   return THPUtils_packInt32(device);
   END_HANDLE_TH_ERRORS
 }
 
 PyObject* THNPModule_getDeviceCount_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  return THPUtils_packInt32(c10_npu::device_count());
+  return THPUtils_packUInt64(c10_npu::device_count());
   END_HANDLE_TH_ERRORS
 }
 
@@ -381,10 +371,9 @@ PyObject* THNPModule_setStream_wrap(
       static_cast<c10::DeviceIndex>(device_index),
       static_cast<c10::DeviceType>(device_type));
 
-  c10::DeviceIndex device;
-  NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
+  auto device = c10_npu::current_device();
   if (device != stream.device_index()) {
-    THNPModule_setDevice(stream.device_index());
+    c10_npu::set_device(stream.device_index());
   }
   c10_npu::setCurrentNPUStream(stream);
   Py_RETURN_NONE;
