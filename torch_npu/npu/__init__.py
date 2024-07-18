@@ -9,7 +9,6 @@ __all__ = [
     "get_device_name",
     "get_device_properties",
     "get_device_capability",
-    "mem_get_info",
     "is_available",
     "device",
     "device_of",
@@ -108,7 +107,6 @@ from .utils import (
     is_bf16_supported,
     get_npu_overflow_flag,
     clear_npu_overflow_flag,
-    mem_get_info,
 )
 from .streams import Stream, Event
 

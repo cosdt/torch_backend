@@ -109,7 +109,6 @@ PyObject* initModule() {
   RegisterNPUDeviceProperties(module);
   BindGetDeviceProperties(module);
   RegisterNPUDeviceMemories(module);
-  BindGetDeviceMemories(module);
   RegisterNpuPluggableAllocator(module);
   torch::installCapturedTracebackPython();
   return module;

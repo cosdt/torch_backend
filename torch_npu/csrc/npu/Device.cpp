@@ -50,8 +50,6 @@ NPUDeviceProp* GetDeviceProperties(int64_t deviceid) {
   } else {
     prop.name = std::string(device_name);
   }
-  NPU_CHECK_ERROR(aclrtGetMemInfo(ACL_HBM_MEM, &device_free, &device_total));
-  prop.totalGlobalMem = device_total;
   return &prop;
 }
 
@@ -72,26 +70,6 @@ void RegisterNPUDeviceMemories(PyObject* module) {
   py::class_<NPUDeviceMem>(m, "_NPUDeviceMemories")
       .def_readonly("total_memory", &NPUDeviceMem::totalGlobalMem)
       .def_readonly("free_memory", &NPUDeviceMem::freeMem);
-}
-
-NPUDeviceMem* GetDeviceMemories(c10::DeviceIndex deviceid) {
-  c10_npu::NPUGuard guard(deviceid);
-  size_t device_free;
-  size_t device_total;
-  NPU_CHECK_ERROR(aclrtGetMemInfo(ACL_HBM_MEM, &device_free, &device_total));
-  memory.totalGlobalMem = device_total;
-  memory.freeMem = device_free;
-  return &memory;
-}
-
-void BindGetDeviceMemories(PyObject* module) {
-  auto m = py::handle(module).cast<py::module>();
-  m.def(
-      "_npu_getDeviceMemories",
-      [](c10::DeviceIndex deviceid) -> NPUDeviceMem* {
-        return GetDeviceMemories(deviceid);
-      },
-      py::return_value_policy::reference);
 }
 
 PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
