@@ -1,7 +1,5 @@
 #include <ATen/Parallel.h>
 #include <Python.h>
-#include <torch/csrc/Exceptions.h>
-#include <torch/csrc/Generator.h>
 #include <torch/csrc/profiler/python/combined_traceback.h>
 
 #include "csrc/npu/NPUCachingAllocator.h"
@@ -10,6 +8,7 @@
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 #include "torch_npu/csrc/npu/Event.h"
 #include "torch_npu/csrc/npu/Module.h"
+#include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/core/AutocastMode.h"
 #include "torch_npu/csrc/core/TensorType.h"
 
@@ -82,7 +81,9 @@ static PyMethodDef TorchNpuMethods[] = {
 
 void THNPStream_init(PyObject* module);
 void THNPEvent_init(PyObject* module);
+
 PyMethodDef* THNPModule_get_methods();
+PyMethodDef* THNPModule_device_methods();
 
 static std::vector<PyMethodDef> methods;
 
@@ -91,6 +92,7 @@ PyObject* initModule() {
   at::internal::lazy_init_num_threads();
 
   AddPyMethodDefs(methods, TorchNpuMethods);
+  AddPyMethodDefs(methods, THNPModule_device_methods());
   AddPyMethodDefs(methods, THNPModule_get_methods());
   AddPyMethodDefs(methods, torch_npu::utils::npu_extension_functions());
   AddPyMethodDefs(methods, torch_npu::autocast::autocast_mode_functions());
