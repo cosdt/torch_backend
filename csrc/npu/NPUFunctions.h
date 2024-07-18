@@ -50,12 +50,7 @@ C10_NPU_API void SetTargetDevice();
 
 C10_NPU_API aclrtContext GetDeviceContext(c10::DeviceIndex device);
 
-// TODO: remove the following three functions
 aclError ResetUsedDevices();
-
-aclError DestroyUsedStreams();
-
-aclError SynchronizeUsedDevices();
 
 enum class SyncDebugMode { L_DISABLED = 0, L_WARN, L_ERROR };
 

@@ -14,7 +14,7 @@ aclError aclrtGetDevice(int32_t* deviceId) {
     return ACL_ERROR_NONE;
   }
 
-  // If ::aclrtSetDevice has never been called, then device is set to 0
+  // If ::aclrtSetDevice() has never been called, then device is set to 0.
   if (err == ACL_ERROR_RT_CONTEXT_NULL && aclrtSetDevice(0) == ACL_ERROR_NONE) {
     *deviceId = 0;
     return ACL_ERROR_NONE;
@@ -23,7 +23,7 @@ aclError aclrtGetDevice(int32_t* deviceId) {
   return err;
 }
 
-// ::aclrtSetDevice will create a context implicitly. Save it when setting
+// ::aclrtSetDevice() will create a context implicitly. Save it when setting
 // device.
 aclError aclrtSetDevice(int32_t deviceId) {
   aclError err = ::aclrtSetDevice(deviceId);
@@ -39,6 +39,7 @@ aclError aclrtSetDevice(int32_t deviceId) {
   return err;
 }
 
+// Each device that has been set has a primary context.
 bool hasPrimaryContext(c10::DeviceIndex device_index) {
   return used_devices.find(device_index) != used_devices.end();
 }
@@ -63,33 +64,11 @@ aclError ResetUsedDevices() {
   return ACL_ERROR_NONE;
 }
 
-aclError DestroyUsedStreams() {
-  c10::DeviceIndex cur_device = 0;
-  NPU_CHECK_ERROR(GetDevice(&cur_device));
-  for (const auto it : used_devices) {
-    NPU_CHECK_ERROR(SetDevice(it.first));
-    NPUStream stream = getCurrentNPUStream(it.first);
-    aclError acl_ret = acl::AclrtDestroyStreamForce(stream);
-    if (acl_ret != ACL_ERROR_NONE) {
-      return acl_ret;
-    }
+std::vector<c10::DeviceIndex> GetUsedDevices() {
+  std::vector<c10::DeviceIndex> device_idx_vec;
+  for (auto pair : used_devices) {
+    device_idx_vec.push_back(pair.first);
   }
-  NPU_CHECK_ERROR(SetDevice(cur_device));
-  return ACL_ERROR_NONE;
+  return device_idx_vec;
 }
-
-aclError SynchronizeUsedDevices() {
-  c10::DeviceIndex cur_device = 0;
-  NPU_CHECK_ERROR(GetDevice(&cur_device));
-  for (const auto it : used_devices) {
-    NPU_CHECK_ERROR(SetDevice(it.first));
-    aclError acl_ret = aclrtSynchronizeDevice();
-    if (acl_ret != ACL_ERROR_NONE) {
-      return acl_ret;
-    }
-  }
-  NPU_CHECK_ERROR(SetDevice(cur_device));
-  return ACL_ERROR_NONE;
-}
-
 } // namespace acl_adapter

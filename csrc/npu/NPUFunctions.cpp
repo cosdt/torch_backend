@@ -187,34 +187,4 @@ aclrtContext GetDeviceContext(c10::DeviceIndex device) {
 aclError ResetUsedDevices() {
   return acl_adapter::ResetUsedDevices();
 }
-
-aclError DestroyUsedStreams() {
-  c10::DeviceIndex cur_device = 0;
-  NPU_CHECK_ERROR(GetDevice(&cur_device));
-  for (const auto it : used_devices) {
-    NPU_CHECK_ERROR(SetDevice(it.first));
-    NPUStream stream = getCurrentNPUStream(it.first);
-    aclError acl_ret = acl::AclrtDestroyStreamForce(stream);
-    if (acl_ret != ACL_ERROR_NONE) {
-      return acl_ret;
-    }
-  }
-  NPU_CHECK_ERROR(SetDevice(cur_device));
-  return ACL_ERROR_NONE;
-}
-
-aclError SynchronizeUsedDevices() {
-  c10::DeviceIndex cur_device = 0;
-  NPU_CHECK_ERROR(GetDevice(&cur_device));
-  for (const auto it : used_devices) {
-    NPU_CHECK_ERROR(SetDevice(it.first));
-    aclError acl_ret = aclrtSynchronizeDevice();
-    if (acl_ret != ACL_ERROR_NONE) {
-      return acl_ret;
-    }
-  }
-  NPU_CHECK_ERROR(SetDevice(cur_device));
-  return ACL_ERROR_NONE;
-}
-
 } // namespace c10_npu

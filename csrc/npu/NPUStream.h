@@ -144,6 +144,7 @@ C10_NPU_API void setCurrentNPUStream(NPUStream stream);
 
 std::ostream& operator<<(std::ostream& stream, const NPUStream& s);
 
+aclError DestroyUsedStreams();
 } // namespace c10_npu
 
 namespace std {

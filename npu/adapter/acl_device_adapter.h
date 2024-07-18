@@ -17,8 +17,6 @@ aclrtContext GetDeviceContext(c10::DeviceIndex device);
 
 aclError ResetUsedDevices();
 
-aclError DestroyUsedStreams();
-
-aclError SynchronizeUsedDevices();
+std::vector<c10::DeviceIndex> GetUsedDevices();
 
 } // namespace acl_adapter
