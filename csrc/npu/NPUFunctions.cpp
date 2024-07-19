@@ -83,7 +83,7 @@ std::optional<c10::DeviceIndex> getDeviceIndexWithPrimaryContext() {
       return device_index;
     }
   }
-  return std::nullopt;
+  return c10::nullopt;
 }
 
 bool hasPrimaryContext(c10::DeviceIndex device_index) {
