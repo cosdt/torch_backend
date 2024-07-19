@@ -2,7 +2,7 @@
 #include <iostream>
 #include "csrc/core/CachingAllocator.h"
 
-namespace c10_backend::CachingAllocator::NPU {
+namespace c10_npu::NPUCachingAllocator {
 class DefaultNPUAllocator final : public NPUAllocator {
  public:
   void init(CachingAllocator* delegate) {
@@ -82,4 +82,4 @@ std::mutex* getFreeMutex() {
 void init(CachingAllocator* delegate) {
   defaultNPUAllocator.init(delegate);
 }
-} // namespace c10_backend::CachingAllocator::NPU
+} // namespace c10_npu::NPUCachingAllocator

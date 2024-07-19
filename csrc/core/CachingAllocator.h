@@ -121,7 +121,7 @@ struct TraceEntry {
     SNAPSHOT, // a call to snapshot, used to correlate memory snapshots to
               // trace events
     OOM // the allocator threw an OutOfMemoryError (addr_ is the amount of
-        // free bytes reported by cuda)
+        // free bytes reported by device)
   };
   TraceEntry(
       Action action,
@@ -138,7 +138,7 @@ struct TraceEntry {
         size_(size) {}
   Action action_;
   c10::DeviceIndex device_;
-  int64_t addr_; // for OOM, this is the amount of free bytes reported by cuda
+  int64_t addr_; // for OOM, this is the amount of free bytes reported by device
   std::shared_ptr<c10::GatheredContext> context_;
   void* stream_;
   int64_t size_;
@@ -200,7 +200,7 @@ class CachingAllocator : public c10::Allocator {
 };
 
 // Allocator object, statically initialized
-// See BackendInitializer in CUDACachingAllocator.cpp.
+// See BackendInitializer in CachingAllocator.cpp.
 // Atomic loads on x86 are just normal loads,
 // (atomic stores are different), so reading this value
 // is no different than loading a pointer.
@@ -211,7 +211,6 @@ inline CachingAllocator* get() {
 }
 
 // Called directly by clients.
-
 inline void init(int device_count) {
   return get()->init(device_count);
 }

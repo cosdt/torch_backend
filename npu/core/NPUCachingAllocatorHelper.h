@@ -9,9 +9,10 @@
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/core/npu_log.h"
 
-namespace c10_backend::CachingAllocator {
+namespace c10_npu::NPUCachingAllocator {
 
-class NPUCachingAllocatorHelper : public CachingAllocatorHelper {
+class CachingAllocatorHelper
+    : public c10_backend::CachingAllocator::CachingAllocatorHelper {
  public:
   void insertEventWrapper(c10::DeviceIndex device, std::function<void()> fn)
       override {
@@ -103,4 +104,4 @@ class NPUCachingAllocatorHelper : public CachingAllocatorHelper {
     return c10_npu::acl::AclrtUnmapMem(ptr);
   }
 };
-} // namespace c10_backend::CachingAllocator
+} // namespace c10_npu::NPUCachingAllocator

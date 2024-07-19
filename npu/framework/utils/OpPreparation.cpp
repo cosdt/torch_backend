@@ -458,7 +458,7 @@ at::Tensor OpPreparation::apply_tensor_without_format(
 
 at::Tensor OpPreparation::unsafe_empty_workspace(uint64_t workspace_size) {
   ASCEND_LOGD("Alloc workspace %zu bytes unsafely.", workspace_size);
-  c10::Allocator* allocator = c10_backend::CachingAllocator::NPU::get();
+  c10::Allocator* allocator = c10_npu::NPUCachingAllocator::get();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
       c10::make_intrusive<torch_npu::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),

@@ -66,7 +66,7 @@ void _record_memory_history(
     }
   }
   torch::utils::device_lazy_init(at::kPrivateUse1);
-  c10_backend::CachingAllocator::NPU::recordHistory(
+  c10_npu::NPUCachingAllocator::recordHistory(
       enabled.has_value(), recorder, max_entries, when);
 }
 
@@ -222,7 +222,7 @@ std::string _memory_snapshot_pickled() {
     return segmentDict;
   };
 
-  auto snapshot = c10_backend::CachingAllocator::NPU::snapshot();
+  auto snapshot = c10_npu::NPUCachingAllocator::snapshot();
 
   auto segments = new_list();
   for (const auto& segmentInfo : snapshot.segments) {

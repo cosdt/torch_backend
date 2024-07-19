@@ -3,7 +3,9 @@
 #include "csrc/core/CachingAllocator.h"
 #include "npu/core/NPUMacros.h"
 
-namespace c10_backend::CachingAllocator::NPU {
+namespace c10_npu::NPUCachingAllocator {
+
+using namespace c10_backend::CachingAllocator;
 
 std::mutex* getFreeMutex();
 
@@ -99,4 +101,4 @@ inline bool isHistoryEnabled() {
 inline void attachOutOfMemoryObserver(OutOfMemoryObserver observer) {
   return get()->attachOutOfMemoryObserver(observer);
 }
-} // namespace c10_backend::CachingAllocator::NPU
+} // namespace c10_npu::NPUCachingAllocator

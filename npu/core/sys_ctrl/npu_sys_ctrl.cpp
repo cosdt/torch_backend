@@ -146,13 +146,12 @@ NpuSysCtrl& NpuSysCtrl::GetInstance() {
 }
 
 void initAllocator() {
-  static c10_backend::CachingAllocator::NPUCachingAllocatorHelper helper;
+  static c10_npu::NPUCachingAllocator::CachingAllocatorHelper helper;
   c10_backend::CachingAllocator::registerHelper(&helper);
   const auto num_devices = c10_npu::device_count_ensure_non_zero();
   c10_backend::CachingAllocator::init(num_devices);
 
-  c10_backend::CachingAllocator::NPU::init(
-      c10_backend::CachingAllocator::get());
+  c10_npu::NPUCachingAllocator::init(c10_backend::CachingAllocator::get());
   ASCEND_LOGD("Npu caching allocator initialize successfully");
 }
 
