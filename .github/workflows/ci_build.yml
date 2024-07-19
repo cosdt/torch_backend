@@ -90,5 +90,7 @@ jobs:
       - name: Run C++ test
         working-directory: ./build
         run: |
-          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib/python${{ matrix.python-version }}/site-packages/torch/lib:$LD_LIBRARY_PATH"
+          echo $CONDA_PREFIX
+          echo $LD_LIBRARY_PATH
           ctest --output-on-failure --verbose
