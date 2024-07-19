@@ -9,14 +9,16 @@
 #include <sstream>
 #include <vector>
 
-#include "npu/core/NPUException.h"
 #include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/NPUStream.h"
+#include "npu/acl/include/acl/acl_rt.h"
+#include "npu/core/NPUException.h"
 #include "npu/core/NPUGuard.h"
 #include "npu/core/NPUQueue.h"
-#include "csrc/npu/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
-#include "npu/acl/include/acl/acl_rt.h"
+
+#define C10_COMPILE_TIME_MAX_NPUS 16
 
 namespace c10_npu {
 namespace {
