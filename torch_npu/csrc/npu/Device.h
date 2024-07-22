@@ -12,4 +12,3 @@ TORCH_NPU_API void BindGetDeviceProperties(PyObject* module);
 
 PyObject* THNPModule_getDevice_wrap(PyObject* self);
 PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg);
-PyObject* THNPModule_getDeviceName_wrap(PyObject* self, PyObject* arg);
