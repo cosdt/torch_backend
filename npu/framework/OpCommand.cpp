@@ -153,19 +153,9 @@ OpCommand& OpCommand::Output(
 void OpCommand::Run() {
   aclCmd->SetEnginePriority();
   const string& op_name = aclCmd->GetName();
-  if (c10_npu::option::OptionsManager::CheckQueueEnable() && !sync) {
-    RECORD_FUNCTION(op_name, std::vector<c10::IValue>({}));
-    ExecuteParas execParams;
-    aclCmd->ExportParams(execParams);
-    c10_npu::queue::QueueParas params(
-        c10_npu::queue::COMPILE_AND_EXECUTE, sizeof(ExecuteParas), &execParams);
-    c10_npu::enCurrentNPUStream(&params);
-    aclCmd->releaseSource(false);
-  } else {
     aclCmd->Run(sync, sync_index, outputTensor);
     if (c10_npu::option::OptionsManager::CheckBlockingEnable()) {
       Sync();
-    }
     aclCmd->releaseSource();
   }
   aclCmds->Pop();

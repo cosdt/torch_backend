@@ -14,7 +14,6 @@
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUGuard.h"
-#include "npu/core/NPUQueue.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
 
@@ -24,7 +23,6 @@ namespace c10_npu {
 namespace {
 struct LeakyStreamInternals {
   LeakyStreamInternals() {
-    repo = ::std::make_unique<Repository>();
   }
   C10_DISABLE_COPY_AND_ASSIGN(LeakyStreamInternals);
 
@@ -39,7 +37,6 @@ struct LeakyStreamInternals {
   c10::DeviceIndex device_index = -1;
   int32_t stream_id = -1;
   aclrtStream stream = nullptr;
-  ::std::unique_ptr<NPUQueueBase> repo = nullptr;
   bool is_data_preprocess_stream = false;
 };
 
@@ -158,9 +155,6 @@ static void initGlobalStreamState() {
       &default_streamsi.stream,
       0,
       (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC)));
-  if (c10_npu::option::OptionsManager::CheckQueueEnable()) {
-    default_streamsi.repo->InitRepo(device_id);
-  }
   // Initializes secondary streams
   secondary_streams[device_id].device_index = device_id;
   auto& secondary_streamsi = secondary_streams[device_id];
@@ -271,13 +265,6 @@ NPUStream NPUStream_fromInternals(const LeakyStreamInternals* ptr) {
 aclrtStream NPUStream::stream() const {
   auto ptr = NPUStream_internals(getDefaultNPUStream());
   AT_ASSERT(ptr, PTA_ERROR(ErrCode::PTR));
-  if (ptr->repo->CheckInit()) {
-    NPUStatus ret = ptr->repo->MakeSureQueueEmpty();
-    if (ret != SUCCESS) {
-      ASCEND_LOGE("MakeSureQueueEmpty fail, ret: %s", ret.c_str());
-      return nullptr;
-    }
-  }
   auto cur_ptr = NPUStream_internals(*this);
   AT_ASSERT(cur_ptr, PTA_ERROR(ErrCode::PTR));
   return cur_ptr->stream;
@@ -354,48 +341,7 @@ aclrtStream getCurrentNPUStreamNoWait(c10::DeviceIndex device_index) {
   return ptr->stream;
 }
 
-NPUStatus emptyAllNPUStream() {
-  initNPUStreamsOnce();
-  NPUStatus ret;
-  for (auto i = decltype(num_npus){0}; i < num_npus; ++i) {
-    auto& default_streamsi = default_streams[i];
-    if (default_streamsi.stream == nullptr) {
-      continue;
-    }
-    if (default_streamsi.stream != nullptr &&
-        default_streamsi.repo->CheckInit()) {
-      ret = default_streamsi.repo->MakeSureQueueEmpty();
-      if (ret != SUCCESS) {
-        return ret;
-      }
-    }
-  }
-  return SUCCESS;
-}
-
-std::string getRepoInfo() {
-  std::stringstream repo_info;
-  for (auto i = decltype(num_npus){0}; i < num_npus; ++i) {
-    auto& default_streamsi = default_streams[i];
-    if (default_streamsi.stream == nullptr) {
-      continue;
-    }
-    if (default_streamsi.stream != nullptr &&
-        default_streamsi.repo->CheckInit()) {
-      repo_info << "device " << (int)i << ": "
-                << default_streamsi.repo->GetPara() << ". ";
-    }
-  }
-  return repo_info.str();
-}
-
 bool npuSynchronizeDevice(bool check_error) {
-  if (c10_npu::option::OptionsManager::CheckQueueEnable()) {
-    NPUStatus ret = c10_npu::emptyAllNPUStream();
-    if (ret != SUCCESS) {
-      ASCEND_LOGE("MakeSureQueueEmpty fail, ret: %s", ret.c_str());
-    }
-  }
   auto acl_ret = aclrtSynchronizeDevice();
   if (check_error) {
     NPU_CHECK_ERROR(acl_ret, "aclrtSynchronizeDevice");
@@ -406,13 +352,6 @@ bool npuSynchronizeDevice(bool check_error) {
 }
 
 bool npuSynchronizeUsedDevices(bool check_error) {
-  if (c10_npu::option::OptionsManager::CheckQueueEnable()) {
-    NPUStatus ret = c10_npu::emptyAllNPUStream();
-    if (ret != SUCCESS) {
-      ASCEND_LOGE("MakeSureQueueEmpty fail, ret: %s", ret.c_str());
-    }
-  }
-
   auto acl_ret = SynchronizeUsedDevices();
   if (check_error) {
     NPU_CHECK_ERROR(acl_ret);
@@ -420,24 +359,6 @@ bool npuSynchronizeUsedDevices(bool check_error) {
     NPU_CHECK_WARN(acl_ret);
   }
   return acl_ret == ACL_ERROR_NONE;
-}
-
-void enCurrentNPUStream(void* cur_paras, c10::DeviceIndex device_index) {
-  initNPUStreamsOnce();
-  if (device_index == -1) {
-    device_index = current_device();
-  }
-  check_npu(device_index);
-  c10_npu::queue::QueueParas* queueParam =
-      static_cast<c10_npu::queue::QueueParas*>(cur_paras);
-  queueParam->correlation_id = c10_npu::queue::QueueParas::g_correlation_id++;
-  queueParam->paramStream = current_streams[device_index]->stream;
-  default_streams[device_index].repo->Enqueue(cur_paras);
-  if (default_streams[device_index].repo->GetStatus() == RepoStatus::INIT) {
-    default_streams[device_index].repo->MakeSureQueueEmpty();
-    default_streams[device_index].repo->ChangeStatus(
-        RepoStatus::INIT, RepoStatus::RUN);
-  }
 }
 
 void setCurrentNPUStream(NPUStream stream) {

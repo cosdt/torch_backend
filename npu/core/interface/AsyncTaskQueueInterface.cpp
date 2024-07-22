@@ -79,10 +79,6 @@ AsyncCopyTask::AsyncCopyTask(
 void AsyncCopyTask::LaunchCopyTask() {
   RECORD_FUNCTION(
       CopyParas::COPY_PARAS_MAP[copyParam_.kind], std::vector<c10::IValue>({}));
-  if (c10_npu::option::OptionsManager::CheckQueueEnable()) {
-    QueueParas params(ASYNC_MEMCPY, sizeof(CopyParas), &copyParam_);
-    c10_npu::enCurrentNPUStream(&params);
-  } else {
     c10_npu::NPUStream stream = c10_npu::getCurrentNPUStream();
     NPU_CHECK_ERROR(aclrtMemcpyAsync(
         copyParam_.dst,
@@ -91,7 +87,6 @@ void AsyncCopyTask::LaunchCopyTask() {
         copyParam_.srcLen,
         copyParam_.kind,
         stream));
-  }
 }
 
 aclError LaunchAsyncCopyTask(
@@ -108,24 +103,11 @@ aclError LaunchAsyncCopyTask(
 void EventTask::LaunchRecordTask(c10_npu::NPUStream npuStream) {
   RECORD_FUNCTION(
       EventParas::EVENT_PARAS_MAP[RECORD_EVENT], std::vector<c10::IValue>({}));
-  if (c10_npu::option::OptionsManager::CheckQueueEnable()) {
-    c10_npu::NPUStream currentStream = c10_npu::getCurrentNPUStream();
-    c10_npu::setCurrentNPUStream(npuStream);
-    QueueParas params(RECORD_EVENT, sizeof(EventParas), &eventParam_);
-    c10_npu::NPUEventManager::GetInstance().IncreaseUnrecordedCount(
-        eventParam_.event);
-    c10_npu::enCurrentNPUStream(&params);
-    c10_npu::setCurrentNPUStream(currentStream);
-    ASCEND_LOGI(
-        "Event: LaunchRecordTask is successfully executed, event=%p",
-        eventParam_.event);
-  } else {
     NPU_CHECK_ERROR(aclrtRecordEvent(eventParam_.event, npuStream));
     ASCEND_LOGI(
         "Event: aclrtRecordEvent is successfully executed, stream=%p, event=%p",
         npuStream.stream(false),
         eventParam_.event);
-  }
 }
 
 aclError LaunchRecordEventTask(aclrtEvent event, c10_npu::NPUStream npuStream) {
@@ -137,22 +119,11 @@ aclError LaunchRecordEventTask(aclrtEvent event, c10_npu::NPUStream npuStream) {
 void EventTask::LaunchWaitTask(c10_npu::NPUStream npuStream) {
   RECORD_FUNCTION(
       EventParas::EVENT_PARAS_MAP[WAIT_EVENT], std::vector<c10::IValue>({}));
-  if (c10_npu::option::OptionsManager::CheckQueueEnable()) {
-    c10_npu::NPUStream currentStream = c10_npu::getCurrentNPUStream();
-    c10_npu::setCurrentNPUStream(npuStream);
-    QueueParas params(WAIT_EVENT, sizeof(EventParas), &eventParam_);
-    c10_npu::enCurrentNPUStream(&params);
-    c10_npu::setCurrentNPUStream(currentStream);
-    ASCEND_LOGI(
-        "Event: LaunchWaitTask is successfully executed, event=%p",
-        eventParam_.event);
-  } else {
     NPU_CHECK_ERROR(aclrtStreamWaitEvent(npuStream, eventParam_.event));
     ASCEND_LOGI(
         "Event: aclrtStreamWaitEvent is successfully executed, stream=%p, event=%p",
         npuStream.stream(false),
         eventParam_.event);
-  }
 }
 
 aclError LaunchWaitEventTask(aclrtEvent event, c10_npu::NPUStream npuStream) {
@@ -165,17 +136,9 @@ void EventTask::LaunchLazyDestroyTask(c10::DeviceIndex device_index) {
   RECORD_FUNCTION(
       EventParas::EVENT_PARAS_MAP[LAZY_DESTROY_EVENT],
       std::vector<c10::IValue>({}));
-  if (c10_npu::option::OptionsManager::CheckQueueEnable()) {
-    QueueParas params(LAZY_DESTROY_EVENT, sizeof(EventParas), &eventParam_);
-    c10_npu::enCurrentNPUStream(&params, device_index);
-    ASCEND_LOGI(
-        "Event: LaunchLazyDestroyTask is successfully executed, event=%p",
-        eventParam_.event);
-  } else {
     NPU_CHECK_ERROR(
         c10_npu::NPUEventManager::GetInstance().LazyDestroy(eventParam_.event),
         "aclrtDestroyEvent");
-  }
 }
 
 aclError LaunchLazyDestroyEventTask(
