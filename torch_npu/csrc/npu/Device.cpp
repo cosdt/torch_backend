@@ -41,8 +41,6 @@ void RegisterNPUDeviceProperties(PyObject* module) {
 
 NPUDeviceProp* GetDeviceProperties(int64_t deviceid) {
   const char* device_name;
-  size_t device_free;
-  size_t device_total;
   device_name = c10_npu::acl::AclrtGetSocName();
   if (device_name == nullptr) {
     prop.name = " ";
@@ -61,15 +59,6 @@ void BindGetDeviceProperties(PyObject* module) {
         return GetDeviceProperties(deviceid);
       },
       py::return_value_policy::reference);
-}
-
-NPUDeviceMem memory;
-
-void RegisterNPUDeviceMemories(PyObject* module) {
-  auto m = py::handle(module).cast<py::module>();
-  py::class_<NPUDeviceMem>(m, "_NPUDeviceMemories")
-      .def_readonly("total_memory", &NPUDeviceMem::totalGlobalMem)
-      .def_readonly("free_memory", &NPUDeviceMem::freeMem);
 }
 
 PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {

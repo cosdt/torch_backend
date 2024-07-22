@@ -5,13 +5,13 @@
 #include <sstream>
 #include <vector>
 
-#include "npu/core/NPUException.h"
 #include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/adapter/acl_device_adapter.h"
+#include "npu/core/NPUException.h"
 #include "npu/core/NPUGuard.h"
 #include "npu/core/NPUQueue.h"
-#include "csrc/npu/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
 

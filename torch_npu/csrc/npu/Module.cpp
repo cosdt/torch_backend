@@ -27,7 +27,6 @@
 #include "npu/acl/include/acl/acl.h"
 #include "torch_npu/csrc/npu/Module.h"
 #include "torch_npu/csrc/npu/NPUPluggableAllocator.h"
-#include "torch_npu/csrc/npu/memory_snapshot.h"
 
 void RegisterNpuPluggableAllocator(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
