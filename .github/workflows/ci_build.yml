@@ -41,7 +41,7 @@ concurrency:
 jobs:
   build:
     name: Build with Python${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    runs-on: npu-arm64
     defaults:
       run:
         shell: bash -el {0}
