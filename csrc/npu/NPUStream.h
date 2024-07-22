@@ -7,12 +7,12 @@
 #include <mutex>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "npu/acl/include/acl/acl.h"
+#include "npu/acl/include/acl/acl_op.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUMacros.h"
 #include "npu/core/NPUQueue.h"
 #include "npu/core/npu_log.h"
-#include "npu/acl/include/acl/acl.h"
-#include "npu/acl/include/acl/acl_op.h"
 
 namespace c10_npu {
 
@@ -138,7 +138,7 @@ C10_NPU_API bool npuSynchronizeDevice(bool check_error = true);
 
 void enCurrentNPUStream(void* cur_paras, c10::DeviceIndex device_index = -1);
 
-C10_NPU_EXPORT bool npuSynchronizeUsedDevices(bool check_error = true);
+C10_NPU_API bool npuSynchronizeUsedDevices(bool check_error = true);
 
 C10_NPU_API void setCurrentNPUStream(NPUStream stream);
 

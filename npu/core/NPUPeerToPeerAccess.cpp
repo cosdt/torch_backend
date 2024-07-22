@@ -4,6 +4,9 @@
 #include <npu/acl/include/acl/acl_rt.h>
 #include "npu/core/NPUGuard.h"
 
+// A maximum of 8 P2P links can be created on a NPU device
+#define C10_P2P_ACCESS_MAX_NPUS 8
+
 namespace at_npu {
 namespace native {
 
