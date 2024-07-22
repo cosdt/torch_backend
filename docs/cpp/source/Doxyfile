@@ -1,0 +1,38 @@
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = "PyTorch Backend"
+OUTPUT_DIRECTORY       = ../build
+
+# Stored in ${OUTPUT_DIRECTORY}/${XML_OUTPUT},
+# consistent with doxygen_xml_dir in conf.py file
+XML_OUTPUT             = xml
+
+# Stored in ${OUTPUT_DIRECTORY}/${HTML_OUTPUT},
+HTML_OUTPUT            = doxygen_html
+
+# Doxygen process files
+INPUT                  = ../../../csrc
+
+# Only header files
+FILE_PATTERNS          = *.h
+RECURSIVE              = YES
+EXCLUDE                =
+
+# Output formats
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_PROGRAMLISTING     = YES
+
+# Compound extraction control
+EXTRACT_ALL            = YES
+EXTRACT_PACKAGE        = YES
+EXTRACT_STATIC         = YES
+CASE_SENSE_NAMES       = NO
+
+# Docstring customization
+# First line of /** comment */ treated as \brief
+JAVADOC_AUTOBRIEF      = YES
+
+# Warning suppression
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
