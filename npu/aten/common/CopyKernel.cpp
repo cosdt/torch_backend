@@ -2,12 +2,12 @@
 
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/npu/THNPUCachingHostAllocator.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUGuard.h"
 #include "npu/core/NPUPeerToPeerAccess.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/StorageDescHelper.h"
@@ -134,9 +134,11 @@ void copy_between_host_and_device(
         dst, nbytes, src, nbytes, kind);
     NPU_CHECK_ERROR(ret);
     ASCEND_LOGD("non_blocking copy without StreamSynchronize.");
-    void* ptr = torch_npu::utils::is_npu(dst) ? src.data_ptr() : dst.data_ptr();
+    const auto& host_tensor = torch_npu::utils::is_npu(dst) ? src : dst;
+    void* ptr = host_tensor.data_ptr();
+    void* ctx = host_tensor.storage().data_ptr().get_context();
     NPU_CHECK_ERROR(
-        THNPUCachingHostAllocator_recordEvent(ptr, stream),
+        THNPUCachingHostAllocator_recordEvent(ptr, ctx, stream),
         "aclrtSynchronizeStreamWithTimeout");
   } else {
     aclError error = c10_npu::acl::AclrtSynchronizeStreamWithTimeout(stream);
