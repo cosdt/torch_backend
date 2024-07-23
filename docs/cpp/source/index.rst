@@ -1,5 +1,5 @@
-PyTorch Backend
-===============
+PyTorch Backend C++ API
+=======================
 
 These pages provide the documentation for the public portions of the PyTorch Backend.
 

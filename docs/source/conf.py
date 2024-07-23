@@ -1,15 +1,7 @@
 import os
 import textwrap
-import subprocess
 
-try:
-    result = subprocess.run(["doxygen", "Doxyfile"], cwd=".", capture_output=True, check=True)
-    print(f"Run doxygen result: {result.stdout}")
-except subprocess.CalledProcessError as err:
-    print(f"Fail to run doxygen: {err.stderr}")
-    raise err
-
-extensions = ['sphinx.ext.intersphinx', 'breathe', 'exhale']
+extensions = ['sphinx.ext.intersphinx']
 
 this_file_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -29,57 +21,6 @@ repo_root = os.path.dirname(
         )
     )
 )
-
-breathe_projects = {"PyTorch Backend": doxygen_xml_dir}
-breathe_default_project = "PyTorch Backend"
-
-
-# Setup the exhale extension
-exhale_args = {
-    ############################################################################
-    # These arguments are required.                                            #
-    ############################################################################
-    "containmentFolder": "./api",
-    "rootFileName": "library_root.rst",
-    "rootFileTitle": "Library API",
-    "doxygenStripFromPath": repo_root,
-    ############################################################################
-    # Suggested optional arguments.                                            #
-    ############################################################################
-    "createTreeView": True,
-    "exhaleExecutesDoxygen": True,
-    "exhaleUseDoxyfile": True,
-    "verboseBuild": True,
-    ############################################################################
-    # HTML Theme specific configurations.                                      #
-    ############################################################################
-    # Fix broken Sphinx RTD Theme 'Edit on GitHub' links
-    # Search for 'Edit on GitHub' on the FAQ:
-    #     http://exhale.readthedocs.io/en/latest/faq.html
-    "pageLevelConfigMeta": ":github_url: https://github.com/pytorch/pytorch",
-    ############################################################################
-    # Individual page layout example configuration.                            #
-    ############################################################################
-    # Example of adding contents directives on custom kinds with custom title
-    "contentsTitle": "Page Contents",
-    "kindsWithContentsDirectives": ["class", "file", "namespace", "struct"],
-    # Exclude PIMPL files from class hierarchy tree and namespace pages.
-    "listingExclude": [r".*Impl$"],
-    ############################################################################
-    # Main library page layout example configuration.                          #
-    ############################################################################
-    "afterTitleDescription": textwrap.dedent(
-        """
-        Welcome to the developer reference for the PyTorch Backend API.
-    """
-    ),
-}
-
-# Tell sphinx what the primary language being documented is.
-primary_domain = "cpp"
-
-# Tell sphinx what the pygments highlight language should be.
-highlight_language = "cpp"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -138,18 +79,6 @@ html_theme_options = {
     "display_version": True,
     "logo_only": True,
 }
-
-# NOTE: sharing python docs resources
-html_logo = os.path.join(
-    repo_root, "docs", "source", "_static", "img", "pytorch-logo-dark-unstable.png"
-)
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-# NOTE: sharing python docs resources
-html_static_path = [os.path.join(repo_root, "docs", "cpp", "source", "_static")]
-
 
 # Called automatically by Sphinx, making this `conf.py` an "extension".
 def setup(app):
