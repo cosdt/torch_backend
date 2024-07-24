@@ -62,15 +62,7 @@ bool OptionsManager::CheckBlockingEnable() {
 }
 
 bool OptionsManager::CheckQueueEnable() {
-  if (CheckBlockingEnable()) {
-    return false;
-  }
-  const static bool checkQueueEnable = []() -> bool {
-    int32_t queue_enable =
-        OptionsManager::GetBoolTypeOption("TASK_QUEUE_ENABLE", 1);
-    return queue_enable != 0;
-  }();
-  return checkQueueEnable;
+  return false;
 }
 
 bool OptionsManager::CheckCombinedOptimizerEnable() {

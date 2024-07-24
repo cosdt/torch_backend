@@ -94,10 +94,6 @@ float NPUEvent::elapsed_time(const NPUEvent& other) const {
       "Both events must be recorded before calculating elapsed time.",
       PTA_ERROR(ErrCode::INTERNAL));
   float time_ms = 0;
-  NPUStatus ret = c10_npu::emptyAllNPUStream();
-  if (ret != SUCCESS) {
-    ASCEND_LOGE("MakeSureQueueEmpty fail, ret: %s", ret.c_str());
-  }
   NPU_CHECK_ERROR(aclrtSynchronizeEvent(event_));
   ASCEND_LOGI(
       "Event: aclrtSynchronizeEvent is successfully executed, event=%p",
@@ -113,10 +109,6 @@ float NPUEvent::elapsed_time(const NPUEvent& other) const {
 
 void NPUEvent::synchronize() const {
   if (is_created_) {
-    NPUStatus ret = c10_npu::emptyAllNPUStream();
-    if (ret != SUCCESS) {
-      ASCEND_LOGE("MakeSureQueueEmpty fail, ret: %s", ret.c_str());
-    }
     NPU_CHECK_ERROR(aclrtSynchronizeEvent(event_));
     ASCEND_LOGI(
         "Event: aclrtSynchronizeEvent is successfully executed, event=%p",
