@@ -1,9 +1,5 @@
-#include <sys/time.h>
-#include <unistd.h>
 #include <array>
 #include <atomic>
-#include <climits>
-#include <cstdint>
 #include <cstring>
 #include <iostream>
 #include <sstream>
@@ -12,6 +8,7 @@
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl_rt.h"
+#include "npu/adapter/acl_device_adapter.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUGuard.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
@@ -260,6 +257,22 @@ NPUStream NPUStream_fromInternals(const LeakyStreamInternals* ptr) {
           c10::Device(c10::DeviceType::PrivateUse1, ptr->device_index),
           NPUStream_getStreamId(ptr)));
 }
+
+aclError SynchronizeUsedDevices() {
+  c10::DeviceIndex cur_device = 0;
+  NPU_CHECK_ERROR(GetDevice(&cur_device));
+  // Synchronize all used devices
+  std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
+  for (const auto deviceId : device_idx_vec) {
+    NPU_CHECK_ERROR(SetDevice(deviceId));
+    aclError acl_ret = aclrtSynchronizeDevice();
+    if (acl_ret != ACL_ERROR_NONE) {
+      return acl_ret;
+    }
+  }
+  NPU_CHECK_ERROR(SetDevice(cur_device));
+  return ACL_ERROR_NONE;
+}
 } // namespace
 
 aclrtStream NPUStream::stream() const {
@@ -394,4 +407,20 @@ aclrtStream NPUStream::stream(const bool need_empty) const {
   return stream();
 }
 
+aclError DestroyUsedStreams() {
+  c10::DeviceIndex cur_device = 0;
+  NPU_CHECK_ERROR(GetDevice(&cur_device));
+  // Synchronize all used devices
+  std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
+  for (const auto deviceId : device_idx_vec) {
+    NPU_CHECK_ERROR(SetDevice(deviceId));
+    NPUStream stream = getCurrentNPUStream(deviceId);
+    aclError acl_ret = acl::AclrtDestroyStreamForce(stream);
+    if (acl_ret != ACL_ERROR_NONE) {
+      return acl_ret;
+    }
+  }
+  NPU_CHECK_ERROR(SetDevice(cur_device));
+  return ACL_ERROR_NONE;
+}
 } // namespace c10_npu

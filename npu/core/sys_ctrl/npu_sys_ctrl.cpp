@@ -247,17 +247,6 @@ NpuSysCtrl::SysStatus NpuSysCtrl::Initialize(int device_id) {
   return INIT_SUCC;
 }
 
-NpuSysCtrl::SysStatus NpuSysCtrl::ExchangeDevice(int pre_device, int device) {
-  NPU_CHECK_ERROR(c10_npu::SetDevice(device));
-  device_id_ = device;
-  return INIT_SUCC;
-}
-
-NpuSysCtrl::SysStatus NpuSysCtrl::BackwardsInit() {
-  NPU_CHECK_ERROR(c10_npu::SetDevice(device_id_));
-  return INIT_SUCC;
-}
-
 NpuSysCtrl::SysStatus NpuSysCtrl::OverflowSwitchEnable() {
   if (!c10_npu::IsSupportInfNan()) {
     c10_npu::acl::AclrtSetStreamOverflowSwitch(

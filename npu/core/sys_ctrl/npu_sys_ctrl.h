@@ -9,7 +9,6 @@
 #include "csrc/npu/NPUEventManager.h"
 #include "npu/core/NPUMacros.h"
 #include "npu/core/npu_log.h"
-#define NpuSysStatus c10_npu::NpuSysCtrl::SysStatus
 
 namespace c10_npu {
 using ReleaseFn = std::function<void()>;
@@ -43,12 +42,6 @@ class NpuSysCtrl {
 
   // Environment Initialize, return SysStatus
   SysStatus Initialize(int device_id = -1);
-
-  // Change current device from pre_device to device
-  SysStatus ExchangeDevice(int pre_device, int device);
-
-  // Init backwards thread
-  SysStatus BackwardsInit();
 
   // Set overflow switch
   SysStatus OverflowSwitchEnable();

@@ -1,7 +1,6 @@
 __all__ = [
     "is_initialized",
     "init",
-    "set_dump",
     "synchronize",
     "device_count",
     "can_device_access_peer",
@@ -10,7 +9,6 @@ __all__ = [
     "get_device_name",
     "get_device_properties",
     "get_device_capability",
-    "mem_get_info",
     "is_available",
     "device",
     "device_of",
@@ -20,8 +18,6 @@ __all__ = [
     "default_stream",
     "set_sync_debug_mode",
     "get_sync_debug_mode",
-    "init_dump",
-    "finalize_dump",
     "manual_seed",
     "manual_seed_all",
     "seed",
@@ -108,13 +104,9 @@ from .utils import (
     default_stream,
     set_sync_debug_mode,
     get_sync_debug_mode,
-    init_dump,
     is_bf16_supported,
-    finalize_dump,
-    set_dump,
     get_npu_overflow_flag,
     clear_npu_overflow_flag,
-    mem_get_info,
 )
 from .streams import Stream, Event
 

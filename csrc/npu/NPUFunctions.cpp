@@ -2,14 +2,10 @@
 #include <mutex>
 #include <unordered_map>
 #include "csrc/npu/NPUStream.h"
+#include "npu/adapter/acl_device_adapter.h"
 #include "npu/core/register/OptionsManager.h"
 
 namespace c10_npu {
-
-static thread_local c10::DeviceIndex local_device = -1;
-// TODO: remove used_devices
-static std::unordered_map<c10::DeviceIndex, aclrtContext> used_devices;
-std::mutex mtx;
 
 int device_count_impl() {
   int count = 0;
@@ -72,18 +68,42 @@ void warn_or_error_on_sync() {
   }
 }
 
+std::optional<c10::DeviceIndex> getDeviceIndexWithPrimaryContext() {
+  // check current device first
+  auto current_device_index = current_device();
+  if (current_device_index >= 0) {
+    if (hasPrimaryContext(current_device_index)) {
+      return current_device_index;
+    }
+  }
+  for (const auto device_index : c10::irange(device_count())) {
+    if (device_index == current_device_index)
+      continue;
+    if (hasPrimaryContext(device_index)) {
+      return device_index;
+    }
+  }
+  return c10::nullopt;
+}
+
+bool hasPrimaryContext(c10::DeviceIndex device_index) {
+  return acl_adapter::hasPrimaryContext(device_index);
+}
+
 // Wrappers for raw CUDA device management functions
 aclError GetDeviceCount(int* dev_count) {
   return aclrtGetDeviceCount(reinterpret_cast<uint32_t*>(dev_count));
 }
 
+thread_local c10::DeviceIndex targetDeviceIndex = -1;
+
 aclError GetDevice(c10::DeviceIndex* device) {
-  if (local_device >= 0) {
-    *device = local_device;
+  if (targetDeviceIndex >= 0) {
+    *device = targetDeviceIndex;
     return ACL_ERROR_NONE;
   }
   int tmp_device = -1;
-  auto err = aclrtGetDevice(&tmp_device);
+  auto err = acl_adapter::aclrtGetDevice(&tmp_device);
   if (err == ACL_ERROR_NONE) {
     TORCH_INTERNAL_ASSERT(
         tmp_device >= 0 &&
@@ -91,18 +111,6 @@ aclError GetDevice(c10::DeviceIndex* device) {
         "aclrtGetDevice returns invalid device ",
         tmp_device);
     *device = static_cast<c10::DeviceIndex>(tmp_device);
-    local_device = *device;
-  } else if (
-      err == ACL_ERROR_RT_CONTEXT_NULL && aclrtSetDevice(0) == ACL_ERROR_NONE) {
-    *device = 0;
-    local_device = 0;
-    if (used_devices.find(local_device) == used_devices.end()) {
-      std::lock_guard<std::mutex> lock(mtx);
-      if (used_devices.find(local_device) == used_devices.end()) {
-        NPU_CHECK_ERROR(aclrtGetCurrentContext(&used_devices[local_device]));
-      }
-    }
-    return ACL_ERROR_NONE;
   }
   return err;
 }
@@ -110,71 +118,73 @@ aclError GetDevice(c10::DeviceIndex* device) {
 aclError SetDevice(c10::DeviceIndex device) {
   TORCH_CHECK(
       device >= 0, "device id must be positive!", PTA_ERROR(ErrCode::VALUE));
-
-  if (local_device == device) {
+  targetDeviceIndex = -1;
+  int cur_device = -1;
+  NPU_CHECK_ERROR(acl_adapter::aclrtGetDevice(&cur_device));
+  if (device == cur_device) {
     return ACL_ERROR_NONE;
   }
+  return acl_adapter::aclrtSetDevice(device);
+}
 
-  aclError err = aclrtSetDevice(device);
-  if (err == ACL_ERROR_NONE) {
-    local_device = device;
-    if (used_devices.find(local_device) == used_devices.end()) {
-      std::lock_guard<std::mutex> lock(mtx);
-      if (used_devices.find(local_device) == used_devices.end()) {
-        NPU_CHECK_ERROR(aclrtGetCurrentContext(&used_devices[local_device]));
-      }
+aclError MaybeSetDevice(c10::DeviceIndex device) {
+  if (hasPrimaryContext(device)) {
+    return c10_npu::SetDevice(device);
+  }
+  targetDeviceIndex = device;
+  return ACL_ERROR_NONE;
+}
+
+// This function always initializes the NPU context
+// on to_device
+c10::DeviceIndex ExchangeDevice(c10::DeviceIndex to_device) {
+  auto cur_device = targetDeviceIndex;
+  targetDeviceIndex = -1;
+  if (cur_device < 0) {
+    int tmp_device = -1;
+    NPU_CHECK_ERROR(acl_adapter::aclrtGetDevice(&tmp_device));
+    cur_device = static_cast<c10::DeviceIndex>(tmp_device);
+    if (to_device == cur_device) {
+      return cur_device;
     }
   }
-  return err;
+  NPU_CHECK_ERROR(acl_adapter::aclrtSetDevice(to_device));
+  return cur_device;
+}
+
+// This function does not initialize the NPU context
+// on to_device if it does not already exist
+c10::DeviceIndex MaybeExchangeDevice(c10::DeviceIndex to_device) {
+  int tmp_cur_device = -1;
+  NPU_CHECK_ERROR(acl_adapter::aclrtGetDevice(&tmp_cur_device));
+  TORCH_INTERNAL_ASSERT(
+      tmp_cur_device >= 0 &&
+          tmp_cur_device <= std::numeric_limits<c10::DeviceIndex>::max(),
+      "aclrtGetDevice returns invalid device ",
+      tmp_cur_device);
+  auto cur_device = static_cast<c10::DeviceIndex>(tmp_cur_device);
+  if (to_device == tmp_cur_device) {
+    return cur_device;
+  }
+  if (hasPrimaryContext(to_device)) {
+    NPU_CHECK_ERROR(acl_adapter::aclrtSetDevice(to_device));
+  } else {
+    targetDeviceIndex = to_device;
+  }
+  return cur_device;
+}
+
+void SetTargetDevice() {
+  if (targetDeviceIndex >= 0) {
+    NPU_CHECK_ERROR(c10_npu::SetDevice(targetDeviceIndex));
+  }
 }
 
 aclrtContext GetDeviceContext(c10::DeviceIndex device) {
-  if (used_devices.find(device) == used_devices.end()) {
-    ASCEND_LOGE(
-        "NPU device %d has been initialized! Can not get context", device);
-    return nullptr;
-  }
-  return used_devices[device];
+  return acl_adapter::GetDeviceContext(device);
 }
 
 aclError ResetUsedDevices() {
-  for (const auto it : used_devices) {
-    aclError err = aclrtResetDevice(it.first);
-    if (err != ACL_ERROR_NONE) {
-      return err;
-    }
-  }
-  used_devices.clear();
-  return ACL_ERROR_NONE;
+  return acl_adapter::ResetUsedDevices();
 }
-
-aclError DestroyUsedStreams() {
-  c10::DeviceIndex cur_device = 0;
-  NPU_CHECK_ERROR(GetDevice(&cur_device));
-  for (const auto it : used_devices) {
-    NPU_CHECK_ERROR(SetDevice(it.first));
-    NPUStream stream = getCurrentNPUStream(it.first);
-    aclError acl_ret = acl::AclrtDestroyStreamForce(stream);
-    if (acl_ret != ACL_ERROR_NONE) {
-      return acl_ret;
-    }
-  }
-  NPU_CHECK_ERROR(SetDevice(cur_device));
-  return ACL_ERROR_NONE;
-}
-
-aclError SynchronizeUsedDevices() {
-  c10::DeviceIndex cur_device = 0;
-  NPU_CHECK_ERROR(GetDevice(&cur_device));
-  for (const auto it : used_devices) {
-    NPU_CHECK_ERROR(SetDevice(it.first));
-    aclError acl_ret = aclrtSynchronizeDevice();
-    if (acl_ret != ACL_ERROR_NONE) {
-      return acl_ret;
-    }
-  }
-  NPU_CHECK_ERROR(SetDevice(cur_device));
-  return ACL_ERROR_NONE;
-}
-
 } // namespace c10_npu
