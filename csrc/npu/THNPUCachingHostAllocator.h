@@ -2,14 +2,15 @@
 #include <c10/util/SmallVector.h>
 
 #include <npu/acl/include/acl/acl.h>
+#include "csrc/npu/NPUStream.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUMacros.h"
-#include "csrc/npu/NPUStream.h"
 
 c10::Allocator* getTHNPUCachingHostAllocator(void);
 
 aclError THNPUCachingHostAllocator_recordEvent(
     void* ptr,
+    void* ctx,
     c10_npu::NPUStream stream);
 
 bool THNPUCachingHostAllocator_isPinndPtr(void* ptr);
