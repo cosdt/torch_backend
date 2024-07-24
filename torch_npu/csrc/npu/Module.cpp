@@ -123,8 +123,8 @@ void RegisterNpuPluggableAllocator(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
 
   py::class_<
-      c10_npu::NPUCachingAllocator::NPUAllocator,
-      std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>>(
+      c10_backend::CachingAllocator::CachingAllocator,
+      std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>>(
       m, "_npu_NPUAllocator");
   m.def("_npu_getAllocator", []() {
     return py::cast(torch::npu::NPUPluggableAllocator::getCurrentAllocator());
@@ -132,13 +132,13 @@ void RegisterNpuPluggableAllocator(PyObject* module) {
 
   m.def(
       "_npu_changeCurrentAllocator",
-      [](std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>
+      [](std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>
              allocator) {
         torch::npu::NPUPluggableAllocator::changeCurrentAllocator(allocator);
       });
   py::class_<
       torch::npu::NPUPluggableAllocator::NPUPluggableAllocator,
-      c10_npu::NPUCachingAllocator::NPUAllocator,
+      c10_backend::CachingAllocator::CachingAllocator,
       std::shared_ptr<
           torch::npu::NPUPluggableAllocator::NPUPluggableAllocator>>(
       m, "_NPUPluggableAllocator")
@@ -442,10 +442,10 @@ PyObject* THNPModule_memoryStats(PyObject* _unused, PyObject* arg) {
       PTA_ERROR(ErrCode::PARAM));
   const int device = (int)THPUtils_unpackLong(arg);
 
-  using c10_npu::NPUCachingAllocator::DeviceStats;
-  using c10_npu::NPUCachingAllocator::Stat;
-  using c10_npu::NPUCachingAllocator::StatArray;
-  using c10_npu::NPUCachingAllocator::StatType;
+  using c10_backend::CachingAllocator::DeviceStats;
+  using c10_backend::CachingAllocator::Stat;
+  using c10_backend::CachingAllocator::StatArray;
+  using c10_backend::CachingAllocator::StatType;
 
   const auto statToDict = [](const Stat& stat) {
     py::dict dict;
@@ -529,8 +529,8 @@ torch::CapturedTraceback* getFromContext(
 PyObject* THNPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
 
-  using c10_npu::NPUCachingAllocator::BlockInfo;
-  using c10_npu::NPUCachingAllocator::SegmentInfo;
+  using c10_backend::CachingAllocator::BlockInfo;
+  using c10_backend::CachingAllocator::SegmentInfo;
 
   py::str device_s = "device";
   py::str address_s = "address";
@@ -624,7 +624,7 @@ PyObject* THNPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
   py::str oom_s = "oom";
   py::str device_free_s = "device_free";
 
-  using namespace c10_npu::NPUCachingAllocator;
+  using namespace c10_backend::CachingAllocator;
 
   auto action_to_str = [&](TraceEntry::Action action) {
     switch (action) {

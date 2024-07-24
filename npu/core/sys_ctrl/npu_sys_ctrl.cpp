@@ -1,14 +1,15 @@
+#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 #include "csrc/npu/NPUCachingAllocator.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl_op_compiler.h"
 #include "npu/acl/include/acl/acl_rt.h"
+#include "npu/core/NPUCachingAllocatorHelper.h"
 #include "npu/core/NpuVariables.h"
 #include "npu/core/interface/AclInterface.h"
 #include "npu/core/npu_log.h"
 #include "npu/core/register/OptionRegister.h"
 #include "npu/core/register/OptionsManager.h"
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 #include "npu/framework/interface/AclOpCompileInterface.h"
 #ifdef SUCCESS
 #undef SUCCESS
@@ -144,9 +145,13 @@ NpuSysCtrl& NpuSysCtrl::GetInstance() {
   return instance;
 }
 
-void initCachingAllocator() {
+void initAllocator() {
+  static c10_npu::NPUCachingAllocator::CachingAllocatorHelper helper;
+  c10_backend::CachingAllocator::registerHelper(&helper);
   const auto num_devices = c10_npu::device_count_ensure_non_zero();
-  c10_npu::NPUCachingAllocator::init(num_devices);
+  c10_backend::CachingAllocator::init(num_devices);
+
+  c10_npu::NPUCachingAllocator::init(c10_backend::CachingAllocator::get());
   ASCEND_LOGD("Npu caching allocator initialize successfully");
 }
 
@@ -186,7 +191,7 @@ NpuSysCtrl::SysStatus NpuSysCtrl::Initialize(int device_id) {
     ASCEND_LOGD("dump init success");
   }
 
-  initCachingAllocator();
+  initAllocator();
 
   // There's no need to call c10_npu::GetDevice at the start of the process,
   // because device 0 may not be needed

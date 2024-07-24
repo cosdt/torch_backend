@@ -1,6 +1,7 @@
 #pragma once
 
 #include <c10/core/Allocator.h>
+#include <c10/core/Device.h>
 
 #include "csrc/npu/NPUCachingAllocator.h"
 
@@ -11,26 +12,29 @@ namespace torch::npu::NPUPluggableAllocator {
 
 using streamType = c10::Stream;
 
-std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>
+std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>
 getCurrentAllocator();
-std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>
+std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>
 createCustomAllocator(
     std::function<void*(size_t, int, aclrtStream)> alloc_fn,
     std::function<void(void*, size_t, int, aclrtStream)> free_fn);
 void changeCurrentAllocator(
-    const std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>&
+    const std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>&
         allocator);
 
 struct _AllocationMetadata {
   _AllocationMetadata();
-  _AllocationMetadata(size_t size, c10::DeviceIndex device_idx, aclrtStream stream);
+  _AllocationMetadata(
+      size_t size,
+      c10::DeviceIndex device_idx,
+      aclrtStream stream);
   size_t size;
   c10::DeviceIndex device_idx;
   aclrtStream stream;
 };
 
 struct NPUPluggableAllocator
-    : public c10_npu::NPUCachingAllocator::NPUAllocator {
+    : public c10_backend::CachingAllocator::CachingAllocator {
   NPUPluggableAllocator(
       std::function<void*(size_t, int, aclrtStream)> alloc_fn,
       std::function<void(void*, size_t, int, aclrtStream)> free_fn);
@@ -56,27 +60,30 @@ struct NPUPluggableAllocator
   void raw_delete(void* ptr) override;
   void init(int device_count) override;
   bool initialized() override;
-  void setMemoryFraction(double fraction, int device) override;
+  void setMemoryFraction(double fraction, c10::DeviceIndex device) override;
   void emptyCache(bool check_error) override;
-  void cacheInfo(int dev_id, size_t* cachedAndFree, size_t* largestBlock)
-      override;
+  void cacheInfo(
+      c10::DeviceIndex device,
+      size_t* cachedAndFree,
+      size_t* largestBlock) override;
   void* getBaseAllocation(void* ptr, size_t* size) override;
   void recordStream(const c10::DataPtr&, streamType stream) override;
   void eraseStream(const c10::DataPtr&, streamType stream) override;
-  c10_npu::NPUCachingAllocator::DeviceStats getDeviceStats(int device) override;
-  void resetAccumulatedStats(int device) override;
-  void resetPeakStats(int device) override;
-  c10_npu::NPUCachingAllocator::SnapshotInfo snapshot() override;
-  void FreeDeviceCachedMemory(int device) override;
+  c10_backend::CachingAllocator::DeviceStats getDeviceStats(
+      c10::DeviceIndex device) override;
+  void resetAccumulatedStats(c10::DeviceIndex device) override;
+  void resetPeakStats(c10::DeviceIndex device) override;
+  c10_backend::CachingAllocator::SnapshotInfo snapshot() override;
+  void emptyDeviceCache(c10::DeviceIndex device) override;
   std::string name() override;
   void copy_data(void* dest, const void* src, std::size_t count) const final;
   void recordHistory(
       bool enabled,
-      c10_npu::NPUCachingAllocator::CreateContextFn context_recorder,
+      c10_backend::CachingAllocator::CreateContextFn context_recorder,
       size_t alloc_trace_max_entries,
-      c10_npu::NPUCachingAllocator::RecordContext when) override;
+      c10_backend::CachingAllocator::RecordContext when) override;
   void attachOutOfMemoryObserver(
-      c10_npu::NPUCachingAllocator::OutOfMemoryObserver observer) override;
+      c10_backend::CachingAllocator::OutOfMemoryObserver observer) override;
 
  protected:
   std::function<void*(size_t, c10::DeviceIndex, aclrtStream)> alloc_fn_;

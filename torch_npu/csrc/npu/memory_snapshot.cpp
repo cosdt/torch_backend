@@ -6,8 +6,8 @@
 #include "csrc/npu/NPUCachingAllocator.h"
 #include "torch_npu/csrc/npu/memory_snapshot.h"
 
-using c10_npu::NPUCachingAllocator::BlockInfo;
-using c10_npu::NPUCachingAllocator::SegmentInfo;
+using c10_backend::CachingAllocator::BlockInfo;
+using c10_backend::CachingAllocator::SegmentInfo;
 using torch::jit::Pickler;
 
 namespace torch_npu {
@@ -48,21 +48,21 @@ void _record_memory_history(
   checkOptionIn(
       stacks, {"python", "all"}, "expected stacks to be 'python', or 'all'");
 
-  c10_npu::NPUCachingAllocator::CreateContextFn recorder = gather;
+  c10_backend::CachingAllocator::CreateContextFn recorder = gather;
   if (enabled && stacks == "all") {
     recorder = gather_with_cpp;
     // warm up C++ stack unwinding
     torch::unwind::unwind();
   }
   max_entries = (enabled && *enabled == "all") ? max_entries : 1;
-  auto when = c10_npu::NPUCachingAllocator::RecordContext::NEVER;
+  auto when = c10_backend::CachingAllocator::RecordContext::NEVER;
   if (context) {
     if (context == "all") {
-      when = c10_npu::NPUCachingAllocator::RecordContext::ALL;
+      when = c10_backend::CachingAllocator::RecordContext::ALL;
     } else if (context == "alloc") {
-      when = c10_npu::NPUCachingAllocator::RecordContext::ALLOC;
+      when = c10_backend::CachingAllocator::RecordContext::ALLOC;
     } else if (context == "state") {
-      when = c10_npu::NPUCachingAllocator::RecordContext::STATE;
+      when = c10_backend::CachingAllocator::RecordContext::STATE;
     }
   }
   torch::utils::device_lazy_init(at::kPrivateUse1);
@@ -242,7 +242,7 @@ std::string _memory_snapshot_pickled() {
   c10::IValue oom_s = "oom";
   c10::IValue device_free_s = "device_free";
 
-  using namespace c10_npu::NPUCachingAllocator;
+  using namespace c10_backend::CachingAllocator;
 
   auto action_to_str = [&](TraceEntry::Action action) {
     switch (action) {

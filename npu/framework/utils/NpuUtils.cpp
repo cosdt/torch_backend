@@ -261,7 +261,7 @@ bool NpuUtils::IsOomError(aclError ret, int index) {
     // oom
     if (index == 1) {
       NPU_CHECK_ERROR(c10_npu::GetDevice(&deviceId));
-      c10_npu::NPUCachingAllocator::FreeDeviceCachedMemory(deviceId);
+      c10_npu::NPUCachingAllocator::emptyDeviceCache(deviceId);
       return true;
     }
     AT_ERROR("NPU out of memory. device id: ", deviceId);

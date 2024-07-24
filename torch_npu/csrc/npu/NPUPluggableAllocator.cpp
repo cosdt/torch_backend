@@ -86,10 +86,7 @@ c10::DataPtr NPUPluggableAllocator::allocate(size_t size) {
   aclrtStream stream = c10_npu::getCurrentNPUStreamNoWait(device);
   void* r = this->malloc(size, device, stream);
   c10::DataPtr data_ptr = {
-      r,
-      r,
-      raw_deleter(),
-      c10::Device(c10::DeviceType::PrivateUse1, device)};
+      r, r, raw_deleter(), c10::Device(c10::DeviceType::PrivateUse1, device)};
   return data_ptr;
 }
 
@@ -142,7 +139,9 @@ bool NPUPluggableAllocator::initialized() {
   return initialized_;
 }
 
-void NPUPluggableAllocator::setMemoryFraction(double fraction, int device) {
+void NPUPluggableAllocator::setMemoryFraction(
+    double fraction,
+    c10::DeviceIndex device) {
   if (memory_fraction_fn_) {
     memory_fraction_fn_(fraction, device);
   }
@@ -155,7 +154,7 @@ void NPUPluggableAllocator::emptyCache(bool check_error) {
 }
 
 void NPUPluggableAllocator::cacheInfo(
-    int dev_id,
+    c10::DeviceIndex device,
     size_t* cachedAndFree,
     size_t* largestBlock) {
   TORCH_NPU_WARN(
@@ -189,34 +188,36 @@ void NPUPluggableAllocator::eraseStream(
   }
 }
 
-c10_npu::NPUCachingAllocator::DeviceStats NPUPluggableAllocator::getDeviceStats(
-    int device) {
-  TORCH_NPU_WARN(
+c10_backend::CachingAllocator::DeviceStats NPUPluggableAllocator::
+    getDeviceStats(c10::DeviceIndex device) {
+  TORCH_CHECK(
+      false,
       "NPUPluggableAllocator does not yet support getDeviceStats. "
       "If you need it, please file an issue describing your use case.");
 }
 
-void NPUPluggableAllocator::resetAccumulatedStats(int device) {
+void NPUPluggableAllocator::resetAccumulatedStats(c10::DeviceIndex device) {
   TORCH_NPU_WARN(
       "NPUPluggableAllocator does not yet support resetAccumulatedStats. "
       "If you need it, please file an issue describing your use case.");
 }
 
-void NPUPluggableAllocator::resetPeakStats(int device) {
+void NPUPluggableAllocator::resetPeakStats(c10::DeviceIndex device) {
   TORCH_NPU_WARN(
       "NPUPluggableAllocator does not yet support resetPeakStats. "
       "If you need it, please file an issue describing your use case.");
 }
 
-c10_npu::NPUCachingAllocator::SnapshotInfo NPUPluggableAllocator::snapshot() {
-  TORCH_NPU_WARN(
+c10_backend::CachingAllocator::SnapshotInfo NPUPluggableAllocator::snapshot() {
+  TORCH_CHECK(
+      false,
       "NPUPluggableAllocator does not yet support snapshot. "
       "If you need it, please file an issue describing your use case.");
 }
 
-void NPUPluggableAllocator::FreeDeviceCachedMemory(int device) {
+void NPUPluggableAllocator::emptyDeviceCache(c10::DeviceIndex device) {
   TORCH_NPU_WARN(
-      "NPUPluggableAllocator does not yet support FreeDeviceCachedMemory. "
+      "NPUPluggableAllocator does not yet support emptyDeviceCache. "
       "If you need it, please file an issue describing your use case.");
 }
 
@@ -233,30 +234,30 @@ void NPUPluggableAllocator::copy_data(
 }
 void NPUPluggableAllocator::recordHistory(
     bool enabled,
-    c10_npu::NPUCachingAllocator::CreateContextFn context_recorder,
+    c10_backend::CachingAllocator::CreateContextFn context_recorder,
     size_t alloc_trace_max_entries,
-    c10_npu::NPUCachingAllocator::RecordContext when) {
+    c10_backend::CachingAllocator::RecordContext when) {
   TORCH_NPU_WARN(
       "NPUPluggableAllocator does not yet support recordHistory. "
       "If you need it, please file an issue describing your use case.");
 }
 
 void NPUPluggableAllocator::attachOutOfMemoryObserver(
-    c10_npu::NPUCachingAllocator::OutOfMemoryObserver observer) {
+    c10_backend::CachingAllocator::OutOfMemoryObserver observer) {
   TORCH_NPU_WARN(
       "NPUPluggableAllocator does not yet support attachOutOfMemoryObserver. "
       "If you need it, please file an issue describing your use case.");
 }
 
-std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>
+std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>
     current_custom_allocator;
 
-std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>
+std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>
 getCurrentAllocator() {
   return current_custom_allocator;
 }
 
-std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>
+std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>
 createCustomAllocator(
     std::function<void*(size_t, int, aclrtStream)> alloc_fn,
     std::function<void(void*, size_t, int, aclrtStream)> free_fn) {
@@ -268,13 +269,13 @@ createCustomAllocator(
 }
 
 void changeCurrentAllocator(
-    const std::shared_ptr<c10_npu::NPUCachingAllocator::NPUAllocator>&
+    const std::shared_ptr<c10_backend::CachingAllocator::CachingAllocator>&
         allocator) {
   TORCH_CHECK(
-      !c10_npu::NPUCachingAllocator::allocator.load()->initialized(),
+      !c10_backend::CachingAllocator::caching_allocator.load()->initialized(),
       "Can't swap an already initialized allocator",
       PTA_ERROR(ErrCode::PTR));
-  c10_npu::NPUCachingAllocator::allocator.store(allocator.get());
+  c10_backend::CachingAllocator::caching_allocator.store(allocator.get());
   current_custom_allocator = allocator;
 }
 
