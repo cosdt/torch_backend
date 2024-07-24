@@ -27,15 +27,6 @@ std::unordered_map<ErrCode, std::string> errCodeMap = {
     {ErrCode::HCCL, "call hccl api failed"},
     {ErrCode::GE, "call ge api failed"}};
 
-c10::WarningHandler* getBaseHandler_() {
-  static c10::WarningHandler warning_handler_ = c10::WarningHandler();
-  return &warning_handler_;
-};
-
-void warn_(const ::c10::Warning& warning) {
-  getBaseHandler_()->process(warning);
-}
-
 std::string formatErrorCode(SubModule submodule, ErrCode errorCode) {
   std::ostringstream oss;
   c10::DeviceIndex deviceIndex = -1;
