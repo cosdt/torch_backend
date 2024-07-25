@@ -2,7 +2,7 @@
 
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/core/NPUException.h"
@@ -138,7 +138,7 @@ void copy_between_host_and_device(
     void* ptr = host_tensor.data_ptr();
     void* ctx = host_tensor.storage().data_ptr().get_context();
     NPU_CHECK_ERROR(
-        THNPUCachingHostAllocator_recordEvent(ptr, ctx, stream),
+        NPUCachingHostAllocator_recordEvent(ptr, ctx, stream),
         "aclrtSynchronizeStreamWithTimeout");
   } else {
     aclError error = c10_npu::acl::AclrtSynchronizeStreamWithTimeout(stream);

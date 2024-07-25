@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 
 namespace at_npu {
 namespace native {
@@ -22,7 +22,7 @@ bool NPUNativeFunctions::is_pinned(
     return false;
   }
 
-  return THNPUCachingHostAllocator_isPinndPtr(self.storage().mutable_data());
+  return NPUCachingHostAllocator_isPinndPtr(self.storage().mutable_data());
 }
 
 at::Tensor NPUNativeFunctions::_pin_memory(

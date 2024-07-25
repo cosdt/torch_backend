@@ -4,7 +4,7 @@
 #include <torch/library.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 
 namespace at_npu {
 namespace native {

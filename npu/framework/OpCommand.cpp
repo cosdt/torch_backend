@@ -4,7 +4,7 @@
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "npu/core/NPUException.h"
 #include "csrc/npu/NPUFunctions.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/OpCmdHelper.h"
