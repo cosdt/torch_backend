@@ -27,7 +27,7 @@ struct HostAllocator : public at::CachingHostAllocatorImpl<
                            NPUStream,
                            c10_backend::EventPool<NPUEvent>::Event> {
  public:
-  bool isPinndPtr(void* ptr) {
+  bool isPinndPtr(const void* ptr) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     return pinned_ptrs.find(ptr) != pinned_ptrs.end();
   }
@@ -73,7 +73,7 @@ struct HostAllocator : public at::CachingHostAllocatorImpl<
   }
 
   std::shared_mutex mutex_{};
-  std::set<void*> pinned_ptrs{};
+  std::set<const void*> pinned_ptrs{};
 };
 } // namespace c10_npu
 
@@ -90,7 +90,7 @@ struct NPUCachingHostAllocator final
         at::DeviceType::CPU};
   }
 
-  bool isPinnedPtr(void* ptr) {
+  bool isPinnedPtr(const void* ptr) {
     return impl_->isPinndPtr(ptr);
   }
 };
@@ -104,7 +104,7 @@ aclError NPUCachingHostAllocator_recordEvent(
   return npu_caching_host_allocator.record_event(ptr, ctx, stream);
 }
 
-bool NPUCachingHostAllocator_isPinndPtr(void* ptr) {
+bool NPUCachingHostAllocator_isPinndPtr(const void* ptr) {
   return npu_caching_host_allocator.isPinnedPtr(ptr);
 }
 
@@ -120,7 +120,7 @@ at::Allocator* getNPUCachingHostAllocator() {
   return &npu_caching_host_allocator;
 }
 
-c10::Allocator* getPinnedMemoryAllocator() {
+c10::Allocator* getNPUPinnedMemoryAllocator() {
   C10_LOG_API_USAGE_ONCE("aten.init.npu");
   if (!c10_npu::NpuSysCtrl::IsInitializeSuccess()) {
     ASCEND_LOGE("Npu init fail.");

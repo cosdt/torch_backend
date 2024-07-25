@@ -13,8 +13,8 @@ aclError NPUCachingHostAllocator_recordEvent(
     void* ctx,
     c10_npu::NPUStream stream);
 
-bool NPUCachingHostAllocator_isPinndPtr(void* ptr);
+bool NPUCachingHostAllocator_isPinndPtr(const void* ptr);
 // Releases cached pinned memory allocations via npuHostFree
 TORCH_NPU_API void NPUCachingHostAllocator_emptyCache(void);
 
-c10::Allocator* getPinnedMemoryAllocator(void);
+c10::Allocator* getNPUPinnedMemoryAllocator(void);

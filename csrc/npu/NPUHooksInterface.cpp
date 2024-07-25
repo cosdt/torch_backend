@@ -1,4 +1,5 @@
 #include "csrc/npu/NPUHooksInterface.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStorageImpl.h"
 #include "npu/aten/common/ResizeNpu.h"
@@ -42,6 +43,14 @@ void NPUHooksInterface::resizePrivateUse1Bytes(
   auto itemsize = storage_impl->npu_desc_.data_type_.itemsize();
   std::vector<int64_t> new_size = {new_bytes / (ptrdiff_t)itemsize};
   at_npu::native::storage_resize_npu(*storage_impl, new_bytes, new_size);
+}
+
+bool NPUHooksInterface::isPinnedPtr(const void* data) const {
+  return NPUCachingHostAllocator_isPinndPtr(data);
+}
+
+at::Allocator* NPUHooksInterface::getPinnedMemoryAllocator() const {
+  return getNPUPinnedMemoryAllocator();
 }
 
 at::PrivateUse1HooksInterface* get_npu_hooks() {
