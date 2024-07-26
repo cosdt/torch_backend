@@ -40,11 +40,23 @@ concurrency:
 
 jobs:
   build:
-    name: Build with Python${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    name: Build
+    runs-on: npu-arm64
     defaults:
       run:
         shell: bash -el {0}
+    container:
+      image: ascendai/cann:${{ matrix.cann-version }}
+      volumes:
+        - /usr/local/dcmi:/usr/local/dcmi
+        - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi
+        - /usr/local/Ascend/driver/lib64/:/usr/local/Ascend/driver/lib64/
+        - /usr/local/Ascend/driver/version.info:/usr/local/Ascend/driver/version.info
+      options: |
+        --device /dev/davinci7
+        --device /dev/davinci_manager
+        --device /dev/devmm_svm
+        --device /dev/hisi_hdc
     strategy:
       fail-fast: false
       matrix:
@@ -52,7 +64,16 @@ jobs:
           - '3.8'
           - '3.9'
           - '3.10'
+        cann-version:
+          - '8.0'
     steps:
+      - name: Show
+        run: |
+          echo "$GITHUB_CONTEXT"
+          npu-smi info
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+
       - name: Checkout
         uses: actions/checkout@v4
 
