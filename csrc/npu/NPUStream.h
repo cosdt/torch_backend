@@ -7,15 +7,15 @@
 #include <mutex>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/core/Macros.h"
 #include "npu/acl/include/acl/acl.h"
 #include "npu/acl/include/acl/acl_op.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUMacros.h"
 #include "npu/core/npu_log.h"
 
 namespace c10_npu {
 
-class C10_NPU_API NPUStream {
+class C10_BACKEND_API NPUStream {
  public:
   enum Unchecked { UNCHECKED };
 
@@ -115,25 +115,27 @@ class C10_NPU_API NPUStream {
   c10::Stream stream_;
 };
 
-C10_NPU_API NPUStream getNPUStreamFromPool(c10::DeviceIndex device = -1);
+C10_BACKEND_API NPUStream getNPUStreamFromPool(c10::DeviceIndex device = -1);
 
-C10_NPU_API NPUStream getDefaultNPUStream(c10::DeviceIndex device_index = -1);
+C10_BACKEND_API NPUStream
+getDefaultNPUStream(c10::DeviceIndex device_index = -1);
 
 NPUStream getStreamFromPool(
     const bool isHighPriority,
     c10::DeviceIndex device_index);
 
-C10_NPU_API NPUStream getCurrentNPUStream(c10::DeviceIndex device_index = -1);
+C10_BACKEND_API NPUStream
+getCurrentNPUStream(c10::DeviceIndex device_index = -1);
 
 NPUStream getCurrentSecondaryStream(c10::DeviceIndex device_index = -1);
 
 aclrtStream getCurrentNPUStreamNoWait(c10::DeviceIndex device_index = -1);
 
-C10_NPU_API bool npuSynchronizeDevice(bool check_error = true);
+C10_BACKEND_API bool npuSynchronizeDevice(bool check_error = true);
 
-C10_NPU_API bool npuSynchronizeUsedDevices(bool check_error = true);
+C10_BACKEND_API bool npuSynchronizeUsedDevices(bool check_error = true);
 
-C10_NPU_API void setCurrentNPUStream(NPUStream stream);
+C10_BACKEND_API void setCurrentNPUStream(NPUStream stream);
 
 std::ostream& operator<<(std::ostream& stream, const NPUStream& s);
 

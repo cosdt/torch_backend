@@ -3,7 +3,7 @@
 
 #include <torch/csrc/Stream.h>
 #include <torch/csrc/python_headers.h>
-#include "npu/core/NPUMacros.h"
+#include "csrc/core/Macros.h"
 #include "csrc/npu/NPUStream.h"
 
 struct THNPStream : THPStream {
@@ -11,13 +11,13 @@ struct THNPStream : THPStream {
 };
 extern PyObject* THNPStreamClass;
 
-TORCH_NPU_API void THNPStream_init(PyObject* module);
+TORCH_BACKEND_API void THNPStream_init(PyObject* module);
 
 inline bool THNPStream_Check(PyObject* obj) {
   return THNPStreamClass && PyObject_IsInstance(obj, THNPStreamClass);
 }
 
-TORCH_NPU_API std::vector<c10::optional<c10_npu::NPUStream>>
+TORCH_BACKEND_API std::vector<c10::optional<c10_npu::NPUStream>>
 THNPUtils_PySequence_to_NPUStreamList(PyObject* obj);
 
 #endif // THNP_STREAM_INC

@@ -2,9 +2,9 @@
 #include <c10/util/SmallVector.h>
 
 #include <npu/acl/include/acl/acl.h>
+#include "csrc/core/Macros.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUMacros.h"
 
 c10::Allocator* getNPUCachingHostAllocator(void);
 
@@ -15,6 +15,6 @@ aclError NPUCachingHostAllocator_recordEvent(
 
 bool NPUCachingHostAllocator_isPinndPtr(const void* ptr);
 // Releases cached pinned memory allocations via npuHostFree
-TORCH_NPU_API void NPUCachingHostAllocator_emptyCache(void);
+TORCH_BACKEND_API void THNPUCachingHostAllocator_emptyCache(void);
 
 c10::Allocator* getNPUPinnedMemoryAllocator(void);

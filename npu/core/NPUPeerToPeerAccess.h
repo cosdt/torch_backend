@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <vector>
-#include "npu/core/NPUMacros.h"
 
 namespace at_npu {
 namespace native {

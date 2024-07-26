@@ -14,17 +14,17 @@
 #include <torch/csrc/utils/python_numbers.h>
 #include <torch/csrc/utils/python_strings.h>
 
-#include "csrc/npu/NPUGeneratorImpl.h"
-#include "npu/aten/common/SetNpu.h"
 #include "csrc/aten/generated/python_functions.h"
-#include "npu/core/OverflowUtils.h"
 #include "csrc/npu/NPUCachingAllocator.h"
-#include "npu/core/NPUException.h"
 #include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/NPUGeneratorImpl.h"
 #include "csrc/npu/NPUStream.h"
-#include "npu/core/NpuVariables.h"
-#include "npu/core/register/OptionRegister.h"
 #include "npu/acl/include/acl/acl.h"
+#include "npu/aten/common/SetNpu.h"
+#include "npu/core/NPUException.h"
+#include "npu/core/NpuVariables.h"
+#include "npu/core/OverflowUtils.h"
+#include "npu/core/register/OptionRegister.h"
 #include "torch_npu/csrc/npu/Module.h"
 #include "torch_npu/csrc/npu/NPUPluggableAllocator.h"
 
@@ -919,6 +919,6 @@ static struct PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr}};
 
-TORCH_NPU_API PyMethodDef* THNPModule_get_methods() {
+TORCH_BACKEND_API PyMethodDef* THNPModule_get_methods() {
   return THNPModule_methods;
 }

@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 #include "c10/macros/Export.h"
+#include "csrc/core/Macros.h"
 #include "csrc/npu/NPUEventManager.h"
-#include "npu/core/NPUMacros.h"
 #include "npu/core/npu_log.h"
 
 namespace c10_npu {
@@ -34,11 +34,11 @@ class NpuSysCtrl {
   };
 
   // Get NpuSysCtrl singleton instance
-  C10_NPU_API static NpuSysCtrl& GetInstance();
+  C10_BACKEND_API static NpuSysCtrl& GetInstance();
 
-  C10_NPU_API static bool IsInitializeSuccess(int device_id = -1);
+  C10_BACKEND_API static bool IsInitializeSuccess(int device_id = -1);
 
-  C10_NPU_API static bool IsFinalizeSuccess();
+  C10_BACKEND_API static bool IsFinalizeSuccess();
 
   // Environment Initialize, return SysStatus
   SysStatus Initialize(int device_id = -1);
@@ -47,10 +47,10 @@ class NpuSysCtrl {
   SysStatus OverflowSwitchEnable();
 
   // Environment Finalize, return SysStatus
-  C10_NPU_API SysStatus Finalize();
+  C10_BACKEND_API SysStatus Finalize();
 
   // Get Init_flag
-  C10_NPU_API bool GetInitFlag();
+  C10_BACKEND_API bool GetInitFlag();
 
   int InitializedDeviceID();
 

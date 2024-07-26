@@ -1,6 +1,6 @@
 #pragma once
 #include <ATen/core/Tensor.h>
-#include "npu/core/NPUMacros.h"
+#include "csrc/core/Macros.h"
 
 namespace at_npu {
 
@@ -58,7 +58,7 @@ inline TensorMaker for_blob(void* data, at::IntArrayRef sizes) noexcept {
   return TensorMaker{data, sizes};
 }
 
-TORCH_NPU_API at::Tensor from_blob(
+TORCH_BACKEND_API at::Tensor from_blob(
     void* data,
     at::IntArrayRef sizes,
     at::IntArrayRef strides,
@@ -66,19 +66,19 @@ TORCH_NPU_API at::Tensor from_blob(
     const at::TensorOptions& options = {},
     const c10::optional<c10::Device> target_device = c10::nullopt);
 
-TORCH_NPU_API at::Tensor from_blob(
+TORCH_BACKEND_API at::Tensor from_blob(
     void* data,
     at::IntArrayRef sizes,
     const c10::optional<c10::Device> target_device = c10::nullopt,
     const at::TensorOptions& options = {});
 
-TORCH_NPU_API at::Tensor from_blob(
+TORCH_BACKEND_API at::Tensor from_blob(
     void* data,
     at::IntArrayRef sizes,
     at::IntArrayRef strides,
     const at::TensorOptions& options = {});
 
-TORCH_NPU_API at::Tensor from_blob(
+TORCH_BACKEND_API at::Tensor from_blob(
     void* data,
     at::IntArrayRef sizes,
     const at::TensorOptions& options = {});
