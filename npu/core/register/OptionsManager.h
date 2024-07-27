@@ -4,8 +4,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "csrc/core/Macros.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUMacros.h"
 
 namespace c10_npu {
 namespace option {
@@ -32,7 +32,7 @@ class OptionsManager {
   static int32_t GetACLExecTimeout();
   static uint32_t CheckUseHcclAsyncErrorHandleEnable();
   static uint32_t CheckUseDesyncDebugEnable();
-  C10_NPU_API static bool isACLGlobalLogOn(aclLogLevel level);
+  C10_BACKEND_API static bool isACLGlobalLogOn(aclLogLevel level);
   static int64_t GetRankId();
   static char* GetNslbPath();
   static uint32_t GetNslbCntVal();

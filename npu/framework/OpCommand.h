@@ -2,8 +2,8 @@
 #define __PULGIN_NATIVE_UTILS_OP_COMMAND__
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/core/Macros.h"
 #include "npu/aten/mirror/NPUTensorIterator.h"
-#include "npu/core/NPUMacros.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/OpParamMaker.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
@@ -23,7 +23,7 @@ struct UnifiedResult {
   bool result_type_defined = false;
 };
 
-class TORCH_NPU_API OpCommand {
+class TORCH_BACKEND_API OpCommand {
  public:
   OpCommand();
   ~OpCommand() {}

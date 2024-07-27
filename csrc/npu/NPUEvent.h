@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <utility>
-#include "npu/core/NPUMacros.h"
+#include "csrc/core/Macros.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl.h"
 
@@ -11,7 +11,7 @@ namespace c10_npu {
  * NPUEvents are movable not copyable wrappers around NPU's events.
  * NPUEvents are constructed lazily when first recorded.
  */
-struct C10_NPU_API NPUEvent {
+struct C10_BACKEND_API NPUEvent {
   // Constructors
   // Default value for `flags` is specified below
   NPUEvent();

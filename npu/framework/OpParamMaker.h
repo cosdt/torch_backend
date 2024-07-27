@@ -3,16 +3,16 @@
 
 #include "csrc/npu/NPUStream.h"
 
+#include <thread>
+#include "csrc/core/Macros.h"
 #include "csrc/npu/NPUStorageImpl.h"
-#include "npu/core/NPUMacros.h"
+#include "npu/acl/include/acl/acl_base.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/NPUDefine.h"
 #include "npu/framework/interface/AclOpCompileInterface.h"
 #include "npu/framework/interface/EnvVariables.h"
 #include "npu/framework/utils/ForceJitCompileList.h"
-#include "npu/acl/include/acl/acl_base.h"
-#include <thread>
 
 namespace at_npu {
 namespace native {
@@ -25,7 +25,7 @@ typedef union {
 constexpr size_t MAX_PARAS_BYTE_SIZE = sizeof(TaskParas);
 
 // This file is defined wrapper C++ functions of ACL
-class TORCH_NPU_API OpAttrMaker {
+class TORCH_BACKEND_API OpAttrMaker {
  public:
   static void Set(aclopAttr* attr, const string& name, bool value);
   static void Set(aclopAttr* attr, const string& name, int64_t value);

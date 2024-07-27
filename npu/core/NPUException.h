@@ -12,8 +12,8 @@
 #include <string>
 #include <unordered_map>
 #include "csrc/core/Exception.h"
+#include "csrc/core/Macros.h"
 #include "npu/core/NPUErrorCodes.h"
-#include "npu/core/NPUMacros.h"
 #include "npu/core/interface/AclInterface.h"
 
 #define C10_NPU_SHOW_ERR_MSG()                                      \
@@ -132,6 +132,6 @@ inline const char* getErrorFunction(const char* /* msg */, const char* args) {
   } while (0)
 namespace c10_npu {
 
-C10_NPU_API const char* c10_npu_get_error_message();
+C10_BACKEND_API const char* c10_npu_get_error_message();
 
 } // namespace c10_npu
