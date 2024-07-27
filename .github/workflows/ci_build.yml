@@ -104,12 +104,15 @@ jobs:
       - name: Install Python dependencies
         run: |
           conda install -y cmake ninja
-          pip install -r requirements.txt
+          pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+          pip install --no-cache-dir \
+              attrs cython numpy decorator sympy cffi pyyaml pathlib2 psutil protobuf scipy requests absl-py          
 
       - name: Install PyTorch
         run: |
-          pip install --pre --index-url https://download.pytorch.org/whl/nightly/cpu \
-              torch torchvision torchaudio
+          pip install --pre --upgrade --index-url https://download.pytorch.org/whl/nightly/cpu \
+              torch
 
       - name: Compile source
         run: |
