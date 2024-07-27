@@ -9,7 +9,6 @@
 #include "npu/core/NPUGuard.h"
 #include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/npu/Module.h"
-#include "torch_npu/csrc/npu/memory_snapshot.h"
 
 NPUDeviceProp prop;
 
@@ -26,13 +25,6 @@ void RegisterNPUDeviceProperties(PyObject* module) {
                << "MB)";
         return stream.str();
       });
-  m.def(
-      "_npu_record_memory_history",
-      static_cast<void (*)(
-          c10::optional<std::string>,
-          c10::optional<std::string>,
-          std::string,
-          size_t)>(torch_npu::_record_memory_history));
 
   m.def("_npu_isHistoryEnabled", []() {
     return c10_npu::NPUCachingAllocator::isHistoryEnabled();
