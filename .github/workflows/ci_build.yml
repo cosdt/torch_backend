@@ -42,6 +42,9 @@ jobs:
   build:
     name: Build on CANN${{ matrix.cann-version }}-${{ matrix.cann-chip }}
     runs-on: npu-arm64
+    defaults:
+      run:
+        shell: bash -el {0}
     container:
       image: ascendai/cann:${{ matrix.cann-version }}-${{ matrix.cann-chip }}-${{ matrix.os }}-py${{ matirx.py-version }}
       volumes:
@@ -67,15 +70,6 @@ jobs:
         py-version:
           - '3.8'
     steps:
-      - name: Show
-        run: |
-          echo "$GITHUB_CONTEXT"
-          npu-smi info
-          echo "$(pwd)"
-          echo "$(whoami)"
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-
       - name: Install dependencies
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -92,21 +86,22 @@ jobs:
 
       - name: Show versions
         run: |
-          conda --version
           python --version
           pip --version
+
+      - name: Show
+        run: |
+          echo "$GITHUB_CONTEXT"
+          npu-smi info
+          echo "$(pwd)"
+          echo "$(whoami)"
+          ls -alh
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
 
       - name: Install CMake
         run: |
           conda install -y cmake ninja
-
-      - name: Install Python dependencies
-        run: |
-          pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install \
-              attrs cython numpy decorator sympy cffi pyyaml pathlib2 psutil protobuf scipy requests absl-py          
 
       - name: Install PyTorch
         run: |
