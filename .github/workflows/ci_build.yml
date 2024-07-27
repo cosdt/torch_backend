@@ -88,6 +88,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup Miniconda with Python${{ matrix.python-version }}
         uses: conda-incubator/setup-miniconda@v3
