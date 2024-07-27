@@ -1,0 +1,66 @@
+name: Build Documents
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*"
+    paths:
+      - ".github/workflows/_docs.yml"
+      - "docs/**/*"
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/_docs.yml"
+      - "docs/**/*"
+  release:
+    types:
+      - "published"
+
+jobs:
+  build:
+    name: Build Pytorch Backend Documents
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.12"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install requirements
+        run: |
+          wget https://www.doxygen.nl/files/doxygen-1.11.0.linux.bin.tar.gz
+          tar -zxvf doxygen-1.11.0.linux.bin.tar.gz
+          sudo make install -C doxygen-1.11.0
+          pip install -r docs/requirements.txt
+
+      - name: Build documents
+        run: |
+          TZ=UTC make clean -C docs/cpp
+          TZ=UTC make html -C docs/cpp
+          TZ=UTC make clean -C docs
+          TZ=UTC make html -C docs
+          cp -R docs/cpp/build/html docs/build/html/cpp_html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "docs/build/html"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/deploy-pages@v4

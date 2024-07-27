@@ -135,6 +135,8 @@ docs/gathered
 _site
 doxygen
 docs/dev
+docs/cpp/source/api/
+docs/src/
 
 # LevelDB files
 *.sst

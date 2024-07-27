@@ -16,7 +16,7 @@
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/core/NPUGuard.h"
 #include "npu/core/NPUPeerToPeerAccess.h"
@@ -47,7 +47,7 @@ void copy_between_host_and_device_opapi(
     void* ptr = host_tensor.data_ptr();
     void* ctx = host_tensor.storage().data_ptr().get_context();
     NPU_CHECK_ERROR(
-        THNPUCachingHostAllocator_recordEvent(ptr, ctx, stream),
+        NPUCachingHostAllocator_recordEvent(ptr, ctx, stream),
         "aclrtSynchronizeStreamWithTimeout");
   } else {
     aclError error = aclrtSynchronizeStream(stream);

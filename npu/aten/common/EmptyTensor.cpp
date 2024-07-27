@@ -4,14 +4,14 @@
 #include <torch/library.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 
 namespace at_npu {
 namespace native {
 
 static c10::Allocator* GetCPUAllocatorMaybePinned(bool pin_memory) {
   if (pin_memory) {
-    return getPinnedMemoryAllocator();
+    return getNPUPinnedMemoryAllocator();
   }
   return c10::GetCPUAllocator();
 }
