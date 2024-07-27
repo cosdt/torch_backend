@@ -46,7 +46,7 @@ jobs:
       run:
         shell: bash -el {0}
     container:
-      image: ascendai/cann:${{ matrix.cann-version }}-${{ matrix.cann-chip }}-${{ matrix.os }}-py${{ matirx.py-version }}
+      image: ascendai/cann:${{ matrix.cann-version }}-${{ matrix.cann-chip }}-${{ matrix.os }}-py${{ matrix.py-version }}
       volumes:
         - /usr/local/dcmi:/usr/local/dcmi
         - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi
