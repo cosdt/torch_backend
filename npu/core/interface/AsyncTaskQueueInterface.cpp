@@ -106,7 +106,7 @@ void EventTask::LaunchRecordTask(c10_npu::NPUStream npuStream) {
     NPU_CHECK_ERROR(aclrtRecordEvent(eventParam_.event, npuStream));
     ASCEND_LOGI(
         "Event: aclrtRecordEvent is successfully executed, stream=%p, event=%p",
-        npuStream.stream(false),
+        npuStream.stream(),
         eventParam_.event);
 }
 
@@ -122,7 +122,7 @@ void EventTask::LaunchWaitTask(c10_npu::NPUStream npuStream) {
     NPU_CHECK_ERROR(aclrtStreamWaitEvent(npuStream, eventParam_.event));
     ASCEND_LOGI(
         "Event: aclrtStreamWaitEvent is successfully executed, stream=%p, event=%p",
-        npuStream.stream(false),
+        npuStream.stream(),
         eventParam_.event);
 }
 
