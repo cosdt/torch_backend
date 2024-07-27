@@ -93,10 +93,8 @@ void OpAttrMaker::Set(
 
 void OpCommandImpl::SetEnginePriority() {
   auto stream = c10_npu::getCurrentNPUStream();
-  if (stream.isDataPreprocessStream()) {
-    AddAttr("_performance_prior", true);
-    AddAttr<std::string>("_exclude_engines", "AiCore");
-  }
+  AddAttr("_performance_prior", true);
+  AddAttr<std::string>("_exclude_engines", "AiCore");
 }
 
 void SetDeterministic() {

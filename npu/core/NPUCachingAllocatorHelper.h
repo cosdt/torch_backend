@@ -26,7 +26,7 @@ class CachingAllocatorHelper
   }
 
   void* getCurrentStream(c10::DeviceIndex device_index) override {
-    return c10_npu::getCurrentNPUStreamNoWait(device_index);
+    return c10_npu::getCurrentNPUStream(device_index);
   }
 
   int synchronizeStream(void* stream) override {

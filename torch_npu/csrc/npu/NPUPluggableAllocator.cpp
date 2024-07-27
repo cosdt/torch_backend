@@ -83,7 +83,7 @@ void* NPUPluggableAllocator::malloc(
 c10::DataPtr NPUPluggableAllocator::allocate(size_t size) {
   c10::DeviceIndex device = -1;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
-  aclrtStream stream = c10_npu::getCurrentNPUStreamNoWait(device);
+  aclrtStream stream = c10_npu::getCurrentNPUStream(device);
   void* r = this->malloc(size, device, stream);
   c10::DataPtr data_ptr = {
       r, r, raw_deleter(), c10::Device(c10::DeviceType::PrivateUse1, device)};
@@ -97,7 +97,7 @@ c10::DeleterFnPtr NPUPluggableAllocator::raw_deleter() const {
 void* NPUPluggableAllocator::raw_alloc(size_t nbytes) {
   c10::DeviceIndex device = -1;
   NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
-  aclrtStream stream = c10_npu::getCurrentNPUStreamNoWait(device);
+  aclrtStream stream = c10_npu::getCurrentNPUStream(device);
   return malloc(nbytes, device, stream);
 }
 

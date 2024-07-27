@@ -137,7 +137,7 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
         c10_npu::queue::LaunchRecordEventTask(npu_event, npu_stream));
     ASCEND_LOGI(
         "Event: aclrtRecordEvent is successfully executed, stream=%p, event=%p",
-        npu_stream.stream(false),
+        npu_stream.stream(),
         npu_event);
     // Makes the void* point to the (possibly just allocated) NPU event
     *event = npu_event;
@@ -156,7 +156,7 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
     NPU_CHECK_ERROR(c10_npu::queue::LaunchWaitEventTask(npu_event, npu_stream));
     ASCEND_LOGI(
         "Event: aclrtStreamWaitEvent is successfully executed, stream=%p, event=%p",
-        npu_stream.stream(false),
+        npu_stream.stream(),
         npu_event);
     setDevice(orig_device);
   }
