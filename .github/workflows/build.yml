@@ -98,7 +98,6 @@ jobs:
       - name: Show NPU info
         run: |
           npu-smi info
-          df -h
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -119,7 +118,7 @@ jobs:
       - name: Run C++ test
         working-directory: ./build
         run: |
-          TORCH_DIR=/usr/local/python${{ matrix.py-version }}/lib/python${{ matrix.py-version }}/site-packages/torch
+          TORCH_DIR="$(python -c 'import os, torch; print(os.path.dirname(os.path.realpath(torch.__file__)))')"
           TORCH_NPU_BUILD_DIR=$(pwd)
           export LD_LIBRARY_PATH="${TORCH_DIR}/lib/:${TORCH_NPU_BUILD_DIR}/lib/:$LD_LIBRARY_PATH"
           ctest --output-on-failure --verbose
