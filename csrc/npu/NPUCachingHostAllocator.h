@@ -15,6 +15,6 @@ aclError NPUCachingHostAllocator_recordEvent(
 
 bool NPUCachingHostAllocator_isPinndPtr(const void* ptr);
 // Releases cached pinned memory allocations via npuHostFree
-TORCH_BACKEND_API void THNPUCachingHostAllocator_emptyCache(void);
+TORCH_BACKEND_API void NPUCachingHostAllocator_emptyCache(void);
 
 c10::Allocator* getNPUPinnedMemoryAllocator(void);
