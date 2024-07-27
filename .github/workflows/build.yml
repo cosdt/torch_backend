@@ -84,16 +84,25 @@ jobs:
               cmake \
               ninja-build
 
+      - name: Show versions
+        run: |
+          set -x
+          python --version
+          pip --version
+          gcc --version
+          g++ --version
+          make --version
+          cmake --version
+          ninja --version
+
+      - name: Show NPU info
+        run: |
+          npu-smi info
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: true
-
-      - name: Show versions
-        run: |
-          python --version
-          pip --version
-          npu-smi info
+          submodules: recursive
 
       - name: Install PyTorch
         run: |
