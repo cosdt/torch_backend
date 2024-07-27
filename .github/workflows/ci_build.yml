@@ -40,7 +40,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build on CANN${{ matrix.cann-version }}-${{ matrix.cann-chip }}
+    name: Build with CANN${{ matrix.cann-version }} on Ascend${{ matrix.cann-chip }}
     runs-on: npu-arm64
     defaults:
       run:
