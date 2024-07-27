@@ -7,7 +7,8 @@ namespace c10_npu {
 
 struct TORCH_API NPUHooksInterface : public at::PrivateUse1HooksInterface {
   virtual ~NPUHooksInterface() = default;
-  const at::Generator& getDefaultGenerator(c10::DeviceIndex device_index) {
+  const at::Generator& getDefaultGenerator(
+      c10::DeviceIndex device_index) override {
     static auto device_gen =
         at_npu::detail::getDefaultNPUGenerator(device_index);
     return device_gen;
@@ -15,7 +16,9 @@ struct TORCH_API NPUHooksInterface : public at::PrivateUse1HooksInterface {
   void initPrivateUse1() const override;
   bool hasPrimaryContext(c10::DeviceIndex device_index) const override;
   void resizePrivateUse1Bytes(const c10::Storage& storage, size_t new_bytes)
-      const;
+      const override;
+  bool isPinnedPtr(const void* data) const override;
+  at::Allocator* getPinnedMemoryAllocator() const override;
 };
 
 struct TORCH_API NPUHooksArgs : public at::PrivateUse1HooksArgs {};

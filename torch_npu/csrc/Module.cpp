@@ -3,7 +3,7 @@
 #include <torch/csrc/profiler/python/combined_traceback.h>
 
 #include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/core/npu_log.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 #include "torch_npu/csrc/npu/Module.h"
@@ -52,7 +52,7 @@ PyObject* THPModule_npu_shutdown(PyObject* /* unused */) {
     ASCEND_LOGE("NPU shutdown synchronize device failed.");
   }
 
-  THNPUCachingHostAllocator_emptyCache();
+  NPUCachingHostAllocator_emptyCache();
   try {
     ASCEND_LOGI("NPU shutdown NPUCachingAllocator emptyCache.");
     c10_npu::NPUCachingAllocator::emptyCache(success);

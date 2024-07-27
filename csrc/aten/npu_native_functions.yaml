@@ -3,7 +3,6 @@ cpp_namespace: at_npu::native
 
 supported:
   - _local_scalar_dense
-  - _pin_memory
   - _reshape_alias
   - as_strided
   - as_strided_
@@ -31,7 +30,6 @@ supported:
   - hamming_window.periodic_alpha_beta
   - hann_window
   - hann_window.periodic
-  - is_pinned
   - is_set_to
   - isnan
   - new_empty_strided

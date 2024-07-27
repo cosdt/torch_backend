@@ -2,7 +2,7 @@
 #define __PLUGIN_NATIVE_NPU_CONTIGUOUS_RESHAPE__
 
 #include "npu/aten/common/InnerNpuNativeFunction.h"
-#include "csrc/npu/THNPUCachingHostAllocator.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
 
 namespace at_npu {
