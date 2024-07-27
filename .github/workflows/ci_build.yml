@@ -71,8 +71,15 @@ jobs:
         run: |
           echo "$GITHUB_CONTEXT"
           npu-smi info
+          echo "$(pwd)"
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install \
+              git
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,7 +96,7 @@ jobs:
           python --version
           pip --version
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           conda install -y cmake ninja
           pip install -r requirements.txt
