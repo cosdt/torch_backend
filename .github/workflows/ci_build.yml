@@ -101,12 +101,16 @@ jobs:
           python --version
           pip --version
 
-      - name: Install Python dependencies
+      - name: Install CMake
         run: |
           conda install -y cmake ninja
-          pip install --no-cache-dir --upgrade pip
-          pip install --no-cache-dir -r requirements.txt
-          pip install --no-cache-dir \
+
+      - name: Install Python dependencies
+        run: |
+          pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install \
               attrs cython numpy decorator sympy cffi pyyaml pathlib2 psutil protobuf scipy requests absl-py          
 
       - name: Install PyTorch
