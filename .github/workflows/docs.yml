@@ -13,13 +13,13 @@ on:
     tags:
       - "v*"
     paths:
-      - ".github/workflows/_docs.yml"
+      - ".github/workflows/docs.yml"
       - "docs/**/*"
   pull_request:
     branches:
       - "main"
     paths:
-      - ".github/workflows/_docs.yml"
+      - ".github/workflows/docs.yml"
       - "docs/**/*"
   release:
     types:

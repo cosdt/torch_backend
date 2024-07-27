@@ -1,4 +1,4 @@
-name: Build source
+name: Build source and test
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
     tags:
       - 'v*'
     paths:
-      - '.github/workflows/ci_build.yml'
+      - '.github/workflows/build.yml'
       - '**/*.py'
       - '**/*.h'
       - '**/*.cpp'
@@ -21,7 +21,7 @@ on:
     branches:
       - 'main'
     paths:
-      - '.github/workflows/ci_build.yml'
+      - '.github/workflows/build.yml'
       - '**/*.py'
       - '**/*.h'
       - '**/*.cpp'
