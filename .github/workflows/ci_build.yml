@@ -108,10 +108,8 @@ jobs:
 
       - name: Install PyTorch
         run: |
-          pip install --index-url https://download.pytorch.org/whl/nightly/cpu \
-              torch==2.5.0.dev20240726 \
-              torchvision==0.20.0.dev20240726 \
-              torchaudio==2.4.0.dev20240726
+          pip install --pre --index-url https://download.pytorch.org/whl/nightly/cpu \
+              torch torchvision torchaudio
 
       - name: Compile source
         run: |
