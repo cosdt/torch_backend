@@ -70,7 +70,7 @@ jobs:
         py-version:
           - '3.8'
     steps:
-      - name: Install dependencies
+      - name: Install system dependencies
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
@@ -80,7 +80,8 @@ jobs:
               gcc \
               g++ \
               make \
-              cmake
+              cmake \
+              ninja-build
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,16 +92,7 @@ jobs:
         run: |
           python --version
           pip --version
-
-      - name: Show
-        run: |
-          echo "$GITHUB_CONTEXT"
           npu-smi info
-          echo "$(pwd)"
-          echo "$(whoami)"
-          ls -alh
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
 
       - name: Install PyTorch
         run: |
@@ -111,11 +103,10 @@ jobs:
         run: |
           export BUILD_TEST=1
           export INSTALL_TEST=1
-          export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
           python setup.py develop
 
       - name: Run C++ test
         working-directory: ./build
         run: |
-          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib/python${{ matrix.py-version }}/site-packages/torch/lib:$LD_LIBRARY_PATH"
+          export LD_LIBRARY_PATH="/usr/local/python${{ matrix.py-version }}/lib/python${{ matrix.py-version }}/site-packages/:$LD_LIBRARY_PATH"
           ctest --output-on-failure --verbose
