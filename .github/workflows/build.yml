@@ -74,10 +74,11 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sed -i 's|ports.ubuntu.com|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
           apt update
           apt install --no-install-recommends -y \
-              git
+              git \
+              make \
+              cmake
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -98,10 +99,6 @@ jobs:
           ls -alh
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
-
-      - name: Install CMake
-        run: |
-          conda install -y cmake ninja
 
       - name: Install PyTorch
         run: |
