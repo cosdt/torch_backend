@@ -98,6 +98,7 @@ jobs:
       - name: Show NPU info
         run: |
           npu-smi info
+          df -h
 
       - name: Checkout
         uses: actions/checkout@v4
