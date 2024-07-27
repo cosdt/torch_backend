@@ -72,13 +72,14 @@ jobs:
           echo "$GITHUB_CONTEXT"
           npu-smi info
           echo "$(pwd)"
+          echo "$(whoami)"
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
 
       - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install \
+          apt update
+          apt install \
               git
 
       - name: Checkout
