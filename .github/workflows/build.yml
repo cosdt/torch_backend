@@ -118,5 +118,5 @@ jobs:
       - name: Run C++ test
         working-directory: ./build
         run: |
-          export LD_LIBRARY_PATH="/usr/local/python${{ matrix.py-version }}/lib/python${{ matrix.py-version }}/site-packages/:$LD_LIBRARY_PATH"
+          export LD_LIBRARY_PATH="/usr/local/python${{ matrix.py-version }}/lib/python${{ matrix.py-version }}/site-packages/torch/lib/:$LD_LIBRARY_PATH"
           ctest --output-on-failure --verbose
