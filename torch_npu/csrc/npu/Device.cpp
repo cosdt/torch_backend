@@ -129,6 +129,6 @@ static struct PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr}};
 
-TORCH_NPU_API PyMethodDef* THNPModule_device_methods() {
+TORCH_BACKEND_API PyMethodDef* THNPModule_device_methods() {
   return THNPModule_methods;
 }

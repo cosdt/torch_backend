@@ -6,7 +6,7 @@
 #include <c10/core/GeneratorImpl.h>
 #include <limits>
 #include "csrc/core/BaseGeneratorImpl.h"
-#include "npu/core/NPUMacros.h"
+#include "csrc/core/Macros.h"
 
 namespace at_npu {
 /**
@@ -118,7 +118,7 @@ struct PhiloxNpuState {
   bool captured_ = false;
 };
 
-struct TORCH_NPU_API NPUGeneratorImpl : public at::BaseGeneratorImpl {
+struct TORCH_BACKEND_API NPUGeneratorImpl : public at::BaseGeneratorImpl {
   // Constructors
   NPUGeneratorImpl(c10::DeviceIndex device_index = -1);
   ~NPUGeneratorImpl() = default;
@@ -148,9 +148,9 @@ struct TORCH_NPU_API NPUGeneratorImpl : public at::BaseGeneratorImpl {
 };
 
 namespace detail {
-TORCH_NPU_API const at::Generator& getDefaultNPUGenerator(
+TORCH_BACKEND_API const at::Generator& getDefaultNPUGenerator(
     c10::DeviceIndex device_index = -1);
-TORCH_NPU_API at::Generator createNPUGenerator(
+TORCH_BACKEND_API at::Generator createNPUGenerator(
     c10::DeviceIndex device_index = -1);
 
 } // namespace detail
