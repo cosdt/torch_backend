@@ -13,6 +13,7 @@
 #include <npu/acl/include/acl/acl.h>
 #include <optional>
 #include "csrc/core/Macros.h"
+#include "csrc/npu/NPUDeviceProp.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/npu_log.h"
 
@@ -76,7 +77,10 @@ C10_BACKEND_API __inline__ WarningState& warning_state() {
 }
 
 C10_BACKEND_API bool hasPrimaryContext(c10::DeviceIndex device_index);
-C10_BACKEND_API std::optional<c10::DeviceIndex>
-getDeviceIndexWithPrimaryContext();
+C10_BACKEND_API std::optional<c10::DeviceIndex> getDeviceIndexWithPrimaryContext();
+
+C10_BACKEND_API void get_device_properties(
+    c10_npu::NPUDeviceProp* device_prop,
+    c10::DeviceIndex device);
 
 } // namespace c10_npu

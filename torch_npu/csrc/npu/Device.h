@@ -1,11 +1,7 @@
 #pragma once
 
 #include "csrc/core/Macros.h"
-
-struct NPUDeviceProp {
-  std::string name;
-  size_t totalGlobalMem = 0;
-};
+#include "csrc/npu/NPUDeviceProp.h"
 
 TORCH_BACKEND_API void RegisterNPUDeviceProperties(PyObject* module);
 TORCH_BACKEND_API void BindGetDeviceProperties(PyObject* module);

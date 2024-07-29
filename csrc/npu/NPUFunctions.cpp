@@ -4,6 +4,7 @@
 #include "csrc/npu/NPUStream.h"
 #include "npu/adapter/acl_device_adapter.h"
 #include "npu/core/register/OptionsManager.h"
+#include "npu/core/interface/AclInterface.h"
 
 namespace c10_npu {
 
@@ -186,5 +187,18 @@ aclrtContext GetDeviceContext(c10::DeviceIndex device) {
 
 aclError ResetUsedDevices() {
   return acl_adapter::ResetUsedDevices();
+}
+
+void get_device_properties(
+    c10_npu::NPUDeviceProp* device_prop,
+    c10::DeviceIndex device) {
+  const char* device_name;
+  device_name = c10_npu::acl::AclrtGetSocName();
+  if (device_name == nullptr) {
+    device_prop->name = " ";
+    ASCEND_LOGE("NPU get device name fail.");
+  } else {
+    device_prop->name = std::string(device_name);
+  }
 }
 } // namespace c10_npu
