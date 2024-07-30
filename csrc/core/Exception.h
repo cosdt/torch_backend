@@ -25,8 +25,9 @@ void warn_(const ::c10::Warning& warning);
       __FILE__,                                                   \
       ":",                                                        \
       __LINE__,                                                   \
-      "\nBackend Error, error code is ",                          \
+      "\nBackend error, error code is ",                          \
       error_code,                                                 \
+      "\n",                                                       \
       code_message,                                               \
       "\n",                                                       \
       ::c10::str(__VA_ARGS__));
@@ -35,6 +36,7 @@ void warn_(const ::c10::Warning& warning);
   TORCH_BACKEND_WARN(                                            \
       "\nBackend warning, error code is ",                       \
       error_code,                                                \
+      "\n",                                                      \
       code_message,                                              \
       "\n",                                                      \
       ::c10::str(__VA_ARGS__));
