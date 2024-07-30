@@ -42,8 +42,6 @@ __all__ = [
     "memory_snapshot",
     "memory_summary",
     "get_allocator_backend",
-    "NPUPluggableAllocator",
-    "change_current_allocator",
     "Stream",
     "Event",
     "get_npu_overflow_flag",
