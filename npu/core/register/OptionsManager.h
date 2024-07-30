@@ -21,10 +21,6 @@ class OptionsManager {
   C10_BACKEND_API static bool isACLGlobalLogOn(aclLogLevel level);
   static int64_t GetRankId();
   static bool CheckGeInitDisable();
-  static bool CheckPerfDumpEnable();
-  static std::string GetPerfDumpPath();
-  static uint32_t GetP2PBufferSize();
-  static uint32_t GetBindCpuConf();
 
  private:
   static int GetBoolTypeOption(const char* env_str, int defaultVal = 0);

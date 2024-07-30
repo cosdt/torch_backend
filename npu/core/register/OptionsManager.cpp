@@ -131,47 +131,5 @@ std::unordered_map<std::string, std::string> OptionsManager::ParsePerfConfig(
   return config_map;
 }
 
-bool OptionsManager::CheckPerfDumpEnable() {
-  char* perf_dump_config = std::getenv("PERF_DUMP_CONFIG");
-  if (perf_dump_config != nullptr) {
-    std::unordered_map<std::string, std::string> config_dict =
-        ParsePerfConfig(perf_dump_config);
-    auto it = config_dict.find("enable");
-    if (it != config_dict.end()) {
-      return it->second == "true";
-    }
-  }
-  return false;
-}
-
-std::string OptionsManager::GetPerfDumpPath() {
-  char* perf_dump_path = std::getenv("PERF_DUMP_PATH");
-  if (perf_dump_path != nullptr) {
-    return std::string(perf_dump_path);
-  } else {
-    return "";
-  }
-}
-
-uint32_t OptionsManager::GetP2PBufferSize() {
-  const static uint32_t buf_size = []() -> uint32_t {
-    char* buf_val = std::getenv("P2P_HCCL_BUFFSIZE");
-    // Default 0M
-    int64_t buf_size = (buf_val != nullptr) ? strtol(buf_val, nullptr, 10) : 0;
-    return static_cast<uint32_t>(buf_size);
-  }();
-  return buf_size;
-}
-
-uint32_t OptionsManager::GetBindCpuConf() {
-  const static uint32_t bind_cpu_conf = []() -> uint32_t {
-    char* bind_core_str = std::getenv("BIND_CPU_CONF");
-    int64_t bind_cpu_conf =
-        (bind_core_str != nullptr) ? strtol(bind_core_str, nullptr, 10) : 0;
-    return static_cast<uint32_t>(bind_cpu_conf);
-  }();
-  return bind_cpu_conf;
-}
-
 } // namespace option
 } // namespace c10_npu
