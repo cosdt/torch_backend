@@ -374,14 +374,20 @@ C10_BACKEND_API bool npuSynchronizeUsedDevices(bool check_error) {
 aclError DestroyUsedStreams() {
   c10::DeviceIndex cur_device = 0;
   NPU_CHECK_ERROR(GetDevice(&cur_device));
-  // Synchronize all used devices
   std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
   for (const auto deviceId : device_idx_vec) {
     NPU_CHECK_ERROR(SetDevice(deviceId));
-    NPUStream stream = getCurrentNPUStream(deviceId);
-    aclError acl_ret = acl::AclrtDestroyStreamForce(stream);
-    if (acl_ret != ACL_ERROR_NONE) {
-      return acl_ret;
+    for (const auto i : c10::irange(kStreamsPerPool)) {
+      for (const auto p : c10::irange(max_compile_time_stream_priorities)) {
+        aclrtStream stream = streams[p][deviceId][i];
+        if (stream == nullptr) {
+          continue;
+        }
+        aclError acl_ret = acl::AclrtDestroyStreamForce(stream);
+        if (acl_ret != ACL_ERROR_NONE) {
+          return acl_ret;
+        }
+      }
     }
   }
   NPU_CHECK_ERROR(SetDevice(cur_device));
