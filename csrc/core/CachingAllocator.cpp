@@ -2001,7 +2001,7 @@ class DeviceCachingAllocator {
   EventPool<c10::Event>::Event create_event_internal(int idx) {
     // Leak the event pool to avoid shutdown issues.
     static auto* event_pool = new EventPool<c10::Event>(deviceCount(), []() {
-      return std::make_unique<c10::Event>(at::DeviceType::PrivateUse1);
+      return std::make_unique<c10::Event>(at::kPrivateUse1);
     });
     return event_pool->get(idx);
   }
