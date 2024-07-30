@@ -1,13 +1,6 @@
 #include <ATen/autocast_mode.h>
-#include <exception>
-#include <iostream>
 
 namespace {
-using namespace at::autocast;
-
-/*******************************
-Banned functions
-*******************************/
 
 at::Tensor binary_cross_entropy_banned(
     const at::Tensor&,
@@ -21,6 +14,7 @@ at::Tensor binary_cross_entropy_banned(
       "or torch.nn.BCEWithLogitsLoss.  binary_cross_entropy_with_logits and BCEWithLogits are\n"
       "safe to autocast.");
 }
+
 TORCH_LIBRARY_IMPL(_, AutocastPrivateUse1, m) {
   m.fallback(torch::CppFunction::makeFallthrough());
 }
@@ -109,6 +103,7 @@ TORCH_LIBRARY_IMPL(aten, AutocastPrivateUse1, m) {
   KERNEL_PRIVATEUSEONE(cdist, fp32)
   KERNEL_PRIVATEUSEONE(renorm, fp32)
   KERNEL_PRIVATEUSEONE(logsumexp, fp32)
+
   // fp32_set_opt_dtype
   KERNEL_PRIVATEUSEONE(prod, fp32_set_opt_dtype)
   KERNEL_PRIVATEUSEONE(prod, dim_int, fp32_set_opt_dtype)
@@ -170,6 +165,7 @@ TORCH_LIBRARY_IMPL(aten, AutocastPrivateUse1, m) {
           bool,
           at::ScalarType),
       fp32_append_dtype)
+
   // promote
   KERNEL_PRIVATEUSEONE(addcdiv, promote)
   KERNEL_PRIVATEUSEONE(addcmul, promote)
