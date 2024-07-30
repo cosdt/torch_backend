@@ -11,6 +11,7 @@
 #include <c10/macros/Macros.h>
 
 #include <npu/acl/include/acl/acl.h>
+#include <mutex>
 #include <optional>
 #include "csrc/core/Macros.h"
 #include "npu/core/NPUException.h"
@@ -78,5 +79,6 @@ C10_BACKEND_API __inline__ WarningState& warning_state() {
 C10_BACKEND_API bool hasPrimaryContext(c10::DeviceIndex device_index);
 C10_BACKEND_API std::optional<c10::DeviceIndex>
 getDeviceIndexWithPrimaryContext();
+C10_BACKEND_API std::mutex* getFreeMutex();
 
 } // namespace c10_npu
