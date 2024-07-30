@@ -13,7 +13,7 @@ class TestNPU(TestCase):
         self.assertTrue(event.query())
         start_event = torch.npu.Event(enable_timing=True)
         stream.record_event(start_event)
-        torch.npu._sleep(int(50 * get_cycles_per_ms()))
+        torch.npu._sleep(int(50 * get_cycles_per_ms()))  # TODO
         stream.record_event(event)
         self.assertFalse(event.query())
         event.synchronize()
