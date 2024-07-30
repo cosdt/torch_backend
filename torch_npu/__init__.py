@@ -1,6 +1,10 @@
+import os
 import atexit
 
 from functools import wraps
+
+# Disable autoloading before running 'import torch'
+os.environ['TORCH_DEVICE_BACKEND_AUTOLOAD'] = '0'
 
 import torch
 import torch.utils
