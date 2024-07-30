@@ -518,6 +518,11 @@ def main():
         ],
         license="BSD License",
         keywords="pytorch, machine learning",
+        entry_points={
+            'torch.backends': [
+                'torch_npu = torch_npu:_autoload',
+            ],
+        }
     )
 
 

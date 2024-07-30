@@ -63,6 +63,7 @@ jobs:
       matrix:
         cann-version:
           - '8.0.rc1'
+          - '8.0.RC2.alpha003'
         cann-chip:
           - '910b'
         os:
@@ -121,5 +122,4 @@ jobs:
           TORCH_DIR="$(python -c 'import os, torch; print(os.path.dirname(os.path.realpath(torch.__file__)))')"
           TORCH_NPU_BUILD_DIR=$(pwd)
           export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${TORCH_DIR}/lib/:${TORCH_NPU_BUILD_DIR}/lib/"
-          echo $LD_LIBRARY_PATH
           ctest --output-on-failure --verbose

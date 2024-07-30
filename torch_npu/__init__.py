@@ -81,3 +81,10 @@ def _npu_shutdown():
 
 # register npu shutdown hook on exit
 atexit.register(_npu_shutdown)
+
+
+# This function is an entrypoint called by PyTorch
+# when running 'import torch'. There is no need to do anything.
+# See this RFC: https://github.com/pytorch/pytorch/pull/127074
+def _autoload():
+    pass
