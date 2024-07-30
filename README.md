@@ -39,7 +39,6 @@
     |   `-- npu       //面相Python需要暴露的所有底层能力的Python绑定
     |-- meta          //meta算子注册（用来计算自定义算子的输出内存占用）
     |-- npu           //npu设备相关功能模块的封装
-    |-- optim         //NPU专属优化器
     |-- testing
     `-- utils         //各种patch
 ```
