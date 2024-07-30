@@ -8,7 +8,6 @@ import torch.utils
 import torch_npu
 import torch_npu._C
 import torch_npu.npu
-import torch_npu.optim
 from torch_npu.utils.error_code import _except_handler, ErrCode, pta_error
 
 from torch_npu.utils.exposed_api import public_npu_functions
