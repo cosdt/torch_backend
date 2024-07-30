@@ -166,10 +166,6 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
     if (!event)
       return true;
     aclrtEvent npu_event = static_cast<aclrtEvent>(event);
-    if (c10_npu::option::OptionsManager::CheckQueueEnable() &&
-        !c10_npu::NPUEventManager::GetInstance().IsEventRecorded(npu_event)) {
-      return false;
-    }
     acl::aclrtEventRecordedStatus status =
         acl::ACL_EVENT_RECORDED_STATUS_NOT_READY;
     NPU_CHECK_ERROR(acl::AclQueryEventRecordedStatus(npu_event, &status));
