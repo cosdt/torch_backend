@@ -63,7 +63,6 @@ jobs:
       matrix:
         cann-version:
           - '8.0.rc1'
-          - '8.0.RC2.alpha003'
         cann-chip:
           - '910b'
         os:
