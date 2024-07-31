@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <c10/core/Allocator.h>
+#include <c10/core/Device.h>
 #include <c10/core/Event.h>
 #include <c10/util/Exception.h>
 #include <c10/util/Optional.h>
@@ -18,11 +19,30 @@
 
 #include "csrc/core/CachingAllocator.h"
 #include "csrc/core/CachingAllocatorHelper.h"
+#include "csrc/core/EventPool.h"
 #include "csrc/npu/NPUFunctions.h"
 
 namespace c10_backend::CachingAllocator {
 
 C10_DEFINE_REGISTRY(FreeNPUMemoryCallbacksRegistry, FreeMemoryCallback);
+
+inline const c10::impl::DeviceGuardImplInterface* getDeviceGuardImpl() {
+  return c10::impl::getDeviceGuardImpl(c10::kPrivateUse1);
+}
+
+inline const c10::DeviceIndex getDeviceIndex() {
+  auto device = getDeviceGuardImpl()->getDevice();
+  return device.index();
+}
+
+inline void setDevice(c10::DeviceIndex deviceIndex) {
+  c10::Device device(c10::kPrivateUse1, deviceIndex);
+  getDeviceGuardImpl()->setDevice(device);
+}
+
+inline const c10::DeviceIndex deviceCount() {
+  return getDeviceGuardImpl()->deviceCount();
+}
 
 //
 // Yet another caching allocator for device allocations.
@@ -518,53 +538,6 @@ struct AllocParams {
   StatTypes stat_types = {false};
   int err;
 };
-
-class EventPool {
- public:
-  using Event = std::unique_ptr<c10::Event, std::function<void(c10::Event*)>>;
-  // Explicit device count
-  EventPool() : pools_(c10_npu::device_count()) {}
-
-  Event get(c10::DeviceIndex device) {
-    TORCH_INTERNAL_ASSERT(0 <= device);
-    TORCH_INTERNAL_ASSERT(device < static_cast<int>(pools_.size()));
-    auto& pool = pools_[device];
-    auto destructor = [&pool](c10::Event* event) {
-      std::lock_guard<std::mutex> g(pool.mutex_);
-      pool.event_pool_.push_back(std::unique_ptr<c10::Event>(event));
-    };
-
-    // Try to acquire an event from the per-device pool.
-    {
-      std::lock_guard<std::mutex> g(pool.mutex_);
-      if (!pool.event_pool_.empty()) {
-        auto* event = pool.event_pool_.back().release();
-        pool.event_pool_.pop_back();
-        return Event(event, destructor);
-      }
-    }
-    // otherwise, allocate a new event that will be returned to the pool on
-    // destruction.
-    return Event(
-        std::make_unique<c10::Event>(at::DeviceType::PrivateUse1).release(),
-        destructor);
-  }
-
-  void empty_cache() {
-    for (auto& pool : pools_) {
-      std::lock_guard<std::mutex> g(pool.mutex_);
-      pool.event_pool_.clear();
-    }
-  }
-
- private:
-  struct PerDevicePool {
-    alignas(64) std::mutex mutex_;
-    std::vector<std::unique_ptr<c10::Event>> event_pool_;
-  };
-  std::vector<PerDevicePool> pools_;
-};
-
 } // namespace
 
 class CachingAllocatorConfig {
@@ -791,7 +764,7 @@ class DeviceCachingAllocator {
   // outstanding events
   ska::flat_hash_map<
       c10::Stream,
-      std::deque<std::pair<EventPool::Event, Block*>>>
+      std::deque<std::pair<EventPool<c10::Event>::Event, Block*>>>
       npu_events;
 
   // record used memory.
@@ -872,7 +845,7 @@ class DeviceCachingAllocator {
     std::unique_lock<std::recursive_mutex> lock(mutex);
 
     if (device == -1) {
-      NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
+      device = getDeviceIndex();
     }
 
     // process outstanding npu Events
@@ -2025,9 +1998,11 @@ class DeviceCachingAllocator {
     }
   }
 
-  EventPool::Event create_event_internal(int idx) {
+  EventPool<c10::Event>::Event create_event_internal(int idx) {
     // Leak the event pool to avoid shutdown issues.
-    static auto* event_pool = new EventPool();
+    static auto* event_pool = new EventPool<c10::Event>(deviceCount(), []() {
+      return std::make_unique<c10::Event>(at::kPrivateUse1);
+    });
     return event_pool->get(idx);
   }
 
@@ -2037,7 +2012,7 @@ class DeviceCachingAllocator {
     // Synchronize on outstanding events and then free associated blocks.
     for (auto& st : npu_events) {
       for (auto& e : st.second) {
-        EventPool::Event event = std::move(e.first);
+        EventPool<c10::Event>::Event event = std::move(e.first);
         Block* block = e.second;
         event->synchronize();
 
@@ -2056,9 +2031,9 @@ class DeviceCachingAllocator {
       stream_set streams(std::move(block->stream_uses));
       AT_ASSERT(block->stream_uses.empty(), PTA_ERROR(ErrCode::VALUE));
       for (auto& stream : streams) {
-        NPU_CHECK_ERROR(c10_npu::SetDevice(stream.device_index()));
+        setDevice(stream.device_index());
 
-        EventPool::Event event = create_event_internal(stream.device_index());
+        EventPool<c10::Event>::Event event = create_event_internal(stream.device_index());
         event->record(stream);
 
         block->event_count++;
@@ -2076,7 +2051,7 @@ class DeviceCachingAllocator {
     for (auto it = npu_events.begin(); it != npu_events.end();) {
       while (!it->second.empty()) {
         auto& e = it->second.front();
-        EventPool::Event event = std::move(e.first);
+        EventPool<c10::Event>::Event event = std::move(e.first);
         Block* block = e.second;
 
         if (!event->query()) {
@@ -2237,7 +2212,7 @@ class DefaultCachingAllocator : public CachingAllocator {
         ". Please set within (0, 1).",
         PTA_ERROR(ErrCode::PARAM));
 
-    c10_npu::SetDevice(device);
+    setDevice(device);
 
     device_allocator[device]->setMemoryFraction(fraction);
   }
@@ -2254,9 +2229,7 @@ class DefaultCachingAllocator : public CachingAllocator {
   }
 
   bool isHistoryEnabled() override {
-    c10::DeviceIndex device = 0;
-    NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
-    return device_allocator[device]->isHistoryEnabled();
+    return device_allocator[getDeviceIndex()]->isHistoryEnabled();
   }
 
   void attachOutOfMemoryObserver(OutOfMemoryObserver observer) override {
@@ -2348,8 +2321,7 @@ class DefaultCachingAllocator : public CachingAllocator {
   }
 
   c10::DataPtr allocate(size_t size) override {
-    c10::DeviceIndex device = 0;
-    NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
+    c10::DeviceIndex device = getDeviceIndex();
     void* devPtr = nullptr;
     void (*deleteFunc)(void*) = &local_raw_delete;
 
@@ -2385,7 +2357,7 @@ class DefaultCachingAllocator : public CachingAllocator {
   }
 
   void assertValidDevice(c10::DeviceIndex device) {
-    int device_num = c10_npu::device_count();
+    int device_num = deviceCount();
     AT_ASSERTM(
         0 <= device && device < device_num,
         "Invalid device argument.",
@@ -2411,8 +2383,7 @@ class DefaultCachingAllocator : public CachingAllocator {
     if (nbytes == 0) {
       return nullptr;
     }
-    c10::DeviceIndex device = 0;
-    NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
+    c10::DeviceIndex device = getDeviceIndex();
     void* r = nullptr;
     malloc(&r, device, nbytes, helper->getCurrentStream(device));
     return r;
@@ -2422,8 +2393,7 @@ class DefaultCachingAllocator : public CachingAllocator {
     if (nbytes == 0) {
       return nullptr;
     }
-    c10::DeviceIndex device;
-    NPU_CHECK_ERROR(c10_npu::GetDevice(&device));
+    c10::DeviceIndex device = getDeviceIndex();
     void* r = nullptr;
     malloc(&r, device, nbytes, stream);
     return r;
