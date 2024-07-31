@@ -16,21 +16,20 @@
 #include "npu/core/NPUErrorCodes.h"
 #include "npu/core/interface/AclInterface.h"
 
-#define C10_NPU_SHOW_ERR_MSG()                                      \
-  do {                                                              \
-    std::cout << c10_npu::c10_npu_get_error_message() << std::endl; \
+#define C10_NPU_SHOW_ERR_MSG()                                  \
+  do {                                                          \
+    std::cout << c10_npu::getDeviceErrorMessage() << std::endl; \
   } while (0)
 
-#define NPU_CHECK_WARN(err_code)                 \
-  do {                                           \
-    auto Error = err_code;                       \
-    static c10_npu::acl::AclErrorCode err_map;   \
-    if ((Error) != ACL_ERROR_NONE) {             \
-      TORCH_BACKEND_FORMAT_WARN(                 \
-          err_code,                              \
-          err_map.error_code_map,                \
-          c10_npu::c10_npu_get_error_message()); \
-    }                                            \
+#define NPU_CHECK_WARN(err_code)             \
+  do {                                       \
+    auto Error = err_code;                   \
+    if ((Error) != ACL_ERROR_NONE) {         \
+      TORCH_BACKEND_FORMAT_WARN(             \
+          err_code,                          \
+          c10_npu::getErrorMessage(Error),   \
+          c10_npu::getDeviceErrorMessage()); \
+    }                                        \
   } while (0)
 
 #define TORCH_NPU_WARN(...) TORCH_BACKEND_WARN(__VA_ARGS__)
@@ -79,30 +78,28 @@ inline const char* getErrorFunction(const char* /* msg */, const char* args) {
 #define NPU_CHECK_ERROR(err_code, ...)                \
   do {                                                \
     auto Error = err_code;                            \
-    static c10_npu::acl::AclErrorCode err_map;        \
     if ((Error) != ACL_ERROR_NONE) {                  \
       TORCH_BACKEND_FORMAT_ERROR(                     \
-          err_code,                                   \
-          err_map.error_code_map,                     \
+          Error,                                      \
+          c10_npu::getErrorMessage(Error),            \
           " NPU function error: ",                    \
           getErrorFunction(#err_code, ##__VA_ARGS__), \
           PTA_ERROR(ErrCode::ACL),                    \
-          c10_npu::c10_npu_get_error_message());      \
+          c10_npu::getDeviceErrorMessage());          \
     }                                                 \
   } while (0)
 
 #define OPS_CHECK_ERROR(err_code, ...)                \
   do {                                                \
     auto Error = err_code;                            \
-    static c10_npu::acl::AclErrorCode err_map;        \
     if ((Error) != ACL_ERROR_NONE) {                  \
       TORCH_BACKEND_FORMAT_ERROR(                     \
-          err_code,                                   \
-          err_map.error_code_map,                     \
+          Error,                                      \
+          c10_npu::getErrorMessage(Error),            \
           " OPS function error: ",                    \
           getErrorFunction(#err_code, ##__VA_ARGS__), \
           OPS_ERROR(ErrCode::ACL),                    \
-          c10_npu::c10_npu_get_error_message())       \
+          c10_npu::getDeviceErrorMessage())           \
     }                                                 \
   } while (0)
 
@@ -124,14 +121,16 @@ inline const char* getErrorFunction(const char* /* msg */, const char* args) {
         }();                                                        \
       } else {                                                      \
         TORCH_BACKEND_FORMAT_ERROR(                                 \
-            err_code,                                               \
-            err_map.error_code_map,                                 \
-            c10_npu::c10_npu_get_error_message());                  \
+            Error,                                                  \
+            c10_npu::getErrorMessage(Error),                        \
+            c10_npu::getDeviceErrorMessage());                      \
       }                                                             \
     }                                                               \
   } while (0)
 namespace c10_npu {
 
-C10_BACKEND_API const char* c10_npu_get_error_message();
+C10_BACKEND_API const char* getDeviceErrorMessage();
+
+C10_BACKEND_API const std::string getErrorMessage(int error_code);
 
 } // namespace c10_npu
