@@ -6,8 +6,6 @@ namespace c10_npu::NPUCachingAllocator {
 
 using namespace c10_backend::CachingAllocator;
 
-std::mutex* getFreeMutex();
-
 class NPUAllocator : public c10::Allocator {
  public:
   virtual void* raw_alloc_with_stream(size_t nbytes, void* stream) = 0;
