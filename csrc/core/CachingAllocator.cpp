@@ -30,7 +30,7 @@ inline const c10::impl::DeviceGuardImplInterface* getDeviceGuardImpl() {
   return c10::impl::getDeviceGuardImpl(c10::kPrivateUse1);
 }
 
-inline c10::DeviceIndex getDeviceIndex() {
+inline const c10::DeviceIndex getDeviceIndex() {
   auto device = getDeviceGuardImpl()->getDevice();
   return device.index();
 }
