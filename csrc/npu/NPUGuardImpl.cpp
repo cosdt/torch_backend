@@ -3,7 +3,7 @@
 #include <torch/csrc/jit/serialization/pickler.h>
 #include "csrc/npu/NPUSerialization.h"
 #include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUHooksInterface.h"
+#include "csrc/npu/NPUHooks.h"
 
 namespace c10_npu {
 
