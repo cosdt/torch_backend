@@ -14,8 +14,7 @@ static PyObject* set_autocast_enabled(PyObject* _unused, PyObject* arg) {
       PyBool_Check(arg),
       "enabled must be a bool (got ",
       Py_TYPE(arg)->tp_name,
-      ")",
-      PTA_ERROR(ErrCode::TYPE));
+      ")");
   at::autocast::set_autocast_enabled(at::kPrivateUse1, arg == Py_True);
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
@@ -37,8 +36,7 @@ static PyObject* set_autocast_dtype(PyObject* _unused, PyObject* arg) {
       THPDtype_Check(arg),
       "dtype must be a torch.dtype (got ",
       Py_TYPE(arg)->tp_name,
-      ")",
-      PTA_ERROR(ErrCode::TYPE));
+      ")");
   at::ScalarType targetType = reinterpret_cast<THPDtype*>(arg)->scalar_type;
   at::autocast::set_autocast_dtype(at::kPrivateUse1, targetType);
   Py_RETURN_NONE;
