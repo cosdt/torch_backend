@@ -11,7 +11,7 @@ namespace native {
 
 static c10::Allocator* GetCPUAllocatorMaybePinned(bool pin_memory) {
   if (pin_memory) {
-    return getNPUPinnedMemoryAllocator();
+    return getNPUCachingHostAllocator();
   }
   return c10::GetCPUAllocator();
 }
