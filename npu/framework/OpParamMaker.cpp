@@ -2,10 +2,8 @@
 #include <unistd.h>
 #include "npu/core/NPUQueue.h"
 
-#include "csrc/npu/NPUEventManager.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
-#include "npu/framework/OpCmdHelper.h"
 #include "npu/framework/OpParamMaker.h"
 #include "npu/framework/aoe/AoeUtils.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
@@ -357,8 +355,6 @@ int RecordEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
         cur_paras->eventAllocatorType);
     C10_NPU_SHOW_ERR_MSG();
   }
-  c10_npu::NPUEventManager::GetInstance().DecreaseUnrecordedCount(
-      cur_paras->event);
   ASCEND_LOGI(
       "Event: aclrtRecordEvent dequeue is successfully executed, stream=%p, event=%p",
       stream,
@@ -386,8 +382,7 @@ int WaitEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
 
 int LazyDestroyEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
   auto cur_paras = static_cast<c10_npu::queue::EventParas*>(in->paramVal);
-  aclError ret =
-      c10_npu::NPUEventManager::GetInstance().LazyDestroy(cur_paras->event);
+  aclError ret = aclrtDestroyEvent(cur_paras->event);
   if (ret != ACL_ERROR_NONE) {
     ASCEND_LOGE(
         "LazyDestroy error! ret = %d, eventAllocatorType = %d",

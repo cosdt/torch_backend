@@ -7,7 +7,6 @@
 #include <vector>
 #include "c10/macros/Export.h"
 #include "csrc/core/Macros.h"
-#include "csrc/npu/NPUEventManager.h"
 #include "npu/core/npu_log.h"
 
 namespace c10_npu {

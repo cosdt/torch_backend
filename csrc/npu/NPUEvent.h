@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <utility>
 #include "csrc/core/Macros.h"
-#include "csrc/npu/NPUEventManager.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl.h"
 #include "npu/core/NPUException.h"
@@ -24,15 +23,11 @@ struct C10_BACKEND_API NPUEvent {
 
   ~NPUEvent() {
     try {
-      if (is_created_ && (c10_npu::NpuSysCtrl::GetInstance().GetInitFlag())) {
-        NPU_CHECK_ERROR(
-            c10_npu::queue::LaunchLazyDestroyEventTask(event_, device_index_));
-        if (!c10_npu::acl::IsExistCreateEventExWithFlag()) {
-          c10_npu::NPUEventManager::GetInstance().QueryAndDestroyEvent();
-        }
+      if (is_created_ && c10_npu::NpuSysCtrl::GetInstance().GetInitFlag()) {
+        NPUGuard guard(device_index_);
+        NPU_CHECK_ERROR(aclrtDestroyEvent(event_));
       }
-    } catch (...) { /* No throw */
-    }
+    } catch (...) { /* No throw */ }
   }
 
   NPUEvent(const NPUEvent&) = delete;
@@ -96,14 +91,14 @@ struct C10_BACKEND_API NPUEvent {
         ".",
         PTA_ERROR(ErrCode::PARAM));
     NPUGuard guard(device_index_);
-    NPU_CHECK_ERROR(c10_npu::queue::LaunchRecordEventTask(event_, stream));
+    NPU_CHECK_ERROR(aclrtRecordEvent(event_, stream));
     was_recorded_ = true;
   }
 
   void block(const NPUStream& stream) {
     if (is_created_) {
       NPUGuard guard(stream.device_index());
-      NPU_CHECK_ERROR(c10_npu::queue::LaunchWaitEventTask(event_, stream));
+      NPU_CHECK_ERROR(aclrtStreamWaitEvent(stream, event_));
     }
   }
 

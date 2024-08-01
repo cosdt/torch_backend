@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include "csrc/npu/NPUStream.h"
 #include "npu/adapter/acl_device_adapter.h"
-#include "npu/core/register/OptionsManager.h"
 #include "npu/core/interface/AclInterface.h"
 
 namespace c10_npu {

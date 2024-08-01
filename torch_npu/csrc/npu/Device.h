@@ -1,7 +1,6 @@
 #pragma once
 
 #include "csrc/core/Macros.h"
-#include "csrc/npu/NPUDeviceProp.h"
 
 TORCH_BACKEND_API void RegisterNPUDeviceProperties(PyObject* module);
 TORCH_BACKEND_API void BindGetDeviceProperties(PyObject* module);

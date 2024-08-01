@@ -1,6 +1,7 @@
 #ifndef __PULGIN_NATIVE_CONTIGUOUS_CONTIGUOUS_OPTIMIZE__
 #define __PULGIN_NATIVE_CONTIGUOUS_CONTIGUOUS_OPTIMIZE__
 
+#include <c10/util/flat_hash_map.h>
 #include <ATen/record_function.h>
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/contiguous/contiguous_register.h"

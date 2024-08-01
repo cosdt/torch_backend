@@ -264,7 +264,6 @@ NpuSysCtrl::SysStatus NpuSysCtrl::Finalize() {
 
   this->RegisterReleaseFn(
       [=]() -> void {
-        c10_npu::NPUEventManager::GetInstance().ClearEvent();
         NPU_CHECK_WARN(c10_npu::DestroyUsedStreams());
         NPU_CHECK_WARN(c10_npu::ResetUsedDevices());
         // Maintain a basic point of view, who applies for the resource, the

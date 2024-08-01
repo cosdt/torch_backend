@@ -59,13 +59,5 @@ aclError LaunchAsyncCopyTask(
     size_t srcLen,
     aclrtMemcpyKind kind);
 
-aclError LaunchRecordEventTask(aclrtEvent event, c10_npu::NPUStream npuStream);
-
-aclError LaunchWaitEventTask(aclrtEvent event, c10_npu::NPUStream npuStream);
-
-aclError LaunchLazyDestroyEventTask(
-    aclrtEvent event,
-    c10::DeviceIndex device_index);
-
 } // namespace queue
 } // namespace c10_npu
