@@ -171,7 +171,7 @@ OpCommand& OpCommand::Sync(c10::SmallVector<int64_t, N>& index) {
 
 OpCommand& OpCommand::Sync() {
   c10_npu::NPUStream stream = c10_npu::getCurrentNPUStream();
-  NPU_CHECK_ERROR(c10_npu::acl::AclrtSynchronizeStreamWithTimeout(stream));
+  NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(stream, -1));
   return *this;
 }
 

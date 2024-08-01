@@ -91,9 +91,10 @@ PyObject* THNPModule_npuCanDeviceAccessPeer_wrap(
   }
   c10::DeviceIndex device_id = THPUtils_unpackDeviceIndex(value_1);
   c10::DeviceIndex peer_device_id = THPUtils_unpackDeviceIndex(value_2);
-  auto can_access_peer =
-      c10_npu::acl::can_device_access_peer(device_id, peer_device_id);
-  return PyBool_FromLong(can_access_peer);
+  int32_t can_access_peer = 0;
+  NPU_CHECK_ERROR(aclrtDeviceCanAccessPeer(&can_access_peer, device_id, peer_device_id));
+  auto can_device_access_peer = can_access_peer != 0;
+  return PyBool_FromLong(can_device_access_peer);
   END_HANDLE_TH_ERRORS
 }
 

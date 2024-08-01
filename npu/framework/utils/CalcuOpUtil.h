@@ -10,7 +10,6 @@
 
 #include "npu/core/DeviceUtils.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/interface/AclInterface.h"
 #include "npu/core/npu_log.h"
 #include "npu/framework/NPUDefine.h"
 #include "npu/framework/utils/NpuUtils.h"
@@ -49,7 +48,7 @@ using std::vector;
           " NPU error,NPU error code is:", \
           expr,                            \
           "\n",                            \
-          c10_npu::acl::AclGetErrMsg());   \
+          aclGetRecentErrMsg());   \
     }                                      \
   } while (0)
 

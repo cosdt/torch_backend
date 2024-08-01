@@ -7,7 +7,6 @@
 #include "npu/core/NPUException.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "npu/core/NpuVariables.h"
-#include "npu/core/interface/AclInterface.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionRegister.h"
 #include "npu/core/register/OptionsManager.h"

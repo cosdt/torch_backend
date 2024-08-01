@@ -123,9 +123,9 @@ class C10_BACKEND_API NPUStream {
 
   bool query() const {
     c10::DeviceGuard guard{stream_.device()};
-    acl::aclrtStreamStatus status = acl::ACL_STREAM_STATUS_RESERVED;
-    NPU_CHECK_ERROR(acl::AclrtStreamQuery(stream(), &status));
-    if (status == acl::ACL_STREAM_STATUS_COMPLETE) {
+    aclrtStreamStatus status = ACL_STREAM_STATUS_RESERVED;
+    NPU_CHECK_ERROR(aclrtStreamQuery(stream(), &status));
+    if (status == ACL_STREAM_STATUS_COMPLETE) {
       return true;
     }
     return false;
@@ -133,7 +133,7 @@ class C10_BACKEND_API NPUStream {
 
   void synchronize() const {
     c10::DeviceGuard guard{stream_.device()};
-    NPU_CHECK_ERROR(c10_npu::acl::AclrtSynchronizeStreamWithTimeout(stream()));
+    NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(stream(), -1));
   }
 
   // Explicit conversion to aclrtStream.

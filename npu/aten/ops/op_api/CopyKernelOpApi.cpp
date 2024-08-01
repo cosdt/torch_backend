@@ -187,8 +187,7 @@ void copy_d2d_baseformat_opapi(
     guard.reset_device(dst.device());
     c10_npu::NPUStream dst_stream =
         c10_npu::getCurrentNPUStream(dst.device().index());
-    NPU_CHECK_ERROR(
-        c10_npu::acl::AclrtSynchronizeStreamWithTimeout(dst_stream));
+    NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(dst_stream, -1));
     guard.reset_device(src.device());
   } else {
     c10::SmallVector<at::Tensor, N> inputs = {src};
@@ -198,8 +197,7 @@ void copy_d2d_baseformat_opapi(
   EXEC_NPU_CMD(aclnnInplaceCopy, dst, src);
   if (dst.device().index() != src.device().index()) {
     c10_npu::NPUStream copy_stream = c10_npu::getCurrentNPUStream();
-    NPU_CHECK_ERROR(
-        c10_npu::acl::AclrtSynchronizeStreamWithTimeout(copy_stream));
+    NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(copy_stream, -1));
   }
 }
 
