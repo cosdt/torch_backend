@@ -1,3 +1,4 @@
 pyyaml
 setuptools
 auditwheel
+pytest
