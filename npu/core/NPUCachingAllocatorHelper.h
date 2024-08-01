@@ -33,8 +33,8 @@ class CachingAllocatorHelper
     return aclrtSynchronizeStream(stream);
   }
 
-  virtual void deviceSynchronize(bool checkError) override {
-    c10_npu::npuSynchronizeDevice(checkError);
+  virtual void deviceSynchronize() override {
+    c10_npu::synchronize_device();
   }
 
   int memFree(void* devPtr) override {

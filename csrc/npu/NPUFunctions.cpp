@@ -53,8 +53,19 @@ void set_device(c10::DeviceIndex device) {
   NPU_CHECK_ERROR(c10_npu::SetDevice(device));
 }
 
-void device_synchronize() {
+void synchronize_device() {
   NPU_CHECK_ERROR(aclrtSynchronizeDevice());
+}
+
+void synchronize_all_device() {
+  c10::DeviceIndex cur_device = 0;
+  NPU_CHECK_ERROR(GetDevice(&cur_device));
+  std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
+  for (const auto deviceId : device_idx_vec) {
+    NPU_CHECK_ERROR(SetDevice(deviceId));
+    synchronize_device();
+  }
+  NPU_CHECK_ERROR(SetDevice(cur_device));
 }
 
 // this function has to be called from callers performing npu synchronizing
@@ -187,4 +198,5 @@ aclrtContext GetDeviceContext(c10::DeviceIndex device) {
 aclError ResetUsedDevices() {
   return acl_adapter::ResetUsedDevices();
 }
+
 } // namespace c10_npu

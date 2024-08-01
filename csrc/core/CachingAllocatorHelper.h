@@ -21,9 +21,8 @@ class CachingAllocatorHelper {
   // Synchronizes the stream. e.g. cudaStreamSynchronize
   virtual int synchronizeStream(void* stream) = 0;
 
-  // Wait for compute device to finish. e.g. cudaDeviceSynchronize. When
-  // checkError is true, it will check error, and throw error if there is.
-  virtual void deviceSynchronize(bool checkError) = 0;
+  // Wait for compute device to finish. e.g. cudaDeviceSynchronize.
+  virtual void deviceSynchronize() = 0;
 
   /*
    memory management

@@ -11,8 +11,6 @@
 #include "npu/adapter/acl_device_adapter.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUGuard.h"
-#include "npu/core/interface/AsyncTaskQueueInterface.h"
-#include "npu/core/register/OptionsManager.h"
 
 #define C10_COMPILE_TIME_MAX_NPUS 16
 
@@ -36,11 +34,6 @@ static std::once_flag device_flags[C10_COMPILE_TIME_MAX_NPUS];
 // the low and high priority counters track, for each device, the next stream
 // in the pool to be returned when a stream is requested (round-robin fashion
 // , see the note in NPUStream.h).
-// The streams are "leaked": they are created but never destroyed because the
-// destruction of global variables could happen after the NPU runtime has
-// already been destroyed and thus invoking NPUStreamDestroy could lead to a
-// crash. It's likely an issue in NPU, but to be safe - let's just "forget"
-// the destruction.
 static std::array<
     std::array<std::atomic<uint32_t>, C10_COMPILE_TIME_MAX_NPUS>,
     max_compile_time_stream_priorities>
@@ -175,12 +168,7 @@ static void initSingleStream(int p, c10::DeviceIndex device_index, int i) {
         &stream,
         0,
         (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC)));
-  const c10::impl::PyInterpreter* interp = c10::impl::GPUTrace::get_trace();
-  if (C10_UNLIKELY(interp)) {
-    (*interp)->trace_gpu_stream_creation(
-        c10::kPrivateUse1, reinterpret_cast<uintptr_t>(stream));
-    priority_counters[p][device_index] = 0;
-  }
+  priority_counters[p][device_index] = 0;
 }
 
 // Creates the low and high priority stream pools for the specified device
@@ -237,21 +225,6 @@ NPUStream NPUStreamForId(c10::DeviceIndex device_index, c10::StreamId stream_id)
           stream_id));
 }
 
-aclError SynchronizeUsedDevices() {
-  c10::DeviceIndex cur_device = 0;
-  NPU_CHECK_ERROR(GetDevice(&cur_device));
-  // Synchronize all used devices
-  std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
-  for (const auto deviceId : device_idx_vec) {
-    NPU_CHECK_ERROR(SetDevice(deviceId));
-    aclError acl_ret = aclrtSynchronizeDevice();
-    if (acl_ret != ACL_ERROR_NONE) {
-      return acl_ret;
-    }
-  }
-  NPU_CHECK_ERROR(SetDevice(cur_device));
-  return ACL_ERROR_NONE;
-}
 } // namespace
 
 aclrtStream NPUStream::stream() const {
@@ -349,26 +322,6 @@ void setCurrentNPUStream(NPUStream stream) {
 
 std::ostream& operator<<(std::ostream& stream, const NPUStream& s) {
   return stream << s.unwrap();
-}
-
-C10_BACKEND_API bool npuSynchronizeDevice(bool check_error) {
-  auto acl_ret = aclrtSynchronizeDevice();
-  if (check_error) {
-    NPU_CHECK_ERROR(acl_ret, "aclrtSynchronizeDevice");
-  } else {
-    NPU_CHECK_WARN(acl_ret);
-  }
-  return acl_ret == ACL_ERROR_NONE;
-}
-
-C10_BACKEND_API bool npuSynchronizeUsedDevices(bool check_error) {
-  auto acl_ret = SynchronizeUsedDevices();
-  if (check_error) {
-    NPU_CHECK_ERROR(acl_ret);
-  } else {
-    NPU_CHECK_WARN(acl_ret);
-  }
-  return acl_ret == ACL_ERROR_NONE;
 }
 
 aclError DestroyUsedStreams() {
