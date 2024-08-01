@@ -137,9 +137,7 @@ void copy_between_host_and_device(
     const auto& host_tensor = torch_npu::utils::is_npu(dst) ? src : dst;
     void* ptr = host_tensor.data_ptr();
     void* ctx = host_tensor.storage().data_ptr().get_context();
-    NPU_CHECK_ERROR(
-        NPUCachingHostAllocator_recordEvent(ptr, ctx, stream),
-        "aclrtSynchronizeStreamWithTimeout");
+    NPUCachingHostAllocator_recordEvent(ptr, ctx, stream);
   } else {
     aclError error = c10_npu::acl::AclrtSynchronizeStreamWithTimeout(stream);
     auto ret = CalcuOpUtil::AclrtMemcpyWithModeSwitch(

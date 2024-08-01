@@ -74,11 +74,6 @@ std::atomic<NPUAllocator*> npu_allocator = &defaultNPUAllocator;
 
 REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &defaultNPUAllocator);
 
-std::mutex* getFreeMutex() {
-  static std::mutex npu_free_mutex;
-  return &npu_free_mutex;
-}
-
 void init(CachingAllocator* delegate) {
   defaultNPUAllocator.init(delegate);
 }

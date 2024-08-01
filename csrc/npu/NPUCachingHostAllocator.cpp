@@ -1,12 +1,6 @@
+#include <ATen/core/CachingHostAllocator.h>
 #include <c10/core/DeviceGuard.h>
 #include <c10/util/Logging.h>
-#include "csrc/core/EventPool.h"
-#include "csrc/npu/NPUFunctions.h"
-#include "npu/core/interface/AclInterface.h"
-#include "npu/core/interface/AsyncTaskQueueInterface.h"
-#include "npu/core/npu_log.h"
-#include "npu/core/register/OptionsManager.h"
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 #include <cstdint>
 #include <deque>
@@ -17,9 +11,11 @@
 #include <unordered_set>
 #include <utility>
 
-#include <ATen/core/CachingHostAllocator.h>
-#include "csrc/npu/NPUEvent.h"
+#include "csrc/core/EventPool.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
+#include "csrc/npu/NPUEvent.h"
+#include "csrc/npu/NPUFunctions.h"
+#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace c10_npu {
 using Block = at::HostBlock<NPUStream>;
@@ -35,10 +31,10 @@ struct HostAllocator : public at::CachingHostAllocatorImpl<
  private:
   void allocate_host_memory(size_t size, void** ptr) override {
     std::unique_lock<std::shared_mutex> lock(mutex_);
-    // for pin_memory in dataloader, it should be set device first when new a
-    // thread
-    SetCurrentDevice();
-    // allocate a new block if no cached allocation is found
+
+    // TODO(FFFrog): implement aclrtMallocHost which don`t need explicitly
+    // to create context
+    c10_npu::current_device();
     NPU_CHECK_ERROR(aclrtMallocHost(ptr, size));
     pinned_ptrs.insert(*ptr);
   }
@@ -97,33 +93,25 @@ struct NPUCachingHostAllocator final
 
 static NPUCachingHostAllocator npu_caching_host_allocator;
 
-aclError NPUCachingHostAllocator_recordEvent(
-    void* ptr,
-    void* ctx,
-    c10_npu::NPUStream stream) {
-  return npu_caching_host_allocator.record_event(ptr, ctx, stream);
-}
-
-bool NPUCachingHostAllocator_isPinndPtr(const void* ptr) {
-  return npu_caching_host_allocator.isPinnedPtr(ptr);
-}
-
-void NPUCachingHostAllocator_emptyCache() {
-  npu_caching_host_allocator.empty_cache();
+at::Allocator* getNPUCachingHostAllocator() {
+  return &npu_caching_host_allocator;
 }
 
 void raw_local_deleter(void* ptr) {
   npu_caching_host_allocator.free(ptr);
 }
 
-at::Allocator* getNPUCachingHostAllocator() {
-  return &npu_caching_host_allocator;
+bool NPUCachingHostAllocator_recordEvent(
+    void* ptr,
+    void* ctx,
+    c10_npu::NPUStream stream) {
+  return npu_caching_host_allocator.record_event(ptr, ctx, stream);
 }
 
-c10::Allocator* getNPUPinnedMemoryAllocator() {
-  C10_LOG_API_USAGE_ONCE("aten.init.npu");
-  if (!c10_npu::NpuSysCtrl::IsInitializeSuccess()) {
-    ASCEND_LOGE("Npu init fail.");
-  }
-  return getNPUCachingHostAllocator();
+void NPUCachingHostAllocator_emptyCache() {
+  npu_caching_host_allocator.empty_cache();
+}
+
+bool NPUCachingHostAllocator_isPinndPtr(const void* ptr) {
+  return npu_caching_host_allocator.isPinnedPtr(ptr);
 }

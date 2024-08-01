@@ -199,4 +199,8 @@ aclError ResetUsedDevices() {
   return acl_adapter::ResetUsedDevices();
 }
 
+std::mutex* getFreeMutex() {
+  static std::mutex npu_free_mutex;
+  return &npu_free_mutex;
+}
 } // namespace c10_npu
