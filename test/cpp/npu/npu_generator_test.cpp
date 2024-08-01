@@ -1,13 +1,22 @@
 #include <gtest/gtest.h>
 #include "csrc/npu/NPUGeneratorImpl.h"
+#include "csrc/npu/NPUContext.h"
 
 TEST(NPUGeneratorImpl, TestSingletonDefaultGenerator) {
+  if (!c10_npu::is_available()) {
+    GTEST_SKIP() << "NPU is not available";
+  }
+
   auto gen = at_npu::detail::getDefaultNPUGenerator();
   auto other = at_npu::detail::getDefaultNPUGenerator();
   EXPECT_EQ(gen, other);
 }
 
 TEST(NPUGeneratorImpl, TestCloning) {
+  if (!c10_npu::is_available()) {
+    GTEST_SKIP() << "NPU is not available";
+  }
+
   auto gen1 = at_npu::detail::createNPUGenerator();
   auto npu_gen1 = at::check_generator<at_npu::NPUGeneratorImpl>(gen1);
 
@@ -22,6 +31,10 @@ TEST(NPUGeneratorImpl, TestCloning) {
 }
 
 TEST(NPUGeneratorImpl, TestGetSetCurrentSeed) {
+  if (!c10_npu::is_available()) {
+    GTEST_SKIP() << "NPU is not available";
+  }
+
   auto gen = at_npu::detail::createNPUGenerator();
   auto npu_gen = at::check_generator<at_npu::NPUGeneratorImpl>(gen);
   npu_gen->set_current_seed(10);
@@ -34,6 +47,10 @@ TEST(NPUGeneratorImpl, TestDeviceType) {
 }
 
 TEST(NPUGeneratorImpl, TestGetSetOffset) {
+  if (!c10_npu::is_available()) {
+    GTEST_SKIP() << "NPU is not available";
+  }
+
   auto gen = at_npu::detail::createNPUGenerator();
   auto npu_gen = at::check_generator<at_npu::NPUGeneratorImpl>(gen);
   npu_gen->set_offset(100);
@@ -41,6 +58,10 @@ TEST(NPUGeneratorImpl, TestGetSetOffset) {
 }
 
 TEST(NPUGeneratorImpl, TestGetSetPhiloxOffset) {
+  if (!c10_npu::is_available()) {
+    GTEST_SKIP() << "NPU is not available";
+  }
+
   auto gen = at_npu::detail::createNPUGenerator();
   auto npu_gen = at::check_generator<at_npu::NPUGeneratorImpl>(gen);
   npu_gen->set_philox_offset_per_thread(200);

@@ -1,7 +1,5 @@
 #include "csrc/npu/NPUSerialization.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "npu/aten/common/FormatCastHelper.h"
-#include "npu/framework/FormatHelper.h"
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/acl/include/acl/acl_base.h"
 

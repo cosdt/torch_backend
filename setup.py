@@ -23,6 +23,9 @@ from sysconfig import get_paths
 from distutils.version import LooseVersion
 from setuptools import setup, distutils, Extension, find_packages, setup
 
+# Disable autoloading at the beginning of process
+os.environ['TORCH_DEVICE_BACKEND_AUTOLOAD'] = '0'
+
 from codegen.utils import PathManager
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -518,6 +521,11 @@ def main():
         ],
         license="BSD License",
         keywords="pytorch, machine learning",
+        entry_points={
+            'torch.backends': [
+                'torch_npu = torch_npu:_autoload',
+            ],
+        }
     )
 
 

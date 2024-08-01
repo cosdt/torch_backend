@@ -15,7 +15,6 @@
 #include "npu/framework/NPUDefine.h"
 #include "npu/framework/utils/NpuUtils.h"
 #include "npu/acl/include/acl/acl.h"
-#include "npu/acl/include/acl/acl_base.h"
 
 using std::string;
 using std::vector;

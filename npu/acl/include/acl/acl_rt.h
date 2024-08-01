@@ -19,6 +19,7 @@
 extern "C" {
 #endif
 
+#define ACL_EVENT_DEFAULT                 0x0000000Eu
 #define ACL_EVENT_SYNC                    0x00000001u
 #define ACL_EVENT_CAPTURE_STREAM_PROGRESS 0x00000002u
 #define ACL_EVENT_TIME_LINE               0x00000008u
