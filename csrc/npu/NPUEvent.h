@@ -7,7 +7,6 @@
 #include "npu/acl/include/acl/acl.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUGuard.h"
-#include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace c10_npu {
