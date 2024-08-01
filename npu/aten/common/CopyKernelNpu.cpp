@@ -4,7 +4,6 @@
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/core/NPUBridge.h"
 #include "csrc/npu/NPUStorageImpl.h"
-#include "npu/core/NPUGuard.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/StorageDescHelper.h"
@@ -24,7 +23,7 @@ void copy_d2d_by_memcpy(
     at::Tensor& dst,
     const at::Tensor& src,
     int64_t exceptSize) {
-  c10_npu::NPUGuard guard(src.device());
+  c10::DeviceGuard guard(src.device());
   int64_t size = exceptSize;
   auto dst_mem_size = StorageDescHelper::GetMemorySize(dst);
   if (exceptSize == 0) {

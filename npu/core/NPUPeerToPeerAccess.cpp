@@ -1,8 +1,11 @@
-#include "npu/core/NPUPeerToPeerAccess.h"
+#include <ATen/ATen.h>
+
 #include <c10/util/Exception.h>
 #include <c10/util/irange.h>
+#include "csrc/npu/NPUFunctions.h"
 #include <npu/acl/include/acl/acl_rt.h>
-#include "npu/core/NPUGuard.h"
+#include "npu/core/NPUPeerToPeerAccess.h"
+#include "npu/core/NPUException.h"
 
 // A maximum of 8 P2P links can be created on a NPU device
 #define C10_P2P_ACCESS_MAX_NPUS 8
@@ -33,7 +36,7 @@ NpuP2pCtrl& NpuP2pCtrl::get_instance() {
 
 void NpuP2pCtrl::enable_peer_access(int32_t source_dev, int32_t dest_dev) {
   uint32_t enable_flag_value = 0;
-  c10_npu::NPUGuard guard(source_dev);
+  c10::DeviceGuard guard(c10::Device(c10::DeviceType::PrivateUse1, source_dev));
   NPU_CHECK_ERROR(aclrtDeviceEnablePeerAccess(dest_dev, enable_flag_value));
   return;
 }
