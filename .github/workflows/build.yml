@@ -40,85 +40,56 @@ concurrency:
 
 jobs:
   build:
-    name: Build with CANN${{ matrix.cann-version }} on Ascend${{ matrix.cann-chip }}
-    runs-on: npu-arm64
+    name: Build with Python${{ matrix.py-version }}
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash -el {0}
-    container:
-      image: ascendai/cann:${{ matrix.cann-version }}-${{ matrix.cann-chip }}-${{ matrix.os }}-py${{ matrix.py-version }}
-      volumes:
-        - /usr/local/dcmi:/usr/local/dcmi
-        - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi
-        - /usr/local/Ascend/driver/lib64/:/usr/local/Ascend/driver/lib64/
-        - /usr/local/Ascend/driver/version.info:/usr/local/Ascend/driver/version.info
-      options: >-
-        --network host
-        --device /dev/davinci7
-        --device /dev/davinci_manager
-        --device /dev/devmm_svm
-        --device /dev/hisi_hdc
     strategy:
       fail-fast: false
       matrix:
-        cann-version:
-          - '8.0.rc1'
-        cann-chip:
-          - '910b'
-        os:
-          - 'ubuntu22.04'
         py-version:
           - '3.8'
+          - '3.9'
+          - '3.10'
     steps:
-      - name: Install system dependencies
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sed -i 's|ports.ubuntu.com|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
-          apt update
-          apt install --no-install-recommends -y \
-              git \
-              gcc \
-              g++ \
-              make \
-              cmake \
-              ninja-build
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Miniconda with Python${{ matrix.py-version }}
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: torchnpu
+          python-version: ${{ matrix.py-version }}
 
       - name: Show versions
         run: |
-          set -x
+          conda --version
           python --version
           pip --version
-          gcc --version
-          g++ --version
-          make --version
-          cmake --version
-          ninja --version
 
-      - name: Show NPU info
+      - name: Install dependencies
         run: |
-          npu-smi info
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+          conda install -y cmake ninja
+          pip install -r requirements.txt
 
       - name: Install PyTorch
         run: |
-          pip install --pre --upgrade --index-url https://download.pytorch.org/whl/nightly/cpu \
-              torch==2.5.0.dev20240725
+          pip install --index-url https://download.pytorch.org/whl/nightly/cpu \
+              torch==2.5.0.dev20240725 \
+              torchvision==0.20.0.dev20240725 \
+              torchaudio==2.4.0.dev20240725
 
       - name: Compile source
         run: |
           export BUILD_TEST=1
           export INSTALL_TEST=1
+          export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
           python setup.py develop
 
       - name: Run C++ test
         working-directory: ./build
         run: |
-          TORCH_DIR="$(python -c 'import os, torch; print(os.path.dirname(os.path.realpath(torch.__file__)))')"
-          TORCH_NPU_BUILD_DIR=$(pwd)
-          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${TORCH_DIR}/lib/:${TORCH_NPU_BUILD_DIR}/lib/"
+          TORCH_DIR=$CONDA_PREFIX/lib/python${{ matrix.py-version }}/site-packages/torch
+          export LD_LIBRARY_PATH="$TORCH_DIR/lib:$LD_LIBRARY_PATH"
           ctest --output-on-failure --verbose
