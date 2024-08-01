@@ -3,7 +3,6 @@
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "npu/core/NPUBridge.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUGuard.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/FormatHelper.h"
@@ -17,7 +16,7 @@ at::Tensor& NPUNativeFunctions::copy_memory_(
     at::Tensor& self,
     const at::Tensor& src,
     bool non_blocking) {
-  c10_npu::NPUGuard guard(src.device());
+  c10::DeviceGuard guard(src.device());
   AT_ASSERT(
       torch_npu::utils::is_npu(src),
       "copy_memory_ only support npu tensor",

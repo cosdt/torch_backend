@@ -10,7 +10,7 @@
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/adapter/acl_device_adapter.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUGuard.h"
+#include "csrc/npu/NPUGuard.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
 

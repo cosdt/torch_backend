@@ -24,7 +24,6 @@
 #include "csrc/npu/NPUTensorImpl.h"
 #include "csrc/npu/NPUCachingAllocator.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUGuard.h"
 #include "npu/framework/InferFormat.h"
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
@@ -121,7 +120,7 @@ at::Tensor NPUNativeFunctions::empty(
       "Current settings do not support Complex dtype. Please try again with jit_compile=False.",
       OPS_ERROR(ErrCode::NOT_SUPPORT));
   check_size_nonnegative(size);
-  c10_npu::NPUGuard guard_(device_);
+  c10::DeviceGuard guard_(device_);
   c10::Allocator* allocator = c10_npu::NPUCachingAllocator::get();
   int64_t nelements = c10::multiply_integers(size);
   auto dtype = c10::scalarTypeToTypeMeta(dtype_or_default(dtype_opt));
@@ -312,7 +311,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
       "Current settings do not support Complex dtype. Please try again with jit_compile=False.",
       OPS_ERROR(ErrCode::NOT_SUPPORT));
   check_size_nonnegative(size);
-  c10_npu::NPUGuard guard_(device_);
+  c10::DeviceGuard guard_(device_);
   c10::Allocator* allocator = c10_npu::NPUCachingAllocator::get();
   // when the shape and format are not match, fix format here.
   aclFormat format =
@@ -419,7 +418,7 @@ at::Tensor NPUNativeFunctions::empty_strided(
       device_opt,
       pin_memory_opt,
       optional_memory_format);
-  c10_npu::NPUGuard guard(c10::device_or_default(device_opt));
+  c10::DeviceGuard guard(c10::device_or_default(device_opt));
   StorageDescHelper::SetDesc(t, size, stride);
   at_npu::native::resize_impl_npu_(t.unsafeGetTensorImpl(), size, stride);
   return t;
@@ -688,7 +687,7 @@ AT_FORALL_SCALAR_TYPES_AND3(Bool, Half, BFloat16, TENSOR)
 at::Tensor NPUNativeFunctions::clone(
     const at::Tensor& src,
     c10::optional<c10::MemoryFormat> format) {
-  c10_npu::NPUGuard guard(src.device());
+  c10::DeviceGuard guard(src.device());
   OptimizationCases opt_cases{"reshape", "slice"};
   if (TransContiguous::CanOptimize(src, opt_cases)) {
     // clone with any npu formats

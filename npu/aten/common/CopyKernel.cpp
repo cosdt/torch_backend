@@ -6,7 +6,6 @@
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUGuard.h"
 #include "npu/core/NPUPeerToPeerAccess.h"
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/FormatHelper.h"
@@ -84,7 +83,7 @@ void copy_d2d_dtype_format(
 }
 
 void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
-  c10_npu::NPUGuard guard(src.device());
+  c10::DeviceGuard guard(src.device());
   // p2p enable and synchronize self stream
   if (self.device().index() != src.device().index()) {
     bool warning_flag = false;
@@ -97,12 +96,12 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
           src.device().index(),
           self.device().index());
     }
-    guard.set_device(self.device());
+    guard.reset_device(self.device());
     c10_npu::NPUStream dst_stream =
         c10_npu::getCurrentNPUStream(self.device().index());
     NPU_CHECK_ERROR(
         c10_npu::acl::AclrtSynchronizeStreamWithTimeout(dst_stream));
-    guard.set_device(src.device());
+    guard.reset_device(src.device());
   }
   if (self.dtype() != src.dtype()) {
     custom_ops::npu_dtype_cast_(
@@ -172,8 +171,7 @@ void copy_h2d_baseformat_dtype_contigous(
     at::Tensor& dst,
     const at::Tensor& src,
     bool non_blocking) {
-  c10_npu::OptionalNPUGuard device_guard;
-  device_guard.set_device(dst.device());
+  c10::DeviceGuard guard(dst.device());
   aclrtMemcpyKind kind = aclrtMemcpyKind::ACL_MEMCPY_HOST_TO_DEVICE;
   copy_between_host_and_device(dst, src, kind, non_blocking);
 }
@@ -185,8 +183,7 @@ void copy_d2h_baseformat_dtype_contigous(
     at::Tensor& dst,
     const at::Tensor& src,
     bool non_blocking) {
-  c10_npu::OptionalNPUGuard device_guard;
-  device_guard.set_device(src.device());
+  c10::DeviceGuard guard(dst.device());
   aclrtMemcpyKind kind = aclrtMemcpyKind::ACL_MEMCPY_DEVICE_TO_HOST;
   copy_between_host_and_device(dst, src, kind, non_blocking);
 }
@@ -250,7 +247,7 @@ void copy_d2h_baseformat(
 }
 
 void copy_h2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
-  c10_npu::NPUGuard guard(self.device());
+  c10::DeviceGuard guard(self.device());
   if (!FormatHelper::IsBaseFormatType(self)) {
     at::Tensor dst =
         OpPreparation::ApplyTensorWithSizes(self.sizes(), self.options());
@@ -262,7 +259,7 @@ void copy_h2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
 }
 
 void copy_d2h(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
-  c10_npu::NPUGuard guard(src.device());
+  c10::DeviceGuard guard(src.device());
   if (!FormatHelper::IsBaseFormatType(src)) {
     at::Tensor src_4D = FormatCastHelper::ApplyBaseFormatTensorBy(src);
     copy_d2h_baseformat(self, src_4D, non_blocking);

@@ -1,13 +1,11 @@
-#include <array>
-
 #include <ATen/Utils.h>
 #include <c10/core/Allocator.h>
-#include "npu/aten/common/TensorFactories.h"
-#include "npu/aten/common/from_blob.h"
 #include "csrc/npu/NPUStorageImpl.h"
 #include "csrc/npu/NPUCachingAllocator.h"
+#include "csrc/npu/NPUFunctions.h"
+#include "npu/aten/common/TensorFactories.h"
+#include "npu/aten/common/from_blob.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUGuard.h"
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/framework/utils/OpAdapter.h"
 
@@ -37,7 +35,7 @@ at::Tensor TensorMaker::make_tensor() {
   auto dtype = c10::scalarTypeToTypeMeta(
       dtype_or_default(c10::optTypeMetaToScalarType(opts_.dtype_opt())));
   at_npu::native::check_size_nonnegative(sizes_);
-  c10_npu::NPUGuard guard(*device_);
+  c10::DeviceGuard guard(*device_);
   c10::Allocator* allocator = c10_npu::NPUCachingAllocator::get();
 
   std::size_t size_bytes = computeStorageSize();

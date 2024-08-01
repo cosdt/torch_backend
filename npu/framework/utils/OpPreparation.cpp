@@ -4,7 +4,6 @@
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "npu/core/NPUBridge.h"
 #include "csrc/npu/NPUStorageImpl.h"
-#include "npu/core/NPUGuard.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/InferFormat.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
@@ -119,7 +118,7 @@ at::Tensor OpPreparation::copy_scalar_to_device(
     const c10::Scalar& cpu_scalar,
     at::ScalarType scalar_data_type,
     const c10::Device device) {
-  c10_npu::NPUGuard guard(device);
+  c10::DeviceGuard guard(device);
   return copy_scalar_to_device(cpu_scalar, scalar_data_type);
 }
 

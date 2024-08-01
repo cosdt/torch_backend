@@ -18,7 +18,6 @@
 #include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
-#include "npu/core/NPUGuard.h"
 #include "npu/core/NPUPeerToPeerAccess.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
@@ -81,8 +80,7 @@ void copy_h2d_baseformat_dtype_contigous_opapi(
     at::Tensor& dst,
     const at::Tensor& src,
     bool non_blocking) {
-  c10_npu::OptionalNPUGuard device_guard;
-  device_guard.set_device(dst.device());
+  c10::DeviceGuard guard(dst.device());
   aclrtMemcpyKind kind = aclrtMemcpyKind::ACL_MEMCPY_HOST_TO_DEVICE;
   copy_between_host_and_device_opapi(dst, src, kind, non_blocking);
 }
@@ -94,8 +92,7 @@ void copy_d2h_baseformat_dtype_contigous_opapi(
     at::Tensor& dst,
     const at::Tensor& src,
     bool non_blocking) {
-  c10_npu::OptionalNPUGuard device_guard;
-  device_guard.set_device(src.device());
+  c10::DeviceGuard guard(src.device());
   aclrtMemcpyKind kind = aclrtMemcpyKind::ACL_MEMCPY_DEVICE_TO_HOST;
   copy_between_host_and_device_opapi(dst, src, kind, non_blocking);
 }
@@ -106,7 +103,7 @@ void copy_h2d_baseformat_opapi(
     const at::Tensor& src,
     bool non_blocking,
     bool dst_must_be_contiguous = false) {
-  c10_npu::NPUGuard guard(dst.device());
+  c10::DeviceGuard guard(dst.device());
   bool same_type = (src.dtype() == dst.dtype());
   bool same_size = (src.sizes() == dst.sizes());
   bool dst_is_contiguous = dst_must_be_contiguous ? true : dst.is_contiguous();
@@ -143,7 +140,7 @@ void copy_d2h_baseformat_opapi(
     at::Tensor& dst,
     const at::Tensor& src,
     bool non_blocking) {
-  c10_npu::NPUGuard guard(src.device());
+  c10::DeviceGuard guard(src.device());
   bool same_type = (src.dtype() == dst.dtype());
   bool same_size = (src.sizes() == dst.sizes());
   bool dst_is_contiguous = dst.is_contiguous();
@@ -175,7 +172,7 @@ void copy_d2d_baseformat_opapi(
     at::Tensor& dst,
     const at::Tensor& src,
     bool non_blocking) {
-  c10_npu::NPUGuard guard(src.device());
+  c10::DeviceGuard guard(src.device());
   if (dst.device().index() != src.device().index()) {
     bool warning_flag = false;
     NpuP2pCtrl::get_instance().get_p2p_access(
@@ -187,12 +184,12 @@ void copy_d2d_baseformat_opapi(
           src.device().index(),
           dst.device().index());
     }
-    guard.set_device(dst.device());
+    guard.reset_device(dst.device());
     c10_npu::NPUStream dst_stream =
         c10_npu::getCurrentNPUStream(dst.device().index());
     NPU_CHECK_ERROR(
         c10_npu::acl::AclrtSynchronizeStreamWithTimeout(dst_stream));
-    guard.set_device(src.device());
+    guard.reset_device(src.device());
   } else {
     c10::SmallVector<at::Tensor, N> inputs = {src};
     c10::SmallVector<at::Tensor, N> outputs = {dst};

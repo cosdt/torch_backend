@@ -28,3 +28,7 @@ ACL_FUNC_VISIBILITY aclError aclrtGetOverflowStatus(
     aclrtStream stream) {
   return 0;
 }
+
+ACL_FUNC_VISIBILITY const char *aclrtGetSocName() {
+  return "";
+}

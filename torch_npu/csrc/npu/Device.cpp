@@ -8,7 +8,7 @@
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUContext.h"
 #include "csrc/npu/NPUDeviceProp.h"
-#include "npu/core/NPUGuard.h"
+#include "csrc/npu/NPUGuard.h"
 #include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/npu/Module.h"
 
