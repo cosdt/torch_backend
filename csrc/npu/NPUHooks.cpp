@@ -1,4 +1,4 @@
-#include "csrc/npu/NPUHooksInterface.h"
+#include "csrc/npu/NPUHooks.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStorageImpl.h"
@@ -9,14 +9,14 @@ namespace c10_npu {
 
 TORCH_DECLARE_REGISTRY(
     PrivateUse1HooksRegistry,
-    NPUHooksInterface,
+    NPUHooks,
     NPUHooksArgs);
 #define REGISTER_PRIVATEUSE1_HOOKS(clsname) \
   C10_REGISTER_CLASS(PrivateUse1HooksRegistry, clsname, clsname)
 
-C10_DEFINE_REGISTRY(PrivateUse1HooksRegistry, NPUHooksInterface, NPUHooksArgs)
+C10_DEFINE_REGISTRY(PrivateUse1HooksRegistry, NPUHooks, NPUHooksArgs)
 
-void NPUHooksInterface::initPrivateUse1() const {
+void NPUHooks::initPrivateUse1() const {
   c10_npu::NpuSysCtrl::SysStatus status =
       c10_npu::NpuSysCtrl::GetInstance().Initialize();
   TORCH_CHECK(
@@ -26,11 +26,11 @@ void NPUHooksInterface::initPrivateUse1() const {
       PTA_ERROR(ErrCode::INTERNAL));
 }
 
-bool NPUHooksInterface::hasPrimaryContext(c10::DeviceIndex device_index) const {
+bool NPUHooks::hasPrimaryContext(c10::DeviceIndex device_index) const {
   return c10_npu::hasPrimaryContext(device_index);
 }
 
-void NPUHooksInterface::resizePrivateUse1Bytes(
+void NPUHooks::resizePrivateUse1Bytes(
     const c10::Storage& storage,
     size_t new_bytes) const {
   auto storage_impl =
@@ -45,18 +45,18 @@ void NPUHooksInterface::resizePrivateUse1Bytes(
   at_npu::native::storage_resize_npu(*storage_impl, new_bytes, new_size);
 }
 
-bool NPUHooksInterface::isPinnedPtr(const void* data) const {
+bool NPUHooks::isPinnedPtr(const void* data) const {
   return NPUCachingHostAllocator_isPinndPtr(data);
 }
 
-at::Allocator* NPUHooksInterface::getPinnedMemoryAllocator() const {
-  return getNPUPinnedMemoryAllocator();
+at::Allocator* NPUHooks::getPinnedMemoryAllocator() const {
+  return getNPUCachingHostAllocator();
 }
 
 at::PrivateUse1HooksInterface* get_npu_hooks() {
   static at::PrivateUse1HooksInterface* npu_hooks;
   static c10::once_flag once;
-  c10::call_once(once, [] { npu_hooks = new NPUHooksInterface(); });
+  c10::call_once(once, [] { npu_hooks = new NPUHooks(); });
   return npu_hooks;
 }
 } // namespace c10_npu

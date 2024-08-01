@@ -5,8 +5,8 @@
 
 namespace c10_npu {
 
-struct TORCH_API NPUHooksInterface : public at::PrivateUse1HooksInterface {
-  virtual ~NPUHooksInterface() = default;
+struct TORCH_API NPUHooks: public at::PrivateUse1HooksInterface {
+  virtual ~NPUHooks() = default;
   const at::Generator& getDefaultGenerator(
       c10::DeviceIndex device_index) override {
     static auto device_gen =

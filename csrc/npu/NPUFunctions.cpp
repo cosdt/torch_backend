@@ -188,6 +188,11 @@ aclError ResetUsedDevices() {
   return acl_adapter::ResetUsedDevices();
 }
 
+std::mutex* getFreeMutex() {
+  static std::mutex npu_free_mutex;
+  return &npu_free_mutex;
+}
+
 void get_device_properties(
     c10_npu::NPUDeviceProp* device_prop,
     c10::DeviceIndex device) {
@@ -200,4 +205,5 @@ void get_device_properties(
     device_prop->name = std::string(device_name);
   }
 }
+
 } // namespace c10_npu
