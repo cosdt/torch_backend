@@ -5,14 +5,11 @@
 #include <cassert>
 
 #include <npu/acl/include/acl/acl.h>
-#include <npu/acl/include/acl/acl_base.h>
-#include <npu/acl/include/acl/acl_rt.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/core/impl/PrivateUse1GuardImpl.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace c10_npu {
@@ -81,7 +78,7 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
   // Event-related functions
   void createEvent(aclrtEvent* acl_event, const c10::EventFlag flag) const {
     auto flag_ = ACL_EVENT_SYNC;
-    NPU_CHECK_ERROR(c10_npu::acl::AclrtCreateEventWithFlag(acl_event, flag_));
+    NPU_CHECK_ERROR(aclrtCreateEventWithFlag(acl_event, flag_));
     ASCEND_LOGI(
         "Event: aclrtCreateEventWithFlag is successfully executed, event=%p",
         *acl_event);
@@ -126,8 +123,7 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
     // Creates the event (lazily)
     if (!npu_event) {
       auto flag_ = ACL_EVENT_SYNC;
-      NPU_CHECK_ERROR(
-          c10_npu::acl::AclrtCreateEventWithFlag(&npu_event, flag_));
+      NPU_CHECK_ERROR(aclrtCreateEventWithFlag(&npu_event, flag_));
       ASCEND_LOGI(
           "Event: aclrtCreateEventWithFlag is successfully executed, event=%p",
           npu_event);
@@ -164,10 +160,9 @@ struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
     if (!event)
       return true;
     aclrtEvent npu_event = static_cast<aclrtEvent>(event);
-    acl::aclrtEventRecordedStatus status =
-        acl::ACL_EVENT_RECORDED_STATUS_NOT_READY;
-    NPU_CHECK_ERROR(acl::AclQueryEventRecordedStatus(npu_event, &status));
-    return (status == acl::ACL_EVENT_RECORDED_STATUS_COMPLETE);
+    aclrtEventRecordedStatus status = ACL_EVENT_RECORDED_STATUS_NOT_READY;
+    NPU_CHECK_ERROR(aclrtQueryEventStatus(npu_event, &status));
+    return (status == ACL_EVENT_RECORDED_STATUS_COMPLETE);
   }
 
   void synchronizeEvent(void* event) const override {

@@ -8,8 +8,6 @@
 #include "npu/core/npu_log.h"
 
 #include "npu/acl/include/acl/acl.h"
-#include "npu/acl/include/acl/acl_base.h"
-#include "npu/acl/include/acl/acl_op.h"
 #include "npu/acl/include/ge/ge_error_codes.h"
 
 #include "csrc/npu/NPUCachingAllocator.h"

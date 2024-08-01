@@ -60,11 +60,10 @@ struct C10_BACKEND_API NPUEvent {
     if (!is_created_) {
       return true;
     }
-    acl::aclrtEventRecordedStatus currStatus =
-        acl::ACL_EVENT_RECORDED_STATUS_NOT_READY;
-    NPU_CHECK_ERROR(acl::AclQueryEventRecordedStatus(event_, &currStatus));
+    aclrtEventRecordedStatus currStatus = ACL_EVENT_RECORDED_STATUS_NOT_READY;
+    NPU_CHECK_ERROR(aclrtQueryEventStatus(event_, &currStatus));
 
-    if (currStatus == acl::ACL_EVENT_RECORDED_STATUS_COMPLETE) {
+    if (currStatus == ACL_EVENT_RECORDED_STATUS_COMPLETE) {
       return true;
     }
     return false;
@@ -136,7 +135,7 @@ struct C10_BACKEND_API NPUEvent {
   void createEvent(c10::DeviceIndex device_index) {
     device_index_ = device_index;
     NPUGuard guard(device_index_);
-    NPU_CHECK_ERROR(c10_npu::acl::AclrtCreateEventWithFlag(&event_, flags_));
+    NPU_CHECK_ERROR(aclrtCreateEventExWithFlag(&event_, flags_));
     ASCEND_LOGI(
         "Event: aclrtCreateEventWithFlag is successfully executed, event=%p",
         event_);
