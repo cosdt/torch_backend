@@ -88,8 +88,10 @@ jobs:
           python setup.py develop
 
       - name: Run C++ test
+        continue-on-error: false # TODO add NPU support
         working-directory: ./build
         run: |
-          TORCH_DIR=$CONDA_PREFIX/lib/python${{ matrix.py-version }}/site-packages/torch
-          export LD_LIBRARY_PATH="$TORCH_DIR/lib:$LD_LIBRARY_PATH"
+          TORCH_DIR="$(python -c 'import os, torch; print(os.path.dirname(os.path.realpath(torch.__file__)))')"
+          TORCH_NPU_BUILD_DIR=$(pwd)
+          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${TORCH_DIR}/lib/:${TORCH_NPU_BUILD_DIR}/lib/"
           ctest --output-on-failure --verbose
