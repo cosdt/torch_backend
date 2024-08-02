@@ -42,22 +42,11 @@ class NpuSysCtrl {
   // Environment Initialize, return SysStatus
   SysStatus Initialize(int device_id = -1);
 
-  // Set overflow switch
-  SysStatus OverflowSwitchEnable();
-
   // Environment Finalize, return SysStatus
   C10_BACKEND_API SysStatus Finalize();
 
   // Get Init_flag
   C10_BACKEND_API bool GetInitFlag();
-
-  int InitializedDeviceID();
-
-  // Register fn to be called during stage of exit and
-  // the callability of fn is guaranteed by the caller.
-  void RegisterReleaseFn(
-      ReleaseFn release_fn,
-      ReleasePriority priority = ReleasePriority::PriorityMiddle);
 
  private:
   NpuSysCtrl();
@@ -66,9 +55,6 @@ class NpuSysCtrl {
   bool repeat_init_acl_flag_;
   bool init_flag_;
   int device_id_;
-  std::map<ReleasePriority, std::vector<ReleaseFn>> release_fn_;
 };
-
-aclError SetCurrentDevice();
 
 } // namespace c10_npu

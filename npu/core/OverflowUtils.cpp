@@ -12,7 +12,6 @@ OverflowUtil::OverflowUtil() {}
 OverflowUtil::~OverflowUtil() {}
 
 void OverflowUtil::EnableOverflowNpu() {
-  auto result = c10_npu::NpuSysCtrl::GetInstance().OverflowSwitchEnable();
   return;
 }
 
