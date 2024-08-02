@@ -4,7 +4,6 @@
 #include "npu/core/NpuVariables.h"
 #include "npu/core/npu_log.h"
 #include "npu/core/register/OptionRegister.h"
-#include "npu/framework/aoe/AoeUtils.h"
 #include "npu/framework/interface/AclOpCompileInterface.h"
 #include "npu/framework/utils/ForceAclnnList.h"
 #include "npu/framework/utils/ForceJitCompileList.h"
@@ -23,17 +22,6 @@ void ValidPathCheck(const std::string& file_path) {
         PTA_ERROR(ErrCode::PTR));
   }
 }
-
-REGISTER_OPTION_HOOK(autotune, [](const std::string& val) {
-  if (val == "enable") {
-    at_npu::native::aoe::aoe_manager().EnableAoe();
-  }
-})
-
-REGISTER_OPTION_HOOK(autotunegraphdumppath, [](const std::string& val) {
-  ValidPathCheck(val);
-  at_npu::native::aoe::aoe_manager().SetDumpGraphPath(val);
-})
 
 REGISTER_OPTION_INIT_BY_ENV(bmmv2_enable)
 REGISTER_OPTION_BOOL_FUNCTION(CheckBmmV2Enable, bmmv2_enable, "0", "1")
