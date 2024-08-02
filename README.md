@@ -110,3 +110,8 @@ Following modules you may want to switch to your deivce specific implementation 
 ### API Documents
 
 [C++ API](https://cosdt.github.io/torch_npu/cpp_html/index.html)
+
+
+## License
+
+PyTorch Backend has a BSD-style license, as found in the [LICENSE](LICENSE) file.
