@@ -71,7 +71,20 @@ __all__ = [
     "FloatStorage",
     "BFloat16Tensor",
     "BFloat16Storage",
+    "get_amp_supported_dtype",
+    "get_autocast_dtype",
+    "is_autocast_enabled",
+    "set_autocast_enabled",
+    "set_autocast_dtype",
 ]
+
+from torch_npu.npu.autocast_utils import (
+    get_amp_supported_dtype,
+    get_autocast_dtype,
+    is_autocast_enabled,
+    set_autocast_enabled,
+    set_autocast_dtype,
+)
 
 from typing import Tuple, Union
 from multiprocessing.util import register_after_fork as _register_after_fork
