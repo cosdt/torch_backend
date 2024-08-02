@@ -1,9 +1,13 @@
+#include <torch/csrc/jit/serialization/pickler.h>
 #include "csrc/npu/NPUSerialization.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "npu/framework/StorageDescHelper.h"
+#include "csrc/core/Register.h"
 #include "npu/acl/include/acl/acl_base.h"
+#include "npu/framework/StorageDescHelper.h"
 
 namespace torch_npu {
+
+REGISTER_TENSOR_BACKEND_META_REGISTRY(torch_npu::npu_info_serialization, torch_npu::npu_info_deserialization);
 
 std::unordered_map<std::string, aclFormat> FORMAT_INFO = {
     {"NC1HWC0", ACL_FORMAT_NC1HWC0},
