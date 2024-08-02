@@ -27,35 +27,14 @@
 
 namespace c10_npu {
 
-NpuSysCtrl::NpuSysCtrl()
-    : repeat_init_acl_flag_(true), init_flag_(false), device_id_(0) {}
-
-// Get NpuSysCtrl singleton instance
-NpuSysCtrl& NpuSysCtrl::GetInstance() {
-  static NpuSysCtrl instance;
-  return instance;
+void TryInitDevice(c10::DeviceIndex device_id) {
+  static NpuSysCtrl device(device_id);
 }
 
-
-bool NpuSysCtrl::IsInitializeSuccess(int device_id) {
-  SysStatus status = GetInstance().Initialize(device_id);
-  return status == SysStatus::INIT_SUCC;
-}
-
-bool NpuSysCtrl::IsFinalizeSuccess() {
-  SysStatus status = GetInstance().Finalize();
-  return status == SysStatus::FINALIZE_SUCC;
-}
-
-// Environment Initialize, return Status: SUCCESS, FAILED
-NpuSysCtrl::SysStatus NpuSysCtrl::Initialize(int device_id) {
-  if (init_flag_) {
-    return INIT_SUCC;
-  }
-  auto init_ret = aclInit(nullptr);
-
-  if (init_ret != ACL_ERROR_NONE) {
-    NPU_CHECK_ERROR(init_ret, "aclInit");
+NpuSysCtrl::NpuSysCtrl(c10::DeviceIndex device_id) : need_finalize_(true){
+  aclError ret = c10_npu::InitDevice();
+  if(ret == ACL_ERROR_REPEAT_INITIALIZE) {
+    need_finalize_ = false;
   }
 
   // Init allocator
@@ -66,49 +45,34 @@ NpuSysCtrl::SysStatus NpuSysCtrl::Initialize(int device_id) {
 
   c10_npu::NPUCachingAllocator::init(c10_backend::CachingAllocator::get());
 
-  // There's no need to call c10_npu::GetDevice at the start of the process,
-  // because device 0 may not be needed
-  auto ret = aclrtGetDevice(&device_id_);
+  ret = c10_npu::GetDevice(&device_id);
   if (ret != ACL_ERROR_NONE) {
-    device_id_ = (device_id == -1) ? 0 : device_id;
-    NPU_CHECK_ERROR(c10_npu::SetDevice(device_id_));
+    device_id = (device_id == -1) ? 0 : device_id;
+    NPU_CHECK_ERROR(c10_npu::SetDevice(device_id));
   } else {
-    ASCEND_LOGW("Npu device %d has been set before global init.", device_id_);
+    ASCEND_LOGW("Npu device %d has been set before global init.", device_id);
   }
 
   // set default jit_Compile value from Get acl defalut value
   c10_npu::option::SetOption("jitCompile", "disable");
 
-  init_flag_ = true;
   ASCEND_LOGD("Npu sys ctrl initialize successfully.");
-
-  return INIT_SUCC;
 }
 
-// Environment Finalize, return SysStatus
-NpuSysCtrl::SysStatus NpuSysCtrl::Finalize() {
-  if (!init_flag_) {
-    return FINALIZE_SUCC;
-  }
-
-  c10_npu::NPUEventManager::GetInstance().ClearEvent();
+NpuSysCtrl::~NpuSysCtrl() {
   NPU_CHECK_WARN(c10_npu::DestroyUsedStreams());
   NPU_CHECK_WARN(c10_npu::ResetUsedDevices());
   // Maintain a basic point of view, who applies for the resource, the
   // resource is released by whom. If aclInit is not a PTA call, then
   // aclFinalize should not be a PTA call either.
-  if (repeat_init_acl_flag_) {
-    NPU_CHECK_WARN(aclFinalize());
-  }
 
-  init_flag_ = false;
+  // TODO: The order of destruction cannot be guaranteed. Finalize is not
+  // performed to ensure that the program runs normally.
+  // if (need_finalize_) {
+  //   c10_npu::FinalizeDevice();
+  // }
 
   ASCEND_LOGD("Npu sys ctrl finalize successfully.");
-  return FINALIZE_SUCC;
-}
-
-bool NpuSysCtrl::GetInitFlag() {
-  return init_flag_;
 }
 
 } // namespace c10_npu

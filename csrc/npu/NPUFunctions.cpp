@@ -96,6 +96,21 @@ aclError GetDeviceCount(int* dev_count) {
 
 thread_local c10::DeviceIndex targetDeviceIndex = -1;
 
+aclError InitDevice() {
+  auto init_ret = aclInit(nullptr);
+
+  if (init_ret == ACL_ERROR_REPEAT_INITIALIZE) {
+    // do nothing.
+  } else if (init_ret != ACL_ERROR_NONE) {
+    NPU_CHECK_ERROR(init_ret, "aclInit");
+  }
+  return init_ret;
+}
+
+void FinalizeDevice() {
+  NPU_CHECK_WARN(aclFinalize());
+}
+
 aclError GetDevice(c10::DeviceIndex* device) {
   if (targetDeviceIndex >= 0) {
     *device = targetDeviceIndex;

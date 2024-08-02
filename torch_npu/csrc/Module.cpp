@@ -34,10 +34,6 @@ PyObject* THPModule_npu_shutdown(PyObject* /* unused */) {
   // aclrtSynchronizeDevice should be called before aclrtFree to ensure that
   // all of op tasks completed before device memory free.
   ASCEND_LOGI("NPU shutdown begin.");
-  if (!c10_npu::NpuSysCtrl::GetInstance().GetInitFlag()) {
-    Py_RETURN_NONE;
-  }
-
   // Return aclrtSynchronizeDevice result. If sync device fails, release host
   // resources forcibly, only record WARN logs when acl interface of stream
   // or event fails.
@@ -59,13 +55,6 @@ PyObject* THPModule_npu_shutdown(PyObject* /* unused */) {
     c10_npu::NPUCachingAllocator::emptyCache(success);
   } catch (std::exception& e) {
     ASCEND_LOGE("NPUCachingAllocator::emptyCache failed err=:%s", e.what());
-  }
-
-  ASCEND_LOGI("NPU shutdown NpuSysCtrl Finalize.");
-  if (!c10_npu::NpuSysCtrl::IsFinalizeSuccess()) {
-    ASCEND_LOGE("NPU shutdown failed.");
-  } else {
-    ASCEND_LOGI("NPU shutdown success.");
   }
 
   Py_RETURN_NONE;

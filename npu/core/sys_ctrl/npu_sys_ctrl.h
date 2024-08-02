@@ -8,53 +8,19 @@
 #include "c10/macros/Export.h"
 #include "csrc/core/Macros.h"
 #include "npu/core/npu_log.h"
+#include "c10/core/Device.h"
 
 namespace c10_npu {
-using ReleaseFn = std::function<void()>;
 
-enum class ReleasePriority : uint8_t {
-  PriorityFirst = 0,
-  PriorityMiddle = 5,
-  PriorityLast = 10
-};
-
+void TryInitDevice(c10::DeviceIndex device_id = -1);
 class NpuSysCtrl {
  public:
-  ~NpuSysCtrl() = default;
+  virtual ~NpuSysCtrl();
 
-  enum SysStatus {
-    INIT_SUCC = 0,
-    INIT_ALREADY,
-    INIT_FAILED,
-    CREATE_SESS_SUCC,
-    CREATE_SESS_FAILED,
-    FINALIZE_SUCC,
-    FINALIZE_FAILED,
-  };
-
-  // Get NpuSysCtrl singleton instance
-  C10_BACKEND_API static NpuSysCtrl& GetInstance();
-
-  C10_BACKEND_API static bool IsInitializeSuccess(int device_id = -1);
-
-  C10_BACKEND_API static bool IsFinalizeSuccess();
-
-  // Environment Initialize, return SysStatus
-  SysStatus Initialize(int device_id = -1);
-
-  // Environment Finalize, return SysStatus
-  C10_BACKEND_API SysStatus Finalize();
-
-  // Get Init_flag
-  C10_BACKEND_API bool GetInitFlag();
-
+  friend void TryInitDevice(c10::DeviceIndex device_id);
  private:
-  NpuSysCtrl();
-
- private:
-  bool repeat_init_acl_flag_;
-  bool init_flag_;
-  int device_id_;
+  NpuSysCtrl(c10::DeviceIndex device_id);
+  bool need_finalize_;
 };
 
 } // namespace c10_npu

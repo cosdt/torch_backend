@@ -15,13 +15,7 @@ AT_REGISTER_PRIVATEUSE1_HOOKS_INTERFACE(c10_npu::get_npu_hooks());
 C10_DEFINE_REGISTRY(PrivateUse1HooksRegistry, NPUHooks, NPUHooksArgs)
 
 void NPUHooks::initPrivateUse1() const {
-  c10_npu::NpuSysCtrl::SysStatus status =
-      c10_npu::NpuSysCtrl::GetInstance().Initialize();
-  TORCH_CHECK(
-      status == c10_npu::NpuSysCtrl::SysStatus::INIT_SUCC,
-      "Device init failed, status:",
-      status,
-      PTA_ERROR(ErrCode::INTERNAL));
+  c10_npu::TryInitDevice();
 }
 
 bool NPUHooks::hasPrimaryContext(c10::DeviceIndex device_index) const {
