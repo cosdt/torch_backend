@@ -40,12 +40,8 @@ static PyObject* THNPEvent_pynew(
   THNPEvent* self = (THNPEvent*)ptr.get();
 
   unsigned int flags = 0;
-  if (c10_npu::acl::IsExistCreateEventExWithFlag()) {
-    flags =
-        enable_timing ? (ACL_EVENT_TIME_LINE | ACL_EVENT_SYNC) : ACL_EVENT_SYNC;
-  } else {
-    flags = enable_timing ? ACL_EVENT_TIME_LINE : ACL_EVENT_DEFAULT;
-  }
+  flags =
+      enable_timing ? (ACL_EVENT_TIME_LINE | ACL_EVENT_SYNC) : ACL_EVENT_SYNC;
   new (&self->npu_event) c10_npu::NPUEvent(flags);
 
   return (PyObject*)ptr.release();

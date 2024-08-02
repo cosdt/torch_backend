@@ -14,7 +14,6 @@
 #include "csrc/core/Exception.h"
 #include "csrc/core/Macros.h"
 #include "npu/core/NPUErrorCodes.h"
-#include "npu/core/interface/AclInterface.h"
 
 #define C10_NPU_SHOW_ERR_MSG()                                  \
   do {                                                          \

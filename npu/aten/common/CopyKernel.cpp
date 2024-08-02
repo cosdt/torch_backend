@@ -99,8 +99,7 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
     guard.reset_device(self.device());
     c10_npu::NPUStream dst_stream =
         c10_npu::getCurrentNPUStream(self.device().index());
-    NPU_CHECK_ERROR(
-        c10_npu::acl::AclrtSynchronizeStreamWithTimeout(dst_stream));
+    NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(dst_stream, -1));
     guard.reset_device(src.device());
   }
   if (self.dtype() != src.dtype()) {
@@ -112,8 +111,7 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
   // synchronize src stream for different devices copy
   if (self.device().index() != src.device().index()) {
     c10_npu::NPUStream copy_stream = c10_npu::getCurrentNPUStream();
-    NPU_CHECK_ERROR(
-        c10_npu::acl::AclrtSynchronizeStreamWithTimeout(copy_stream));
+    NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(copy_stream, -1));
   }
 }
 
@@ -138,7 +136,7 @@ void copy_between_host_and_device(
     void* ctx = host_tensor.storage().data_ptr().get_context();
     NPUCachingHostAllocator_recordEvent(ptr, ctx, stream);
   } else {
-    aclError error = c10_npu::acl::AclrtSynchronizeStreamWithTimeout(stream);
+    aclError error = aclrtSynchronizeStreamWithTimeout(stream, -1);
     auto ret = CalcuOpUtil::AclrtMemcpyWithModeSwitch(
         std::make_pair(
             dst.storage().unsafeGetStorageImpl(),
