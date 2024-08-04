@@ -2,7 +2,7 @@
 #include "csrc/npu/NPUStorageImpl.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
 #include "npu/framework/utils/OpAdapter.h"
-#include "op_plugin/OpInterface.h"
+#include "npu/aten/OpInterface.h"
 
 namespace at_npu {
 namespace native {

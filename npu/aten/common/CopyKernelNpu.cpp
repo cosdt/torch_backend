@@ -9,7 +9,7 @@
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
 #include "npu/framework/utils/OpAdapter.h"
-#include "op_plugin/OpInterface.h"
+#include "npu/aten/OpInterface.h"
 
 namespace at_npu {
 namespace native {
