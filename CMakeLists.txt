@@ -58,7 +58,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(TORCHNPU_CSRC_ROOT "${PROJECT_SOURCE_DIR}/torch_npu/csrc")
-set(TORCHNPU_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
 
 set(Torch_DIR ${PYTORCH_INSTALL_DIR}/share/cmake/Torch)
 find_package(Torch REQUIRED)
@@ -160,9 +159,7 @@ set(CMAKE_CXX_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 ${CMAKE_CXX_FLA
 
 
 include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/aten)
 include_directories(${PROJECT_SOURCE_DIR}/npu/acl/include)
-include_directories(${PROJECT_SOURCE_DIR}/third_party/op-plugin)
 
 # Set installed PyTorch dir
 if(DEFINED PYTORCH_INSTALL_DIR)
@@ -201,7 +198,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/npu/core)
 add_subdirectory(${PROJECT_SOURCE_DIR}/npu/framework)
 add_subdirectory(${PROJECT_SOURCE_DIR}/npu/aten)
 add_subdirectory(${PROJECT_SOURCE_DIR}/npu/adapter)
-add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/op-plugin/op_plugin)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/csrc)
 

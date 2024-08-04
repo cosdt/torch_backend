@@ -1,5 +1,5 @@
 # Environment variables for feature toggles:
-# 
+#
 # BUILD_TEST=ON
 #     enable the test build
 
@@ -187,8 +187,7 @@ def generate_bindings_code(base_dir):
     generate_code_cmd = [
         "bash",
         os.path.join(base_dir, "generate_code.sh"),
-        python_execute,
-        VERSION,
+        python_execute
     ]
     if subprocess.call(generate_code_cmd) != 0:  # Compliant
         print(

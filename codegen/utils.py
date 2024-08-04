@@ -177,7 +177,7 @@ def filt_exposed_api(custom_path: str):
     return list(exposed_set)
 
 
-# Different implements of ops from origin torch. 
+# Different implements of ops from origin torch.
 # Native ops with dispatchkey CompositeImplicitAutograd but implemented as a kernel op in pta
 COMPOSITEIMPLICITAUTOGRAD_EXCEPT_LIST = [
     'isclose',
@@ -203,7 +203,7 @@ def filt_compositeimplicitautograd_api(native_yaml_path, npu_supported):
         is_compositekey = "CompositeImplicitAutograd[alias]" in dispatch_keys and \
                           "Autograd[alias]" not in dispatch_keys and \
                           api_name not in TORCH_AUTOGRAD_FUNCTION
-        is_npu_api = api_name in npu_supported and api_name not in COMPOSITEIMPLICITAUTOGRAD_EXCEPT_LIST 
+        is_npu_api = api_name in npu_supported and api_name not in COMPOSITEIMPLICITAUTOGRAD_EXCEPT_LIST
         if is_npu_api and is_compositekey:
             supported_autograd.append(api_name)
     return supported_autograd
@@ -361,7 +361,7 @@ return {self_arg_name};
                     ),
                     None,
                 )
-                
+
                 if has_tensor_options and device_of is not None:
                     device_guard = f"""
 OptionalDeviceGuard device_guard(device_of({device_of}));
@@ -378,9 +378,8 @@ const DeviceGuard device_guard(device_or_default(device));"""
                     device_guard = f"const OptionalDeviceGuard device_guard(device_of({device_of}));"
 
             op_key = str(f.func.name)
-            if enable_opplugin():
-                if op_key in GLOBAL_STRUCTURED_OP_INFO_CACHE:
-                    impl_name = f"op_plugin::{GLOBAL_STRUCTURED_OP_INFO_CACHE[op_key]}"
+            if op_key in GLOBAL_STRUCTURED_OP_INFO_CACHE:
+                impl_name = f"op_plugin::{GLOBAL_STRUCTURED_OP_INFO_CACHE[op_key]}"
 
             if is_opapi(op_key) and not is_op_valid(op_key):
                 op_api_impl_name = f"{metadata.cpp_namespace}::NPUNativeOpApiFunctions::{metadata.kernel}"
@@ -471,13 +470,6 @@ def add_header_to_template_file():
                                                     "#include <ATen/Tensor.h>\n#include <ATen/ATen.h>")
         with os.fdopen(os.open(template_dir, os.O_WRONLY, stat.S_IWUSR | stat.S_IRUSR), "w") as file:
             file.write(template_content)
-
-
-def enable_opplugin() -> bool:
-    # enable op_plugin, if path of third_party/op-plugin is valid.
-    base_dir = os.path.dirname(os.path.realpath(__file__))
-    op_plugin_path = os.path.join(base_dir, '../third_party/op-plugin/op_plugin')
-    return os.path.exists(op_plugin_path)
 
 
 def is_op_valid(op_key: str) -> bool:

@@ -12,7 +12,7 @@ from torchgen.utils import concatMap
 from torchgen.context import with_native_function, native_function_manager
 from torchgen.api.types import DispatcherSignature
 from torchgen.api import cpp
-from codegen.utils import (enable_opplugin, is_op_valid, field_tag, get_opplugin_wrap_name, parse_npu_yaml)
+from codegen.utils import (is_op_valid, field_tag, get_opplugin_wrap_name, parse_npu_yaml)
 
 
 # Parse native_functions.yaml into a sequence of NativeFunctions and Backend Indices.
@@ -97,7 +97,7 @@ def compute_op_definition(f: NativeFunction):
 
     impl_name = f"at_npu::native::NPUNativeFunctions::{cpp.name(f.func)}"
 
-    if enable_opplugin() and is_op_valid(str(f.func.name)):
+    if is_op_valid(str(f.func.name)):
         impl_name = f"op_plugin::{get_opplugin_wrap_name(f)}"
 
     check_out = [f'TORCH_CHECK(out.size() == {out_num}, "expected tuple of {out_num} elements but got ", out.size(), '
@@ -133,7 +133,7 @@ def compute_op_definition(f: NativeFunction):
         ),
         None,
     )
-    
+
     if has_tensor_options and device_of is not None:
         device_guard = f"""
 c10::OptionalDeviceGuard device_guard(device_of({device_of}));
