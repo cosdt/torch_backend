@@ -3,9 +3,9 @@
 #include <c10/core/Storage.h>
 #include "csrc/npu/NPUGeneratorImpl.h"
 
-namespace c10_npu {
+namespace c10::npu {
 
-struct TORCH_API NPUHooks: public at::PrivateUse1HooksInterface {
+struct TORCH_API NPUHooks : public at::PrivateUse1HooksInterface {
   virtual ~NPUHooks() = default;
   const at::Generator& getDefaultGenerator(
       c10::DeviceIndex device_index) override {
@@ -25,4 +25,4 @@ struct TORCH_API NPUHooksArgs : public at::PrivateUse1HooksArgs {};
 
 // register to PrivateUse1HooksInterface
 at::PrivateUse1HooksInterface* get_npu_hooks();
-} // namespace c10_npu
+} // namespace c10::npu

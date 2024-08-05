@@ -17,7 +17,7 @@
 #include "csrc/npu/NPUFunctions.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
-namespace c10_npu {
+namespace c10::npu {
 using Block = at::HostBlock<NPUStream>;
 struct HostAllocator : public at::CachingHostAllocatorImpl<
                            NPUStream,
@@ -34,7 +34,7 @@ struct HostAllocator : public at::CachingHostAllocatorImpl<
 
     // TODO(FFFrog): implement aclrtMallocHost which don`t need explicitly
     // to create context
-    c10_npu::current_device();
+    c10::npu::current_device();
     NPU_CHECK_ERROR(aclrtMallocHost(ptr, size));
     pinned_ptrs.insert(*ptr);
   }
@@ -71,12 +71,12 @@ struct HostAllocator : public at::CachingHostAllocatorImpl<
   std::shared_mutex mutex_{};
   std::set<const void*> pinned_ptrs{};
 };
-} // namespace c10_npu
+} // namespace c10::npu
 
 void raw_local_deleter(void* ptr);
 
 struct NPUCachingHostAllocator final
-    : public at::CachingHostAllocatorInterface<c10_npu::HostAllocator> {
+    : public at::CachingHostAllocatorInterface<c10::npu::HostAllocator> {
   at::DataPtr allocate(size_t size) override {
     auto ptr_and_ctx = impl_->allocate(size);
     return {
@@ -104,7 +104,7 @@ void raw_local_deleter(void* ptr) {
 bool NPUCachingHostAllocator_recordEvent(
     void* ptr,
     void* ctx,
-    c10_npu::NPUStream stream) {
+    c10::npu::NPUStream stream) {
   return npu_caching_host_allocator.record_event(ptr, ctx, stream);
 }
 

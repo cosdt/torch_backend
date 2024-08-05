@@ -11,7 +11,7 @@ c10::Allocator* getNPUCachingHostAllocator(void);
 bool NPUCachingHostAllocator_recordEvent(
     void* ptr,
     void* ctx,
-    c10_npu::NPUStream stream);
+    c10::npu::NPUStream stream);
 
 void NPUCachingHostAllocator_emptyCache(void);
 

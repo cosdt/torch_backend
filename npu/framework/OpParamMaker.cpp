@@ -89,7 +89,7 @@ void OpAttrMaker::Set(
 }
 
 void OpCommandImpl::SetEnginePriority() {
-  auto stream = c10_npu::getCurrentNPUStream();
+  auto stream = c10::npu::getCurrentNPUStream();
   AddAttr("_performance_prior", true);
   AddAttr<std::string>("_exclude_engines", "AiCore");
 }
@@ -126,7 +126,7 @@ aclError OpCommandImpl::InnerRun(
     c10::SmallVector<int64_t, N>& sync_index,
     c10::SmallVector<at::Tensor, N>& outputTensor) {
   aclError ret;
-  auto stream = c10_npu::getCurrentNPUStream();
+  auto stream = c10::npu::getCurrentNPUStream();
   auto inputSize = params.inBuffer.size();
   auto outputSize = params.outBuffer.size();
   // open the deterministicAlgorithms config
@@ -226,7 +226,7 @@ void printErrorLog(ExecuteParas* cur_paras) {
   }
 }
 
-int ExecFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
+int ExecFunc(c10::npu::queue::QueueParas* in, aclrtStream stream) {
   auto cur_paras = static_cast<ExecuteParas*>(in->paramVal);
   ASCEND_LOGD("Op %s Run.", cur_paras->opType);
   aclError ret;
@@ -281,8 +281,8 @@ int ExecFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
   return ret;
 }
 
-int MemcopyAsyncFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
-  auto cur_paras = static_cast<c10_npu::queue::CopyParas*>(in->paramVal);
+int MemcopyAsyncFunc(c10::npu::queue::QueueParas* in, aclrtStream stream) {
+  auto cur_paras = static_cast<c10::npu::queue::CopyParas*>(in->paramVal);
   aclError ret = aclrtMemcpyAsync(
       cur_paras->dst,
       cur_paras->dstLen,
@@ -302,8 +302,8 @@ int MemcopyAsyncFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
   return ret;
 }
 
-int RecordEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
-  auto cur_paras = static_cast<c10_npu::queue::EventParas*>(in->paramVal);
+int RecordEventFunc(c10::npu::queue::QueueParas* in, aclrtStream stream) {
+  auto cur_paras = static_cast<c10::npu::queue::EventParas*>(in->paramVal);
 
   aclError ret = aclrtRecordEvent(cur_paras->event, stream);
   if (ret != ACL_ERROR_NONE) {
@@ -321,8 +321,8 @@ int RecordEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
   return ret;
 }
 
-int WaitEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
-  auto cur_paras = static_cast<c10_npu::queue::EventParas*>(in->paramVal);
+int WaitEventFunc(c10::npu::queue::QueueParas* in, aclrtStream stream) {
+  auto cur_paras = static_cast<c10::npu::queue::EventParas*>(in->paramVal);
   aclError ret = aclrtStreamWaitEvent(stream, cur_paras->event);
   if (ret != ACL_ERROR_NONE) {
     ASCEND_LOGE(
@@ -338,8 +338,8 @@ int WaitEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
   return ret;
 }
 
-int LazyDestroyEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
-  auto cur_paras = static_cast<c10_npu::queue::EventParas*>(in->paramVal);
+int LazyDestroyEventFunc(c10::npu::queue::QueueParas* in, aclrtStream stream) {
+  auto cur_paras = static_cast<c10::npu::queue::EventParas*>(in->paramVal);
   aclError ret = aclrtDestroyEvent(cur_paras->event);
   if (ret != ACL_ERROR_NONE) {
     ASCEND_LOGE(
@@ -355,11 +355,11 @@ int LazyDestroyEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
 }
 
 void CopyFunc(void* dst, void* src) {
-  auto dstPtr = static_cast<c10_npu::queue::QueueParas*>(dst);
-  auto srcPtr = static_cast<c10_npu::queue::QueueParas*>(src);
+  auto dstPtr = static_cast<c10::npu::queue::QueueParas*>(dst);
+  auto srcPtr = static_cast<c10::npu::queue::QueueParas*>(src);
   dstPtr->paramVal =
-      static_cast<uint8_t*>(dst) + sizeof(c10_npu::queue::QueueParas);
-  if (dstPtr->paramType == c10_npu::queue::COMPILE_AND_EXECUTE) {
+      static_cast<uint8_t*>(dst) + sizeof(c10::npu::queue::QueueParas);
+  if (dstPtr->paramType == c10::npu::queue::COMPILE_AND_EXECUTE) {
     // string or smallvector of struct is used, deconstructor need be called
     // before memset
     (static_cast<ExecuteParas*>(dstPtr->paramVal))->~ExecuteParas();
@@ -369,28 +369,28 @@ void CopyFunc(void* dst, void* src) {
   dstPtr->paramType = srcPtr->paramType;
   dstPtr->paramLen = srcPtr->paramLen;
   dstPtr->correlation_id = srcPtr->correlation_id;
-  if (srcPtr->paramType == c10_npu::queue::COMPILE_AND_EXECUTE) {
+  if (srcPtr->paramType == c10::npu::queue::COMPILE_AND_EXECUTE) {
     new (dstPtr->paramVal) ExecuteParas();
     (static_cast<ExecuteParas*>(dstPtr->paramVal))
         ->Copy(*(static_cast<ExecuteParas*>(srcPtr->paramVal)));
-  } else if ((srcPtr->paramType == c10_npu::queue::ASYNC_MEMCPY)) {
-    new (dstPtr->paramVal) c10_npu::queue::CopyParas();
-    (static_cast<c10_npu::queue::CopyParas*>(dstPtr->paramVal))
-        ->Copy(*(static_cast<c10_npu::queue::CopyParas*>(srcPtr->paramVal)));
+  } else if ((srcPtr->paramType == c10::npu::queue::ASYNC_MEMCPY)) {
+    new (dstPtr->paramVal) c10::npu::queue::CopyParas();
+    (static_cast<c10::npu::queue::CopyParas*>(dstPtr->paramVal))
+        ->Copy(*(static_cast<c10::npu::queue::CopyParas*>(srcPtr->paramVal)));
   } else {
-    new (dstPtr->paramVal) c10_npu::queue::EventParas();
-    (static_cast<c10_npu::queue::EventParas*>(dstPtr->paramVal))
-        ->Copy(*(static_cast<c10_npu::queue::EventParas*>(srcPtr->paramVal)));
+    new (dstPtr->paramVal) c10::npu::queue::EventParas();
+    (static_cast<c10::npu::queue::EventParas*>(dstPtr->paramVal))
+        ->Copy(*(static_cast<c10::npu::queue::EventParas*>(srcPtr->paramVal)));
   }
 }
 
-void ReleaseFunc(void* ptr, c10_npu::ReleaseQueue& releaseQueue) {
+void ReleaseFunc(void* ptr, c10::npu::ReleaseQueue& releaseQueue) {
   releaseQueue.PushToReleaseQueue(ptr);
 }
 
 void* NewFunc(int caption, int& size) {
   size = static_cast<int>(
-      sizeof(c10_npu::queue::QueueParas) + MAX_PARAS_BYTE_SIZE);
+      sizeof(c10::npu::queue::QueueParas) + MAX_PARAS_BYTE_SIZE);
   void* ptr = malloc(size * caption);
   TORCH_CHECK(
       ptr != nullptr,
@@ -404,18 +404,18 @@ void DeleteFunc(void* ptr) {
   free(ptr);
 }
 
-using Func = int (*)(c10_npu::queue::QueueParas*, aclrtStream);
-using AsyncFuncMap = std::map<c10_npu::queue::QueueParamType, Func>;
+using Func = int (*)(c10::npu::queue::QueueParas*, aclrtStream);
+using AsyncFuncMap = std::map<c10::npu::queue::QueueParamType, Func>;
 AsyncFuncMap funcMap = {
-    {c10_npu::queue::COMPILE_AND_EXECUTE, ExecFunc},
-    {c10_npu::queue::ASYNC_MEMCPY, MemcopyAsyncFunc},
-    {c10_npu::queue::RECORD_EVENT, RecordEventFunc},
-    {c10_npu::queue::WAIT_EVENT, WaitEventFunc},
-    {c10_npu::queue::LAZY_DESTROY_EVENT, LazyDestroyEventFunc},
+    {c10::npu::queue::COMPILE_AND_EXECUTE, ExecFunc},
+    {c10::npu::queue::ASYNC_MEMCPY, MemcopyAsyncFunc},
+    {c10::npu::queue::RECORD_EVENT, RecordEventFunc},
+    {c10::npu::queue::WAIT_EVENT, WaitEventFunc},
+    {c10::npu::queue::LAZY_DESTROY_EVENT, LazyDestroyEventFunc},
 };
 
 int AsncExecFunc(void* data) {
-  auto queueParam = static_cast<c10_npu::queue::QueueParas*>(data);
+  auto queueParam = static_cast<c10::npu::queue::QueueParas*>(data);
   auto type = queueParam->paramType;
   aclrtStream stream = queueParam->paramStream;
   auto ret = funcMap[type](queueParam, stream);
@@ -423,12 +423,12 @@ int AsncExecFunc(void* data) {
 }
 
 void CopyReleaseParamFunc(void* dst, void* src) {
-  auto dstPtr = static_cast<c10_npu::queue::QueueParas*>(dst);
-  auto srcPtr = static_cast<c10_npu::queue::QueueParas*>(src);
+  auto dstPtr = static_cast<c10::npu::queue::QueueParas*>(dst);
+  auto srcPtr = static_cast<c10::npu::queue::QueueParas*>(src);
   dstPtr->paramType = srcPtr->paramType;
   dstPtr->paramVal =
-      static_cast<uint8_t*>(dst) + sizeof(c10_npu::queue::QueueParas);
-  if (srcPtr->paramType == c10_npu::queue::COMPILE_AND_EXECUTE) {
+      static_cast<uint8_t*>(dst) + sizeof(c10::npu::queue::QueueParas);
+  if (srcPtr->paramType == c10::npu::queue::COMPILE_AND_EXECUTE) {
     (static_cast<ExecuteParas*>(dstPtr->paramVal))
         ->CopyEx(*(static_cast<ExecuteParas*>(srcPtr->paramVal)));
     (static_cast<ExecuteParas*>(srcPtr->paramVal))->hostMemory.clear();
@@ -436,9 +436,9 @@ void CopyReleaseParamFunc(void* dst, void* src) {
 }
 
 void ReleaseParamFunc(void* ptr) {
-  auto queueParam = static_cast<c10_npu::queue::QueueParas*>(ptr);
+  auto queueParam = static_cast<c10::npu::queue::QueueParas*>(ptr);
   auto type = queueParam->paramType;
-  if (type == c10_npu::queue::COMPILE_AND_EXECUTE) {
+  if (type == c10::npu::queue::COMPILE_AND_EXECUTE) {
     auto cur_paras = static_cast<ExecuteParas*>(queueParam->paramVal);
     cur_paras->Release();
   }

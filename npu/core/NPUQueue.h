@@ -9,7 +9,7 @@
 #include <npu/acl/include/acl/acl_op.h>
 #include "npu/core/npu_log.h"
 
-namespace c10_npu {
+namespace c10::npu {
 
 struct sring_idx {
   bool working = false;
@@ -159,7 +159,7 @@ class NPUCallBackRegisterBuilder {
 
 #define REGISTER_QUEUE_FUNC(                                                 \
     execF, copyF, releaseF, newF, deleteF, copyReleaseParamF, releaseParamF) \
-  static ::c10_npu::register_queue_cb::NPUCallBackRegisterBuilder            \
+  static ::c10::npu::register_queue_cb::NPUCallBackRegisterBuilder           \
       register_queue_func_builder(                                           \
           execF,                                                             \
           copyF,                                                             \
@@ -168,4 +168,4 @@ class NPUCallBackRegisterBuilder {
           deleteF,                                                           \
           copyReleaseParamF,                                                 \
           releaseParamF);
-} // namespace c10_npu
+} // namespace c10::npu

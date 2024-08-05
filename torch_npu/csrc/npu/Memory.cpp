@@ -24,7 +24,7 @@ PyObject* THNPModule_setMemoryFraction(PyObject* _unused, PyObject* args) {
   double fraction = PyFloat_AsDouble(fraction_o);
   int64_t device = PyLong_AsLongLong(device_o);
 
-  c10_npu::NPUCachingAllocator::setMemoryFraction(fraction, device);
+  c10::npu::NPUCachingAllocator::setMemoryFraction(fraction, device);
   END_HANDLE_TH_ERRORS
   Py_RETURN_NONE;
 }
@@ -38,7 +38,7 @@ PyObject* THNPModule_resetAccumulatedMemoryStats(
       "invalid argument to reset_accumulated_memory_stats",
       PTA_ERROR(ErrCode::PARAM));
   const int device = (int)THPUtils_unpackLong(arg);
-  c10_npu::NPUCachingAllocator::resetAccumulatedStats(device);
+  c10::npu::NPUCachingAllocator::resetAccumulatedStats(device);
   END_HANDLE_TH_ERRORS
   Py_RETURN_NONE;
 }
@@ -50,7 +50,7 @@ PyObject* THNPModule_resetPeakMemoryStats(PyObject* _unused, PyObject* arg) {
       "invalid argument to reset_peak_memory_stats",
       PTA_ERROR(ErrCode::PARAM));
   const int device = (int)THPUtils_unpackLong(arg);
-  c10_npu::NPUCachingAllocator::resetPeakStats(device);
+  c10::npu::NPUCachingAllocator::resetPeakStats(device);
   END_HANDLE_TH_ERRORS
   Py_RETURN_NONE;
 }
@@ -143,7 +143,7 @@ PyObject* THNPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
     return segmentDict;
   };
 
-  auto snapshot = c10_npu::NPUCachingAllocator::snapshot();
+  auto snapshot = c10::npu::NPUCachingAllocator::snapshot();
   py::list segments;
 
   for (const auto& segmentInfo : snapshot.segments) {
@@ -243,7 +243,7 @@ PyObject* THNPModule_attachOutOfMemoryObserver(
     Py_XDECREF(result);
   };
   torch::utils::device_lazy_init(at::kPrivateUse1);
-  c10_npu::NPUCachingAllocator::attachOutOfMemoryObserver(std::move(obs));
+  c10::npu::NPUCachingAllocator::attachOutOfMemoryObserver(std::move(obs));
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }
@@ -265,7 +265,8 @@ PyObject* THNPModule_npuCachingAllocator_raw_alloc(
   }
   ssize_t size = PyLong_AsSsize_t(size_o);
   aclrtStream stream = static_cast<aclrtStream>(PyLong_AsVoidPtr(stream_o));
-  void* mem = c10_npu::NPUCachingAllocator::raw_alloc_with_stream(size, stream);
+  void* mem =
+      c10::npu::NPUCachingAllocator::raw_alloc_with_stream(size, stream);
   return PyLong_FromVoidPtr(mem);
   END_HANDLE_TH_ERRORS
 }
@@ -275,14 +276,14 @@ PyObject* THNPModule_npuCachingAllocator_raw_delete(
     PyObject* obj) {
   HANDLE_TH_ERRORS
   void* mem_ptr = PyLong_AsVoidPtr(obj);
-  c10_npu::NPUCachingAllocator::raw_delete(mem_ptr);
+  c10::npu::NPUCachingAllocator::raw_delete(mem_ptr);
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }
 
 PyObject* THNPModule_getAllocatorBackend(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  return THPUtils_packString(c10_npu::NPUCachingAllocator::name());
+  return THPUtils_packString(c10::npu::NPUCachingAllocator::name());
   END_HANDLE_TH_ERRORS
 }
 
@@ -320,7 +321,7 @@ PyObject* THNPModule_memoryStats(PyObject* _unused, PyObject* arg) {
   };
 
   const DeviceStats stats =
-      c10_npu::NPUCachingAllocator::getDeviceStats(device);
+      c10::npu::NPUCachingAllocator::getDeviceStats(device);
 
   py::dict result;
   result["num_alloc_retries"] = stats.num_alloc_retries;
@@ -343,7 +344,7 @@ PyObject* THNPModule_memoryStats(PyObject* _unused, PyObject* arg) {
 
 PyObject* THNPModule_emptyCache(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  c10_npu::NPUCachingAllocator::emptyCache();
+  c10::npu::NPUCachingAllocator::emptyCache();
   END_HANDLE_TH_ERRORS
   Py_RETURN_NONE;
 }

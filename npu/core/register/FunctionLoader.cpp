@@ -3,7 +3,7 @@
 #include "npu/core/NPUException.h"
 #include "npu/core/register/FunctionLoader.h"
 
-namespace c10_npu {
+namespace c10::npu {
 namespace option {
 
 FunctionLoader::FunctionLoader(const std::string& name) {
@@ -94,4 +94,4 @@ FunctionRegisterBuilder::FunctionRegisterBuilder(
 } // namespace register_function
 
 } // namespace option
-} // namespace c10_npu
+} // namespace c10::npu

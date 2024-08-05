@@ -46,13 +46,13 @@ inline c10::DeviceType get_npu_device_type() {
 
 inline void maybe_initialize_npu(const at::TensorOptions& options) {
   if (torch_npu::utils::is_npu(options)) {
-    c10_npu::TryInitDevice(options.device().index());
+    c10::npu::TryInitDevice(options.device().index());
   }
 }
 
 inline void maybe_initialize_npu(const at::Device& device) {
   if (torch_npu::utils::is_npu(device)) {
-    c10_npu::TryInitDevice(device.index());
+    c10::npu::TryInitDevice(device.index());
   }
 }
 

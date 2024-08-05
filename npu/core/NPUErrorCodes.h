@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-namespace c10_npu::acl {
+namespace c10::npu::acl {
 
 class AclErrorCode {
  public:
@@ -556,4 +556,4 @@ on the device."},
         Rectify the fault based on the error information in the ascend log."},
   }; /* aclError code */
 };
-} // namespace c10_npu::acl
+} // namespace c10::npu::acl

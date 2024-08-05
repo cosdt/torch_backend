@@ -6,14 +6,14 @@
 #include "npu/framework/utils/NpuUtils.h"
 
 #include <ATen/record_function.h>
+#include <npu/acl/include/acl/acl_rt.h>
 #include <sys/eventfd.h>
 #include <sys/prctl.h>
 #include <sys/time.h>
-#include <npu/acl/include/acl/acl_rt.h>
 #include <unistd.h>
 #include <sstream>
 
-namespace c10_npu {
+namespace c10::npu {
 
 struct timeval delay = {0, 1};
 
@@ -168,22 +168,22 @@ static constexpr size_t kQueueCapacity = 4096;
 static std::string repo_error;
 
 std::string get_func_error_msg(void* error_paras) {
-  auto queueParam = static_cast<c10_npu::queue::QueueParas*>(error_paras);
+  auto queueParam = static_cast<c10::npu::queue::QueueParas*>(error_paras);
   auto type = queueParam->paramType;
   std::stringstream result;
-  if (type == c10_npu::queue::COMPILE_AND_EXECUTE) {
+  if (type == c10::npu::queue::COMPILE_AND_EXECUTE) {
     auto cur_paras =
         static_cast<at_npu::native::ExecuteParas*>(queueParam->paramVal);
     auto op_name = cur_paras->opType;
     result << "the current working operator name is " << op_name;
-  } else if (type == c10_npu::queue::ASYNC_MEMCPY) {
+  } else if (type == c10::npu::queue::ASYNC_MEMCPY) {
     auto cur_paras =
-        static_cast<c10_npu::queue::CopyParas*>(queueParam->paramVal);
+        static_cast<c10::npu::queue::CopyParas*>(queueParam->paramVal);
     result << "the current copy params are srclen=" << cur_paras->srcLen
            << ", dstlen=" << cur_paras->dstLen << ", kind=" << cur_paras->kind;
   } else {
     auto cur_paras =
-        static_cast<c10_npu::queue::EventParas*>(queueParam->paramVal);
+        static_cast<c10::npu::queue::EventParas*>(queueParam->paramVal);
     result << "the current working event is " << cur_paras->event;
   }
   return result.str();
@@ -501,7 +501,7 @@ void StartConsume(Repository* repo, c10::DeviceIndex device_id) {
     ASCEND_LOGE("set thread name failed!");
   }
 
-  aclError ret = c10_npu::SetDevice(device_id);
+  aclError ret = c10::npu::SetDevice(device_id);
   if (ret != 0) {
     C10_NPU_SHOW_ERR_MSG();
     ASCEND_LOGE(
@@ -676,4 +676,4 @@ void ReleaseQueue::ChangeStatus(RepoStatus expected, RepoStatus desired) {
 
   repo_status.compare_exchange_strong(expected, desired);
 }
-} // namespace c10_npu
+} // namespace c10::npu

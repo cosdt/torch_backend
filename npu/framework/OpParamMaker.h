@@ -19,8 +19,8 @@ namespace native {
 
 typedef union {
   ExecuteParas exeParas;
-  c10_npu::queue::CopyParas copyParas;
-  c10_npu::queue::EventParas eventParas;
+  c10::npu::queue::CopyParas copyParas;
+  c10::npu::queue::EventParas eventParas;
 } TaskParas;
 constexpr size_t MAX_PARAS_BYTE_SIZE = sizeof(TaskParas);
 

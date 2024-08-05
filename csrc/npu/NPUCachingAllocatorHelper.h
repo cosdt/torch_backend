@@ -9,7 +9,7 @@
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/core/npu_log.h"
 
-namespace c10_npu::NPUCachingAllocator {
+namespace c10::npu::NPUCachingAllocator {
 
 class CachingAllocatorHelper
     : public c10::backend::CachingAllocator::CachingAllocatorHelper {
@@ -18,7 +18,7 @@ class CachingAllocatorHelper
       override {
     aclrtContext compiler_ctx = aclrtContext();
     aclError ret_ctx = aclrtGetCurrentContext(&compiler_ctx);
-    NPU_CHECK_ERROR(aclrtSetCurrentContext(c10_npu::GetDeviceContext(device)));
+    NPU_CHECK_ERROR(aclrtSetCurrentContext(c10::npu::GetDeviceContext(device)));
     fn();
     if (ret_ctx == ACL_ERROR_NONE) {
       NPU_CHECK_ERROR(aclrtSetCurrentContext(compiler_ctx));
@@ -26,7 +26,7 @@ class CachingAllocatorHelper
   }
 
   void* getCurrentStream(c10::DeviceIndex device_index) override {
-    return c10_npu::getCurrentNPUStream(device_index);
+    return c10::npu::getCurrentNPUStream(device_index);
   }
 
   int synchronizeStream(void* stream) override {
@@ -34,7 +34,7 @@ class CachingAllocatorHelper
   }
 
   virtual void deviceSynchronize() override {
-    c10_npu::device_synchronize();
+    c10::npu::device_synchronize();
   }
 
   int memFree(void* devPtr) override {
@@ -103,4 +103,4 @@ class CachingAllocatorHelper
     return aclrtUnmapMem(ptr);
   }
 };
-} // namespace c10_npu::NPUCachingAllocator
+} // namespace c10::npu::NPUCachingAllocator

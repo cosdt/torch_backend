@@ -22,7 +22,7 @@ static PyObject* THNPModule_initExtension(PyObject* self, PyObject* noargs) {
       throw python_error();
     }
   };
-  c10::DeviceIndex num_npus = c10_npu::device_count();
+  c10::DeviceIndex num_npus = c10::npu::device_count();
   auto default_npu_generators = PyTuple_New(static_cast<Py_ssize_t>(num_npus));
   for (c10::DeviceIndex i = 0; i < num_npus; i++) {
     auto gen = at_npu::detail::getDefaultNPUGenerator(i);

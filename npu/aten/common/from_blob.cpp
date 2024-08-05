@@ -1,10 +1,10 @@
+#include "npu/aten/common/from_blob.h"
 #include <ATen/Utils.h>
 #include <c10/core/Allocator.h>
-#include "csrc/npu/NPUStorageImpl.h"
 #include "csrc/npu/NPUCachingAllocator.h"
 #include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/NPUStorageImpl.h"
 #include "npu/aten/common/TensorFactories.h"
-#include "npu/aten/common/from_blob.h"
 #include "npu/core/NPUException.h"
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/framework/utils/OpAdapter.h"
@@ -16,7 +16,7 @@ namespace native {
 at::Tensor TensorMaker::make_tensor() {
   if (device_ == c10::nullopt) {
     device_ =
-        c10::Device(at::DeviceType::PrivateUse1, c10_npu::current_device());
+        c10::Device(at::DeviceType::PrivateUse1, c10::npu::current_device());
   }
 
   if (opts_.device().has_index()) {
@@ -36,7 +36,7 @@ at::Tensor TensorMaker::make_tensor() {
       dtype_or_default(c10::optTypeMetaToScalarType(opts_.dtype_opt())));
   at_npu::native::check_size_nonnegative(sizes_);
   c10::DeviceGuard guard(*device_);
-  c10::Allocator* allocator = c10_npu::NPUCachingAllocator::get();
+  c10::Allocator* allocator = c10::npu::NPUCachingAllocator::get();
 
   std::size_t size_bytes = computeStorageSize();
 

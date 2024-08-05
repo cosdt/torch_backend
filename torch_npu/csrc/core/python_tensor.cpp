@@ -51,7 +51,7 @@ static PyObject* Tensor_new(
   }();
 
   TORCH_CHECK_TYPE(
-      c10_npu::device_count() != 0,
+      c10::npu::device_count() != 0,
       "type ",
       tensor_type.name,
       " not available.",

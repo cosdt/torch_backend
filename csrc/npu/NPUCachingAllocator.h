@@ -2,7 +2,7 @@
 
 #include "csrc/core/CachingAllocator.h"
 
-namespace c10_npu::NPUCachingAllocator {
+namespace c10::npu::NPUCachingAllocator {
 
 using namespace c10::backend::CachingAllocator;
 
@@ -98,4 +98,4 @@ inline bool isHistoryEnabled() {
 inline void attachOutOfMemoryObserver(OutOfMemoryObserver observer) {
   return get()->attachOutOfMemoryObserver(observer);
 }
-} // namespace c10_npu::NPUCachingAllocator
+} // namespace c10::npu::NPUCachingAllocator

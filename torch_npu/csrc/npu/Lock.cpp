@@ -1,6 +1,6 @@
 #include "torch_npu/csrc/npu/Lock.h"
-#include "csrc/npu/NPUFunctions.h"
 #include <pybind11/gil.h>
+#include "csrc/npu/NPUFunctions.h"
 
 // We need to ensure that as long as a thread will NEVER loose the GIL as long
 // as it holds the NPU mutex. Otherwise another thread might be scheduled and
@@ -11,7 +11,7 @@
 static PyGILState_STATE npuMutexGILState;
 
 PyObject* THNPModule_npuLockMutex(PyObject* module, PyObject* noargs) {
-  auto mutex = c10_npu::getFreeMutex();
+  auto mutex = c10::npu::getFreeMutex();
   // This has to be a busy loop because we **absolutely need to** hold the GIL
   // or it's a recipe for a deadlock otherwise (if we let other Python threads
   // run while we have the cudaMutex, but not the GIL, they might try to e.g.
@@ -32,7 +32,7 @@ PyObject* THNPModule_npuLockMutex(PyObject* module, PyObject* noargs) {
 }
 
 PyObject* THNPModule_npuUnlockMutex(PyObject* module, PyObject* noargs) {
-  auto mutex = c10_npu::getFreeMutex();
+  auto mutex = c10::npu::getFreeMutex();
   PyGILState_Release(npuMutexGILState);
   mutex->unlock();
   Py_RETURN_NONE;

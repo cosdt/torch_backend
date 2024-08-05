@@ -3,9 +3,9 @@
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/npu/NPUStream.h"
-#include "npu/framework/utils/CalcuOpUtil.h"
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/acl/include/acl/acl_rt.h"
+#include "npu/framework/utils/CalcuOpUtil.h"
 
 namespace at_npu {
 namespace native {
@@ -20,7 +20,7 @@ c10::Scalar NPUNativeFunctions::_local_scalar_dense(const at::Tensor& self) {
       "_local_scalar_dense_npu",
       [&] {
         scalar_t value = 0;
-        c10_npu::NPUStream copy_stream = c10_npu::getCurrentNPUStream();
+        c10::npu::NPUStream copy_stream = c10::npu::getCurrentNPUStream();
         // Synchronous copy after stream synchronization
         aclError error = aclrtSynchronizeStreamWithTimeout(copy_stream, -1);
         if (error != ACL_ERROR_NONE) {

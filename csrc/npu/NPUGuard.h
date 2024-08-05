@@ -8,7 +8,7 @@
 
 #include <cstddef>
 
-namespace c10_npu {
+namespace c10::npu {
 
 // This code is kind of boilerplatey.  See Note [Whither the DeviceGuard
 // boilerplate]
@@ -109,7 +109,7 @@ struct NPUStreamGuard {
   }
 
  private:
-  c10::impl::InlineStreamGuard<c10_npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
 };
 
 /// A variant of OptionalStreamGuard that is specialized for NPU.  See NPUGuard
@@ -178,7 +178,7 @@ struct OptionalNPUStreamGuard {
   }
 
  private:
-  c10::impl::InlineOptionalStreamGuard<c10_npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineOptionalStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
 };
 
 /// A variant of MultiStreamGuard that is specialized for NPU.
@@ -197,7 +197,7 @@ struct NPUMultiStreamGuard {
   NPUMultiStreamGuard& operator=(NPUMultiStreamGuard&& other) = delete;
 
  private:
-  c10::impl::InlineMultiStreamGuard<c10_npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineMultiStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
 
   static std::vector<c10::Stream> unwrapStreams(
       at::ArrayRef<NPUStream> NPUStreams) {
@@ -210,4 +210,4 @@ struct NPUMultiStreamGuard {
   }
 };
 
-} // namespace c10_npu
+} // namespace c10::npu

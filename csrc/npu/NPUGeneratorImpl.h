@@ -118,7 +118,8 @@ struct PhiloxNpuState {
   bool captured_ = false;
 };
 
-struct TORCH_BACKEND_API NPUGeneratorImpl : public at::BaseGeneratorImpl {
+struct TORCH_BACKEND_API NPUGeneratorImpl
+    : public c10::backend::BaseGeneratorImpl {
   // Constructors
   NPUGeneratorImpl(c10::DeviceIndex device_index = -1);
   ~NPUGeneratorImpl() = default;

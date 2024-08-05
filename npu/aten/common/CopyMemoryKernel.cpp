@@ -1,13 +1,13 @@
 #include <ATen/ATen.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/npu/NPUStream.h"
+#include "npu/acl/include/acl/acl.h"
 #include "npu/core/NPUBridge.h"
 #include "npu/core/NPUException.h"
-#include "csrc/npu/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
-#include "npu/acl/include/acl/acl.h"
 
 namespace at_npu {
 namespace native {
@@ -67,7 +67,7 @@ at::Tensor& NPUNativeFunctions::copy_memory_(
   NPU_CHECK_ERROR(ret);
 
   if (!non_blocking) {
-    c10_npu::NPUStream stream = c10_npu::getCurrentNPUStream();
+    c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(stream, -1));
   }
   return self;

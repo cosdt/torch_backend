@@ -2,9 +2,9 @@
 #include <string>
 
 #include "csrc/aten/generated/CustomFunctions.h"
-#include "npu/core/NPUException.h"
-#include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
+#include "csrc/npu/NPUFunctions.h"
+#include "npu/core/NPUException.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/OpCmdHelper.h"
@@ -153,9 +153,9 @@ OpCommand& OpCommand::Output(
 void OpCommand::Run() {
   aclCmd->SetEnginePriority();
   const string& op_name = aclCmd->GetName();
-    aclCmd->Run(sync, sync_index, outputTensor);
-    if (c10_npu::option::OptionsManager::CheckBlockingEnable()) {
-      Sync();
+  aclCmd->Run(sync, sync_index, outputTensor);
+  if (c10::npu::option::OptionsManager::CheckBlockingEnable()) {
+    Sync();
     aclCmd->releaseSource();
   }
   aclCmds->Pop();
@@ -170,7 +170,7 @@ OpCommand& OpCommand::Sync(c10::SmallVector<int64_t, N>& index) {
 }
 
 OpCommand& OpCommand::Sync() {
-  c10_npu::NPUStream stream = c10_npu::getCurrentNPUStream();
+  c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
   NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(stream, -1));
   return *this;
 }
@@ -261,7 +261,7 @@ at::Tensor OpCommand::CopyHostToDevice(
 at::Tensor OpCommand::CopyHostToDevice(const at::Tensor& cpuTensor) {
   at::Tensor cpuPinMemTensor = cpuTensor.pin_memory();
   c10::DeviceIndex deviceIndex = 0;
-  NPU_CHECK_ERROR(c10_npu::GetDevice(&deviceIndex));
+  NPU_CHECK_ERROR(c10::npu::GetDevice(&deviceIndex));
   auto tensor = cpuPinMemTensor.to(
       c10::Device(c10::DeviceType::PrivateUse1, deviceIndex),
       cpuPinMemTensor.scalar_type(),

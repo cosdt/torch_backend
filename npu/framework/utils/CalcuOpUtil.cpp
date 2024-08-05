@@ -1,11 +1,13 @@
 #include <ATen/record_function.h>
 
+#include "csrc/npu/NPUCachingAllocator.h"
+#include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/NPUStorageImpl.h"
+#include "npu/acl/include/acl/acl_base.h"
+#include "npu/acl/include/acl/acl_rt.h"
 #include "npu/aten/mirror/NPUMemoryOverlap.h"
 #include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUCachingAllocator.h"
 #include "npu/core/NPUException.h"
-#include "csrc/npu/NPUFunctions.h"
 #include "npu/core/NpuVariables.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionRegister.h"
@@ -17,8 +19,6 @@
 #include "npu/framework/utils/CalcuOpUtil.h"
 #include "npu/framework/utils/ForceJitCompileList.h"
 #include "npu/framework/utils/NpuUtils.h"
-#include "npu/acl/include/acl/acl_base.h"
-#include "npu/acl/include/acl/acl_rt.h"
 
 namespace {
 constexpr float EPSILON = 1e-6;
@@ -186,7 +186,7 @@ at::Tensor CalcuOpUtil::CopyScalarToDevice(
 at::Tensor CalcuOpUtil::CopyTensorHostToDevice(const at::Tensor& cpu_tensor) {
   at::Tensor cpuPinMemTensor = cpu_tensor.pin_memory();
   c10::DeviceIndex deviceIndex = 0;
-  NPU_CHECK_ERROR(c10_npu::GetDevice(&deviceIndex));
+  NPU_CHECK_ERROR(c10::npu::GetDevice(&deviceIndex));
   return cpuPinMemTensor.to(
       c10::Device(c10::DeviceType::PrivateUse1, deviceIndex),
       cpuPinMemTensor.scalar_type(),
@@ -204,7 +204,7 @@ NPUStatus CalcuOpUtil::AclrtMemcpyAsync(
       dst.second * dst.first.itemsize();
   void* src_ptr = reinterpret_cast<uint8_t*>(src.first.data_ptr()) +
       src.second * src.first.itemsize();
-  NPU_CHECK_ERROR(c10_npu::queue::LaunchAsyncCopyTask(
+  NPU_CHECK_ERROR(c10::npu::queue::LaunchAsyncCopyTask(
       dst_ptr, dst_size, const_cast<void*>(src_ptr), src_size, kind));
 
   return "SUCCESS";
@@ -253,7 +253,7 @@ aclError CalcuOpUtil::LaunchAsyncCopyTaskWithModeSwitch(
     const at::Tensor& src,
     size_t count,
     aclrtMemcpyKind kind) {
-  aclError ret = c10_npu::queue::LaunchAsyncCopyTask(
+  aclError ret = c10::npu::queue::LaunchAsyncCopyTask(
       dst.data_ptr(), dstMax, src.data_ptr(), count, kind);
   return ret;
 }
@@ -264,7 +264,7 @@ aclError CalcuOpUtil::LaunchAsyncCopyTaskWithModeSwitch(
     void* src,
     size_t count,
     aclrtMemcpyKind kind) {
-  aclError ret = c10_npu::queue::LaunchAsyncCopyTask(
+  aclError ret = c10::npu::queue::LaunchAsyncCopyTask(
       const_cast<void*>(dst.data()), dstMax, src, count, kind);
   return ret;
 }

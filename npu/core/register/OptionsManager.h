@@ -7,7 +7,7 @@
 #include "csrc/core/Macros.h"
 #include "npu/core/NPUException.h"
 
-namespace c10_npu {
+namespace c10::npu {
 namespace option {
 
 class OptionsManager {
@@ -29,4 +29,4 @@ class OptionsManager {
 };
 
 } // namespace option
-} // namespace c10_npu
+} // namespace c10::npu

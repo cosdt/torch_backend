@@ -30,8 +30,8 @@ std::unordered_map<ErrCode, std::string> errCodeMap = {
 std::string formatErrorCode(SubModule submodule, ErrCode errorCode) {
   std::ostringstream oss;
   c10::DeviceIndex deviceIndex = -1;
-  c10_npu::GetDevice(&deviceIndex);
-  auto rank_id = c10_npu::option::OptionsManager::GetRankId();
+  c10::npu::GetDevice(&deviceIndex);
+  auto rank_id = c10::npu::option::OptionsManager::GetRankId();
   oss << "\n[ERROR] " << getCurrentTimestamp() << " (PID:" << getpid()
       << ", Device:" << deviceIndex << ", RankID:" << rank_id << ") ";
   oss << "ERR" << std::setw(2) << std::setfill('0')
@@ -60,14 +60,14 @@ static std::string getCurrentTimestamp() {
   return oss.str();
 }
 
-namespace c10_npu {
+namespace c10::npu {
 
 const char* getDeviceErrorMessage() {
   return aclGetRecentErrMsg();
 }
 
 const std::string getErrorMessage(int error_code) {
-  static c10_npu::acl::AclErrorCode aclErrorCode;
+  static c10::npu::acl::AclErrorCode aclErrorCode;
   auto itr = aclErrorCode.error_code_map.find(error_code);
   if (itr == aclErrorCode.error_code_map.end()) {
     return "";
@@ -75,4 +75,4 @@ const std::string getErrorMessage(int error_code) {
   return "\n[Error]: " + itr->second;
 }
 
-} // namespace c10_npu
+} // namespace c10::npu

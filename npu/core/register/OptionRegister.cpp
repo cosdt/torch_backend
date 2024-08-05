@@ -3,7 +3,7 @@
 #include "npu/core/NPUException.h"
 #include "npu/core/register/OptionRegister.h"
 
-namespace c10_npu {
+namespace c10::npu {
 namespace option {
 
 OptionInterface::OptionInterface(OptionCallBack callback) {
@@ -86,4 +86,4 @@ c10::optional<std::string> GetOption(const std::string& key) {
 }
 
 } // namespace option
-} // namespace c10_npu
+} // namespace c10::npu
