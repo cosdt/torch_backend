@@ -10,3 +10,4 @@ struct THNPStream : THPStream {
 };
 
 TORCH_BACKEND_API void THNPStream_init(PyObject* module);
+TORCH_BACKEND_API PyMethodDef* THNPModule_stream_methods();
