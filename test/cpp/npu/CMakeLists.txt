@@ -1,7 +1,8 @@
 if(BUILD_TEST)
   set(TORCH_BACKEND_NPU_TEST_SOURCES
     ${PROJECT_SOURCE_DIR}/test/cpp/common/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/npu_generator_test.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/npu_generator_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/npu_context_test.cpp)
 
   add_executable(test_npu ${TORCH_BACKEND_NPU_TEST_SOURCES})
   target_link_libraries(test_npu PRIVATE torch_npu gtest_main gtest)

@@ -63,7 +63,7 @@ static std::string getCurrentTimestamp() {
 namespace c10_npu {
 
 const char* getDeviceErrorMessage() {
-  return c10_npu::acl::AclGetErrMsg();
+  return aclGetRecentErrMsg();
 }
 
 const std::string getErrorMessage(int error_code) {

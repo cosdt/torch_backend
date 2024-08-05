@@ -4,15 +4,13 @@
 #include "csrc/npu/NPUStorageImpl.h"
 #include "npu/aten/common/ResizeNpu.h"
 #include "npu/framework/FormatHelper.h"
+#include "csrc/core/Register.h"
 
 namespace c10_npu {
 
-TORCH_DECLARE_REGISTRY(
-    PrivateUse1HooksRegistry,
-    NPUHooks,
-    NPUHooksArgs);
-#define REGISTER_PRIVATEUSE1_HOOKS(clsname) \
-  C10_REGISTER_CLASS(PrivateUse1HooksRegistry, clsname, clsname)
+TORCH_DECLARE_REGISTRY(PrivateUse1HooksRegistry, NPUHooks, NPUHooksArgs);
+
+AT_REGISTER_PRIVATEUSE1_HOOKS_INTERFACE(c10_npu::get_npu_hooks());
 
 C10_DEFINE_REGISTRY(PrivateUse1HooksRegistry, NPUHooks, NPUHooksArgs)
 

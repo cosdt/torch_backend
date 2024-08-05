@@ -1,6 +1,10 @@
+import os
 import atexit
 
 from functools import wraps
+
+# Disable autoloading before running 'import torch'
+os.environ['TORCH_DEVICE_BACKEND_AUTOLOAD'] = '0'
 
 import torch
 import torch.utils
@@ -80,3 +84,10 @@ def _npu_shutdown():
 
 # register npu shutdown hook on exit
 atexit.register(_npu_shutdown)
+
+
+# This function is an entrypoint called by PyTorch
+# when running 'import torch'. There is no need to do anything.
+# See this RFC: https://github.com/pytorch/pytorch/pull/127074
+def _autoload():
+    pass

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <map>
 #include <string>
 
@@ -62,18 +61,12 @@ bool IsSupportInfNan() {
   if (!c10_npu::option::OptionsManager::CheckInfNanModeEnable()) {
     return false;
   }
-  if (c10_npu::acl::IsExistGetCannAttribute()) {
-    const static bool supportInfNan = []() -> bool {
-      int enable = 0;
-      NPU_CHECK_ERROR(
-          c10_npu::acl::AclGetCannAttribute(ACL_CANN_ATTR_INF_NAN, &enable));
-      return enable != 0;
-    }();
-    return supportInfNan;
-  }
-  return ((GetSocVersion() >= SocVersion::Ascend910B1) &&
-          (GetSocVersion() < SocVersion::Ascend310B1)) ||
-      (GetSocVersion() >= SocVersion::Ascend910C1);
+  const static bool supportInfNan = []() -> bool {
+    int enable = 0;
+    NPU_CHECK_ERROR(aclGetCannAttribute(ACL_CANN_ATTR_INF_NAN, &enable));
+    return enable != 0;
+  }();
+  return supportInfNan;
 }
 
 bool IsBF16Supported() {

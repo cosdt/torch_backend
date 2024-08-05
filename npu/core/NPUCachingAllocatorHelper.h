@@ -51,7 +51,7 @@ class CachingAllocatorHelper
   }
 
   int memAddressFree(void* ptr, size_t size) override {
-    return c10_npu::acl::AclrtReleaseMemAddress(ptr);
+    return aclrtReleaseMemAddress(ptr);
   }
 
   int memAddressReserve(
@@ -60,13 +60,12 @@ class CachingAllocatorHelper
       size_t alignment,
       void* expectPtr,
       uint64_t flags) override {
-    return c10_npu::acl::AclrtReserveMemAddress(
-        virPtr, size, alignment, expectPtr, flags);
+    return aclrtReserveMemAddress(virPtr, size, alignment, expectPtr, flags);
   }
 
   int memAddressReserve(void** ptr, size_t size, size_t alignment, void* addr)
       override {
-    return c10_npu::acl::AclrtReserveMemAddress(ptr, size, alignment, addr, 1);
+    return aclrtReserveMemAddress(ptr, size, alignment, addr, 1);
   }
 
   int memCreate(void** handle, size_t size, int device, uint64_t flags)
@@ -78,13 +77,13 @@ class CachingAllocatorHelper
     prop.location.type = ACL_MEM_LOCATION_TYPE_DEVICE;
     prop.location.id = device;
     prop.reserve = 0;
-    int status = c10_npu::acl::AclrtMallocPhysical(handle, size, &prop, flags);
+    int status = aclrtMallocPhysical(handle, size, &prop, flags);
     return status == ACL_ERROR_RT_MEMORY_ALLOCATION ? MEM_ALLOCATION_ERROR
                                                     : status;
   }
 
   int memRelease(void* handle) override {
-    return c10_npu::acl::AclrtFreePhysical(handle);
+    return aclrtFreePhysical(handle);
   }
 
   int memMap(
@@ -93,7 +92,7 @@ class CachingAllocatorHelper
       size_t offset,
       void* handle,
       uint64_t flags) override {
-    return c10_npu::acl::AclrtMapMem(ptr, size, offset, handle, flags);
+    return aclrtMapMem(ptr, size, offset, handle, flags);
   }
 
   int memSetAccess(void* ptr, size_t size, int device) override {
@@ -101,7 +100,7 @@ class CachingAllocatorHelper
   }
 
   int memUnmap(void* ptr, size_t size) override {
-    return c10_npu::acl::AclrtUnmapMem(ptr);
+    return aclrtUnmapMem(ptr);
   }
 };
 } // namespace c10_npu::NPUCachingAllocator

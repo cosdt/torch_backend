@@ -3,10 +3,8 @@
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl_op_compiler.h"
-#include "npu/acl/include/acl/acl_rt.h"
 #include "npu/core/NPUCachingAllocatorHelper.h"
 #include "npu/core/NpuVariables.h"
-#include "npu/core/interface/AclInterface.h"
 #include "npu/core/npu_log.h"
 #include "npu/core/register/OptionRegister.h"
 #include "npu/core/register/OptionsManager.h"
@@ -209,16 +207,14 @@ NpuSysCtrl::SysStatus NpuSysCtrl::Initialize(int device_id) {
     ASCEND_LOGD("set dump config success");
   }
 
-  auto soc_name = c10_npu::acl::AclGetSocName();
+  auto soc_name = aclrtGetSocName();
   // set global soc name
   c10_npu::SetSocVersion(soc_name);
 
   if (c10_npu::IsSupportInfNan()) {
-    c10_npu::acl::AclrtSetDeviceSatMode(
-        aclrtFloatOverflowMode::ACL_RT_OVERFLOW_MODE_INFNAN);
+    aclrtSetDeviceSatMode(aclrtFloatOverflowMode::ACL_RT_OVERFLOW_MODE_INFNAN);
   } else {
-    c10_npu::acl::AclrtSetDeviceSatMode(
-        aclrtFloatOverflowMode::ACL_RT_OVERFLOW_MODE_SATURATION);
+    aclrtSetDeviceSatMode(aclrtFloatOverflowMode::ACL_RT_OVERFLOW_MODE_SATURATION);
   }
 
   // set ACL_PRECISION_MODE by SocVersion("allow_fp32_to_fp16" or
@@ -239,8 +235,7 @@ NpuSysCtrl::SysStatus NpuSysCtrl::Initialize(int device_id) {
 
   NPU_CHECK_ERROR(at_npu::native::AclrtCtxSetSysParamOpt(
       aclSysParamOpt::ACL_OPT_DETERMINISTIC, 0));
-  NPU_CHECK_SUPPORTED_OR_ERROR(
-      c10_npu::acl::AclrtSetOpExecuteTimeOut(kMaxOpExecuteTimeOut));
+  NPU_CHECK_SUPPORTED_OR_ERROR(aclrtSetOpExecuteTimeOut(kMaxOpExecuteTimeOut));
   init_flag_ = true;
   ASCEND_LOGD("Npu sys ctrl initialize successfully.");
 
@@ -249,8 +244,7 @@ NpuSysCtrl::SysStatus NpuSysCtrl::Initialize(int device_id) {
 
 NpuSysCtrl::SysStatus NpuSysCtrl::OverflowSwitchEnable() {
   if (!c10_npu::IsSupportInfNan()) {
-    c10_npu::acl::AclrtSetStreamOverflowSwitch(
-        c10_npu::getCurrentNPUStream(), 1);
+    aclrtSetStreamOverflowSwitch(c10_npu::getCurrentNPUStream(), 1);
     ASCEND_LOGI("Npu overflow check switch set successfully.");
   }
   return INIT_SUCC;
@@ -264,7 +258,6 @@ NpuSysCtrl::SysStatus NpuSysCtrl::Finalize() {
 
   this->RegisterReleaseFn(
       [=]() -> void {
-        c10_npu::NPUEventManager::GetInstance().ClearEvent();
         NPU_CHECK_WARN(c10_npu::DestroyUsedStreams());
         NPU_CHECK_WARN(c10_npu::ResetUsedDevices());
         // Maintain a basic point of view, who applies for the resource, the

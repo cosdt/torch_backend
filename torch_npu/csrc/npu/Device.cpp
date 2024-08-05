@@ -6,18 +6,18 @@
 
 #include "csrc/npu/NPUCachingAllocator.h"
 #include "csrc/npu/NPUFunctions.h"
-#include "npu/core/NPUGuard.h"
+#include "csrc/npu/NPUContext.h"
+#include "csrc/npu/NPUDeviceProp.h"
+#include "csrc/npu/NPUGuard.h"
 #include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/npu/Module.h"
 
-NPUDeviceProp prop;
-
 void RegisterNPUDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
-  py::class_<NPUDeviceProp>(m, "_NPUDeviceProperties")
-      .def_readonly("name", &NPUDeviceProp::name)
-      .def_readonly("total_memory", &NPUDeviceProp::totalGlobalMem)
-      .def("__repr__", [](const NPUDeviceProp& prop) {
+  py::class_<c10_npu::NPUDeviceProp>(m, "_NPUDeviceProperties")
+      .def_readonly("name", &c10_npu::NPUDeviceProp::name)
+      .def_readonly("total_memory", &c10_npu::NPUDeviceProp::totalGlobalMem)
+      .def("__repr__", [](const c10_npu::NPUDeviceProp& prop) {
         std::ostringstream stream;
         stream << "_NPUDeviceProperties(name='" << prop.name
                << "', total_memory="
@@ -31,24 +31,12 @@ void RegisterNPUDeviceProperties(PyObject* module) {
   });
 }
 
-NPUDeviceProp* GetDeviceProperties(int64_t deviceid) {
-  const char* device_name;
-  device_name = c10_npu::acl::AclrtGetSocName();
-  if (device_name == nullptr) {
-    prop.name = " ";
-    ASCEND_LOGE("NPU get device name fail.");
-  } else {
-    prop.name = std::string(device_name);
-  }
-  return &prop;
-}
-
 void BindGetDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   m.def(
       "_npu_getDeviceProperties",
-      [](int deviceid) -> NPUDeviceProp* {
-        return GetDeviceProperties(deviceid);
+      [](c10::DeviceIndex deviceid) -> c10_npu::NPUDeviceProp* {
+        return c10_npu::getDeviceProperties(deviceid);
       },
       py::return_value_policy::reference);
 }
@@ -103,9 +91,10 @@ PyObject* THNPModule_npuCanDeviceAccessPeer_wrap(
   }
   c10::DeviceIndex device_id = THPUtils_unpackDeviceIndex(value_1);
   c10::DeviceIndex peer_device_id = THPUtils_unpackDeviceIndex(value_2);
-  auto can_access_peer =
-      c10_npu::acl::can_device_access_peer(device_id, peer_device_id);
-  return PyBool_FromLong(can_access_peer);
+  int32_t can_access_peer = 0;
+  NPU_CHECK_ERROR(aclrtDeviceCanAccessPeer(&can_access_peer, device_id, peer_device_id));
+  auto can_device_access_peer = can_access_peer != 0;
+  return PyBool_FromLong(can_device_access_peer);
   END_HANDLE_TH_ERRORS
 }
 

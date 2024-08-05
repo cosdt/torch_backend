@@ -1,5 +1,5 @@
 # Environment variables for feature toggles:
-# 
+#
 # BUILD_TEST=ON
 #     enable the test build
 
@@ -22,6 +22,9 @@ import distutils.command.clean
 from sysconfig import get_paths
 from distutils.version import LooseVersion
 from setuptools import setup, distutils, Extension, find_packages, setup
+
+# Disable autoloading at the beginning of process
+os.environ['TORCH_DEVICE_BACKEND_AUTOLOAD'] = '0'
 
 from codegen.utils import PathManager
 
@@ -184,8 +187,7 @@ def generate_bindings_code(base_dir):
     generate_code_cmd = [
         "bash",
         os.path.join(base_dir, "generate_code.sh"),
-        python_execute,
-        VERSION,
+        python_execute
     ]
     if subprocess.call(generate_code_cmd) != 0:  # Compliant
         print(
@@ -518,6 +520,11 @@ def main():
         ],
         license="BSD License",
         keywords="pytorch, machine learning",
+        entry_points={
+            'torch.backends': [
+                'torch_npu = torch_npu:_autoload',
+            ],
+        }
     )
 
 

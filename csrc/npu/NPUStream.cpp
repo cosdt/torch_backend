@@ -2,7 +2,6 @@
 #include <atomic>
 #include <cstring>
 #include <iostream>
-#include <sstream>
 #include <vector>
 
 #include "csrc/npu/NPUFunctions.h"
@@ -10,7 +9,7 @@
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/adapter/acl_device_adapter.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/NPUGuard.h"
+#include "csrc/npu/NPUGuard.h"
 
 #define C10_COMPILE_TIME_MAX_NPUS 16
 
@@ -164,7 +163,7 @@ static void initSingleStream(int p, c10::DeviceIndex device_index, int i) {
   auto& stream = streams[p][device_index][i];
   auto pri = -p; // lower number is higher priority
 
-  NPU_CHECK_SUPPORTED_OR_ERROR(acl::AclrtCreateStreamWithConfig(
+  NPU_CHECK_SUPPORTED_OR_ERROR(aclrtCreateStreamWithConfig(
         &stream,
         0,
         (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC)));
@@ -336,7 +335,7 @@ aclError DestroyUsedStreams() {
         if (stream == nullptr) {
           continue;
         }
-        aclError acl_ret = acl::AclrtDestroyStreamForce(stream);
+        aclError acl_ret = aclrtDestroyStreamForce(stream);
         if (acl_ret != ACL_ERROR_NONE) {
           return acl_ret;
         }

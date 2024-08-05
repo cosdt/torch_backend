@@ -396,7 +396,7 @@ def gen_dispatcher_registrations(
 #include "npu/framework/interface/EnvVariables.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/utils/ForceAclnnList.h"
-#include "op_plugin/OpInterface.h"
+#include "npu/aten/OpInterface.h"
 """
     static_template = CodeTemplate(
         """\
@@ -527,7 +527,7 @@ def gen_quantize_register(
 
     native_func_header = """\
 #include <ATen/ops/quantize_per_tensor.h>
-#include "op_plugin/OpInterface.h"
+#include "npu/aten/OpInterface.h"
 """
     static_template = CodeTemplate(
         """\
@@ -600,7 +600,7 @@ def gen_functionalization(fm: FileManager,
             "func_registrations",
         },
     )
-    return 
+    return
 
 
 def gen_target_registration(
@@ -718,7 +718,7 @@ def run(source_yaml: str, output_dir: str, dry_run: bool,
 
         pta_template_dir = os.path.join(pathlib.Path(__file__).parent.absolute(), "templates")
         fm = FileManager(install_dir=output_dir, template_dir=pta_template_dir, dry_run=dry_run)
-        
+
         custom_functions = parse_custom_yaml(source_yaml, tags_yaml_path).native_functions
         grouped_custom_functions = get_grouped_native_functions_optional_out(custom_functions)
         gen_functionalization(fm, selector, grouped_custom_functions)

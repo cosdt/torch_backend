@@ -2,12 +2,9 @@
 #include <unistd.h>
 #include "npu/core/NPUQueue.h"
 
-#include "csrc/npu/NPUEventManager.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
-#include "npu/framework/OpCmdHelper.h"
 #include "npu/framework/OpParamMaker.h"
-#include "npu/framework/aoe/AoeUtils.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
 #include "npu/framework/utils/NpuUtils.h"
 
@@ -150,28 +147,6 @@ aclError OpCommandImpl::InnerRun(
       continue;
     }
 
-    if (at_npu::native::aoe::aoe_manager().IsAoeEnabled() &&
-        at_npu::native::aoe::aoe_manager().IsInWhitelist(name)) {
-      ret = at_npu::native::AclGenGraphAndDumpForOp(
-          name.c_str(),
-          inputSize,
-          params.inDesc.data(),
-          params.inBuffer.data(),
-          outputSize,
-          params.outDesc.data(),
-          params.outBuffer.data(),
-          params.attr,
-          ACL_ENGINE_SYS,
-          at_npu::native::aoe::aoe_manager().GetDumpGraphPath().c_str(),
-          nullptr);
-      if (ret != ACL_ERROR_NONE) {
-        C10_NPU_SHOW_ERR_MSG();
-        TORCH_CHECK(
-            false,
-            "In aoe mode, AclGenGraphAndDumpForOp failed!",
-            PTA_ERROR(ErrCode::ACL));
-      }
-    }
     if (!sync) {
       ret = aclopCompileAndExecute(
           name.c_str(),
@@ -279,26 +254,7 @@ int ExecFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
         AclSetCompileopt(aclCompileOpt::ACL_OP_JIT_COMPILE, "enable"));
     reset_flag = true;
   }
-  if (at_npu::native::aoe::aoe_manager().IsAoeEnabled() &&
-      at_npu::native::aoe::aoe_manager().IsInWhitelist(cur_paras->opType)) {
-    ret = at_npu::native::AclGenGraphAndDumpForOp(
-        cur_paras->opType,
-        cur_paras->paras.input_num,
-        cur_paras->paras.input_desc,
-        cur_paras->paras.input_data_buf,
-        cur_paras->paras.output_num,
-        cur_paras->paras.output_desc,
-        cur_paras->paras.output_data_buf,
-        cur_paras->attr,
-        ACL_ENGINE_SYS,
-        at_npu::native::aoe::aoe_manager().GetDumpGraphPath().c_str(),
-        nullptr);
-    if (ret != ACL_ERROR_NONE) {
-      ASCEND_LOGE("In aoe mode, AclGenGraphAndDumpForOp failed!");
-      C10_NPU_SHOW_ERR_MSG();
-      return ret;
-    }
-  }
+
   ret = aclopCompileAndExecute(
       cur_paras->opType,
       cur_paras->paras.input_num,
@@ -357,8 +313,6 @@ int RecordEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
         cur_paras->eventAllocatorType);
     C10_NPU_SHOW_ERR_MSG();
   }
-  c10_npu::NPUEventManager::GetInstance().DecreaseUnrecordedCount(
-      cur_paras->event);
   ASCEND_LOGI(
       "Event: aclrtRecordEvent dequeue is successfully executed, stream=%p, event=%p",
       stream,
@@ -386,8 +340,7 @@ int WaitEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
 
 int LazyDestroyEventFunc(c10_npu::queue::QueueParas* in, aclrtStream stream) {
   auto cur_paras = static_cast<c10_npu::queue::EventParas*>(in->paramVal);
-  aclError ret =
-      c10_npu::NPUEventManager::GetInstance().LazyDestroy(cur_paras->event);
+  aclError ret = aclrtDestroyEvent(cur_paras->event);
   if (ret != ACL_ERROR_NONE) {
     ASCEND_LOGE(
         "LazyDestroy error! ret = %d, eventAllocatorType = %d",

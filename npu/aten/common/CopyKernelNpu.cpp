@@ -4,13 +4,12 @@
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/core/NPUBridge.h"
 #include "csrc/npu/NPUStorageImpl.h"
-#include "npu/core/NPUGuard.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
 #include "npu/framework/utils/OpAdapter.h"
-#include "op_plugin/OpInterface.h"
+#include "npu/aten/OpInterface.h"
 
 namespace at_npu {
 namespace native {
@@ -24,7 +23,7 @@ void copy_d2d_by_memcpy(
     at::Tensor& dst,
     const at::Tensor& src,
     int64_t exceptSize) {
-  c10_npu::NPUGuard guard(src.device());
+  c10::DeviceGuard guard(src.device());
   int64_t size = exceptSize;
   auto dst_mem_size = StorageDescHelper::GetMemorySize(dst);
   if (exceptSize == 0) {
