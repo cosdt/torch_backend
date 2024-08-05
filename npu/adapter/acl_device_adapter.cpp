@@ -71,4 +71,16 @@ std::vector<c10::DeviceIndex> GetUsedDevices() {
   }
   return device_idx_vec;
 }
+
+void synchronize_all_device() {
+  int32_t cur_device = 0;
+  NPU_CHECK_ERROR(aclrtGetDevice(&cur_device));
+  std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
+  for (const auto deviceId : device_idx_vec) {
+    NPU_CHECK_ERROR(aclrtSetDevice(deviceId));
+    NPU_CHECK_ERROR(aclrtSynchronizeDevice());
+  }
+  NPU_CHECK_ERROR(aclrtSetDevice(cur_device));
+}
+
 } // namespace acl_adapter

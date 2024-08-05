@@ -1711,7 +1711,7 @@ class DeviceCachingAllocator {
       return;
     }
 
-    helper->deviceSynchronize(true);
+    helper->deviceSynchronize();
 
     // Repeat GC until we reach reclaim > target size.
     bool block_freed = true;
@@ -1810,7 +1810,7 @@ class DeviceCachingAllocator {
         : key.size;
     auto it = pool.blocks.lower_bound(&key);
 
-    helper->deviceSynchronize(true);
+    helper->deviceSynchronize();
 
     if (it == pool.blocks.end() || (*it)->stream != p.stream()) {
       // No single block is large enough; free multiple oversize blocks,
@@ -1847,7 +1847,7 @@ class DeviceCachingAllocator {
       bool check_error,
       const std::shared_ptr<c10::GatheredContext>& context) {
     // Make sure event deque from taskqueue, then synchronize Event
-    helper->deviceSynchronize(check_error);
+    helper->deviceSynchronize();
 
     // First ensure that all blocks that can't currently be allocated due to
     // outstanding events are returned to the pool.
@@ -2128,7 +2128,7 @@ bool force_uncached_allocator() {
 }
 
 static void uncached_delete(void* ptr) {
-  helper->deviceSynchronize(true);
+  helper->deviceSynchronize();
   NPU_CHECK_ERROR(helper->memFree(ptr));
 }
 

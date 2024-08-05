@@ -11,6 +11,7 @@
 #include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/npu/Memory.h"
 #include "torch_npu/csrc/npu/Module.h"
+#include "npu/adapter/acl_device_adapter.h"
 
 PyObject* module;
 
