@@ -5,12 +5,13 @@
 #include <torch/csrc/utils/python_numbers.h>
 
 #include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUContext.h"
 #include "csrc/npu/NPUDeviceProp.h"
+#include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUGuard.h"
 #include "torch_npu/csrc/npu/Device.h"
-#include "torch_npu/csrc/npu/Module.h"
+
+#define CHANGE_UNIT_SIZE 1024.0
 
 void RegisterNPUDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
@@ -117,6 +118,6 @@ static struct PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr}};
 
-TORCH_BACKEND_API PyMethodDef* THNPModule_device_methods() {
+PyMethodDef* THNPModule_device_methods() {
   return THNPModule_methods;
 }

@@ -1,5 +1,4 @@
-#ifndef THNP_STREAM_INC
-#define THNP_STREAM_INC
+#pragma once
 
 #include <torch/csrc/Stream.h>
 #include <torch/csrc/python_headers.h>
@@ -20,4 +19,4 @@ inline bool THNPStream_Check(PyObject* obj) {
 TORCH_BACKEND_API std::vector<c10::optional<c10_npu::NPUStream>>
 THNPUtils_PySequence_to_NPUStreamList(PyObject* obj);
 
-#endif // THNP_STREAM_INC
+TORCH_BACKEND_API PyMethodDef* THNPModule_stream_methods();
