@@ -1,16 +1,17 @@
-#include "torch_npu/csrc/core/TensorType.h"
 #include <c10/core/DeviceType.h>
 #include <torch/csrc/autograd/utils/wrap_outputs.h>
 #include <torch/csrc/utils/device_lazy_init.h>
 #include <torch/csrc/utils/python_arg_parser.h>
 
-namespace torch_npu {
-namespace utils {
+#include "python_tensor.h"
+
+namespace torch::backend::tensor {
 
 using namespace at;
 using namespace torch::autograd;
 
 static Backend backend = c10::Backend::PrivateUse1;
+
 struct PyTensorType {
   PyTypeObject py_type;
   THPDtype* dtype;
@@ -31,14 +32,14 @@ static_assert(
     std::is_standard_layout<PyTensorType>::value,
     "PyTensorType must be standard layout");
 
-static void py_bind_tensor_types(const std::vector<PyTensorType>& tensor_types);
-
 static PyObject* Tensor_new(
     PyTypeObject* type,
     PyObject* args,
     PyObject* kwargs) {
   HANDLE_TH_ERRORS
   auto& tensor_type = *((PyTensorType*)type);
+  torch::utils::device_lazy_init(at::kPrivateUse1);
+
   static auto warn_once = []() {
     auto name = c10::get_privateuse1_backend();
     std::cout
@@ -48,13 +49,14 @@ static PyObject* Tensor_new(
         << name << "') to create tensors." << std::endl;
     return true;
   }();
+
   TORCH_CHECK_TYPE(
       c10_npu::device_count() != 0,
       "type ",
       tensor_type.name,
-      " not available. Torch not compiled with npu enabled.",
+      " not available.",
       PTA_ERROR(ErrCode::TYPE))
-  torch::utils::device_lazy_init(at::kPrivateUse1);
+
   return THPVariable_Wrap(torch::utils::legacy_tensor_ctor(
       tensor_type.get_dispatch_key(),
       tensor_type.get_scalar_type(),
@@ -207,7 +209,7 @@ static THPObjectPtr get_tensor_dict() {
 
 static std::vector<PyTensorType> tensor_types;
 
-static void initialize_npu_aten_types(
+static void initialize_aten_types(
     std::vector<PyTensorType>& tensor_types,
     std::vector<ScalarType>& scalar_types) {
   tensor_types.resize(scalar_types.size());
@@ -218,35 +220,6 @@ static void initialize_npu_aten_types(
     set_type(tensor_type, scalar_type);
     set_name(tensor_type, get_name(scalar_type));
   }
-}
-
-void initialize_python_bindings(std::vector<ScalarType>& scalar_types) {
-  // Initialize the at::Type* pointers, name, and properties of the
-  // PyTensorType vector. After this call, the vector must not be resized.
-  initialize_npu_aten_types(tensor_types, scalar_types);
-
-  // Initialize the Python metaclass for the torch.FloatTensor, etc. types.
-  // The metaclass handles __instancecheck__ checks and binds the dtype
-  // property on the type objects.
-  py_initialize_metaclass(metaclass);
-
-  // Get the tp_dict of the Variable class. We copy function definitions
-  // onto each Tensor type object so that they can be accessed via e.g.
-  // `torch.npu.FloatTensor.add`.
-  auto tensor_dict = get_tensor_dict();
-
-  // Initialize each Python type object. e.g. torch.npu.FloatTensor,
-  // torch.npu.DoubleTensor, etc.
-  for (auto& tensor_type : tensor_types) {
-    py_initialize_tensor_type(
-        tensor_type.py_type, tensor_type.name, tensor_dict.get());
-  }
-
-  // Add the type objects to their corresponding modules. e.g.
-  // torch.npu.FloatTensor is added to the `torch_npu` module as
-  // `FloatTensor`. Also add all the type objects to the set
-  // torch_npu._tensor_classes.
-  py_bind_tensor_types(tensor_types);
 }
 
 static void py_bind_tensor_types(
@@ -281,6 +254,19 @@ static void py_bind_tensor_types(
   }
 }
 
+void initialize_python_bindings(std::vector<ScalarType>& scalar_types) {
+  initialize_aten_types(tensor_types, scalar_types);
+  py_initialize_metaclass(metaclass);
+
+  auto tensor_dict = get_tensor_dict();
+  for (auto& tensor_type : tensor_types) {
+    py_initialize_tensor_type(
+        tensor_type.py_type, tensor_type.name, tensor_dict.get());
+  }
+
+  py_bind_tensor_types(tensor_types);
+}
+
 // Callback for python part. Used for additional initialization of python
 // classes
 static PyObject* generate_tensor_types(PyObject* _unused, PyObject* args) {
@@ -303,16 +289,16 @@ static PyObject* generate_tensor_types(PyObject* _unused, PyObject* args) {
   END_HANDLE_TH_ERRORS
 }
 
-// autograd methods on torch._C
-static PyMethodDef TorchNpuExtensionMethods[] = {
+static PyMethodDef THNPModule_methods[] = {
     {"generate_tensor_types",
      (PyCFunction)generate_tensor_types,
      METH_VARARGS,
      nullptr},
     {nullptr, nullptr, 0, nullptr}};
 
-PyMethodDef* npu_extension_functions() {
-  return TorchNpuExtensionMethods;
+PyMethodDef* python_functions() {
+  return THNPModule_methods;
 }
-} // namespace utils
-} // namespace torch_npu
+
+} // namespace torch::backend::tensor
+
