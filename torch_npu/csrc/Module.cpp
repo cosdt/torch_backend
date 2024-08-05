@@ -1,8 +1,8 @@
 #include <ATen/Parallel.h>
 #include <Python.h>
-#include <torch/csrc/profiler/python/combined_traceback.h>
 #include <torch/csrc/utils.h>
-#include "torch_npu/csrc/core/AutocastMode.h"
+#include <torch/csrc/profiler/python/combined_traceback.h>
+
 #include "torch_npu/csrc/core/TensorType.h"
 #include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/npu/Event.h"
@@ -25,8 +25,6 @@ PyObject* initModule() {
   THPUtils_addPyMethodDefs(methods, THNPModule_stream_methods());
   THPUtils_addPyMethodDefs(
       methods, torch_npu::utils::npu_extension_functions());
-  THPUtils_addPyMethodDefs(
-      methods, torch_npu::autocast::autocast_mode_functions());
   static struct PyModuleDef torchnpu_module = {
       PyModuleDef_HEAD_INIT, "torch_npu._C", nullptr, -1, methods.data()};
   module = PyModule_Create(&torchnpu_module);

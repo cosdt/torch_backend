@@ -1,4 +1,4 @@
-__all__ = [
+__all__ = [  # noqa 405
     "is_initialized",
     "init",
     "synchronize",
@@ -84,7 +84,7 @@ from torch._utils import classproperty
 
 import torch_npu
 from torch_npu.utils.error_code import ErrCode, pta_error
-from .utils import (
+from .utils import (  # noqa 401
     synchronize,
     device_count,
     can_device_access_peer,
@@ -107,6 +107,7 @@ from .utils import (
     clear_npu_overflow_flag,
 )
 from .streams import Stream, Event
+from .autocast_mode import *  # noqa 403
 
 default_generators: Tuple[torch._C.Generator] = ()  # type: ignore[assignment]
 
@@ -203,7 +204,7 @@ def _after_fork(arg):
     if _initialized and _original_pid != os.getpid():
         _initialized = False
         _is_internal_in_bad_fork = True
-        torch_npu._C._npu_set_run_yet_variable_to_false()
+        torch_npu._C._npu_set_run_yet_variable_to_false()  # type: ignore[attr-defined]
 
 
 _register_after_fork(_after_fork, _after_fork)
@@ -232,7 +233,7 @@ def _get_generator(device: torch.device) -> torch._C.Generator:
     idx = device.index
     if idx is None:
         idx = current_device()
-    return torch.npu.default_generators[idx]
+    return torch.npu.default_generators[idx]  # type: ignore[attr-defined]
 
 
 def _set_rng_state_offset(
