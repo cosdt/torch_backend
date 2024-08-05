@@ -46,27 +46,13 @@ inline c10::DeviceType get_npu_device_type() {
 
 inline void maybe_initialize_npu(const at::TensorOptions& options) {
   if (torch_npu::utils::is_npu(options)) {
-    if (!c10_npu::NpuSysCtrl::IsInitializeSuccess(options.device().index())) {
-      TORCH_CHECK(
-          false,
-          "npu device ",
-          options.device().index(),
-          " init failed.",
-          PTA_ERROR(ErrCode::INTERNAL));
-    }
+    c10_npu::TryInitDevice(options.device().index());
   }
 }
 
 inline void maybe_initialize_npu(const at::Device& device) {
   if (torch_npu::utils::is_npu(device)) {
-    if (!c10_npu::NpuSysCtrl::IsInitializeSuccess(device.index())) {
-      TORCH_CHECK(
-          false,
-          "npu device ",
-          device.index(),
-          " init failed.",
-          PTA_ERROR(ErrCode::INTERNAL));
-    }
+    c10_npu::TryInitDevice(device.index());
   }
 }
 

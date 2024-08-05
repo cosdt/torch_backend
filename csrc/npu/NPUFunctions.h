@@ -38,6 +38,10 @@ C10_BACKEND_API void warn_or_error_on_sync();
 // Raw CUDA device management functions
 C10_BACKEND_API aclError GetDeviceCount(int* dev_count);
 
+C10_BACKEND_API aclError InitDevice();
+
+C10_BACKEND_API void FinalizeDevice();
+
 C10_BACKEND_API aclError GetDevice(c10::DeviceIndex* device);
 
 C10_BACKEND_API aclError SetDevice(c10::DeviceIndex device);

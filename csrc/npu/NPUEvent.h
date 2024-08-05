@@ -22,7 +22,7 @@ struct C10_BACKEND_API NPUEvent {
 
   ~NPUEvent() {
     try {
-      if (is_created_ && c10_npu::NpuSysCtrl::GetInstance().GetInitFlag()) {
+      if (is_created_) {
         NPUGuard guard(device_index_);
         NPU_CHECK_ERROR(aclrtDestroyEvent(event_));
       }

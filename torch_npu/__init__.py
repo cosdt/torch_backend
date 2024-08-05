@@ -76,16 +76,6 @@ supported_dtypes = [
 torch_npu._C.generate_tensor_types(supported_dtypes)
 
 
-# NPU exit, need to synchronize devices
-def _npu_shutdown():
-    torch_npu._C._npu_shutdown()
-    _except_handler.handle_exception()
-
-
-# register npu shutdown hook on exit
-atexit.register(_npu_shutdown)
-
-
 # This function is an entrypoint called by PyTorch
 # when running 'import torch'. There is no need to do anything.
 # See this RFC: https://github.com/pytorch/pytorch/pull/127074
