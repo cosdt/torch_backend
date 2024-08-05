@@ -70,14 +70,15 @@ GPU integration and accelerating the development of high-performance machine lea
     |   |-- distributed       // Distributed
     |   `-- npu               // NPU-related implementations in PyTorch, theoretically only includes interface calls
     |-- npu                   // Strongly device-specific, barely involves PyTorch-related concepts (except ATen), provides low-level APIs for csrc
-    |   |-- acl
+    |   |-- acl               // Will be deleted later
     |   |   |-- include
     |   |   `-- libs
-    |   |-- aten
+    |   |-- aten              // operator implementation
     |   |   |-- common
     |   |   |-- mirror
-    |   |   `-- ops
-    |   |-- core
+    |   |   |-- ops
+    |   |   `-- utils
+    |   |-- core 
     |   |   |-- interface
     |   |   |-- register
     |   |   `-- sys_ctrl
@@ -88,15 +89,13 @@ GPU integration and accelerating the development of high-performance machine lea
     |       |-- interface
     |       `-- utils
     |-- third_party
-    |   |-- googletest
-    |   `-- op-plugin         // Device-specific
+    |   `-- googletest        // Device-specific
     `-- torch_npu             // Python interface implementation for PyTorch
         |-- csrc              // Python & C++ binding
         |   |-- core          // General capabilities, only provided for Python
         |   `-- npu           // Python bindings for all low-level capabilities needed to be exposed to Python for NPU
         |-- meta              // Meta operator registration
         |-- npu               // Encapsulation of functional modules related to NPU devices
-        |-- testing
         `-- utils
 ```
 
@@ -104,13 +103,11 @@ GPU integration and accelerating the development of high-performance machine lea
 
 Following modules you may want to switch to your deivce specific implementation in order to make it works.
 
-
 ## Documents
 
 ### API Documents
 
 [C++ API](https://cosdt.github.io/torch_npu/cpp_html/index.html)
-
 
 ## License
 
