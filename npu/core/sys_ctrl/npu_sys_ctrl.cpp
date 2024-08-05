@@ -9,6 +9,7 @@
 #include "npu/core/register/OptionRegister.h"
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/interface/AclOpCompileInterface.h"
+#include "csrc/npu/NPUCachingHostAllocator.h"
 #ifdef SUCCESS
 #undef SUCCESS
 #endif
@@ -60,6 +61,10 @@ NpuSysCtrl::NpuSysCtrl(c10::DeviceIndex device_id) : need_finalize_(true){
 }
 
 NpuSysCtrl::~NpuSysCtrl() {
+
+  NPUCachingHostAllocator_emptyCache();
+  c10_npu::NPUCachingAllocator::emptyCache();
+
   NPU_CHECK_WARN(c10_npu::DestroyUsedStreams());
   NPU_CHECK_WARN(c10_npu::ResetUsedDevices());
   // Maintain a basic point of view, who applies for the resource, the

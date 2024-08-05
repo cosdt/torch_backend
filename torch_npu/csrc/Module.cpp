@@ -28,46 +28,6 @@ void AddPyMethodDefs(std::vector<PyMethodDef>& vector, PyMethodDef* methods) {
   }
 }
 
-PyObject* THPModule_npu_shutdown(PyObject* /* unused */) {
-  // cudaFree is blocking and will synchronize across all kernels executing
-  // on the current device, while aclrtFree Free device memory immediately.
-  // aclrtSynchronizeDevice should be called before aclrtFree to ensure that
-  // all of op tasks completed before device memory free.
-  ASCEND_LOGI("NPU shutdown begin.");
-  // Return aclrtSynchronizeDevice result. If sync device fails, release host
-  // resources forcibly, only record WARN logs when acl interface of stream
-  // or event fails.
-  bool success = true;
-  try {
-    ASCEND_LOGI("NPU shutdown synchronize device.");
-    success = c10_npu::npuSynchronizeUsedDevices(false);
-  } catch (std::exception& e) {
-    ASCEND_LOGE("npuSynchronizeDevice failed err=:%s", e.what());
-    success = false;
-  }
-  if (!success) {
-    ASCEND_LOGE("NPU shutdown synchronize device failed.");
-  }
-
-  NPUCachingHostAllocator_emptyCache();
-  try {
-    ASCEND_LOGI("NPU shutdown NPUCachingAllocator emptyCache.");
-    c10_npu::NPUCachingAllocator::emptyCache(success);
-  } catch (std::exception& e) {
-    ASCEND_LOGE("NPUCachingAllocator::emptyCache failed err=:%s", e.what());
-  }
-
-  Py_RETURN_NONE;
-}
-
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
-static PyMethodDef TorchNpuMethods[] = {
-    {"_npu_shutdown",
-     (PyCFunction)THPModule_npu_shutdown,
-     METH_NOARGS,
-     nullptr},
-    {nullptr, nullptr, 0, nullptr}};
-
 void THNPStream_init(PyObject* module);
 void THNPEvent_init(PyObject* module);
 
@@ -80,7 +40,6 @@ extern "C" C10_EXPORT PyObject* initModule();
 PyObject* initModule() {
   at::internal::lazy_init_num_threads();
 
-  AddPyMethodDefs(methods, TorchNpuMethods);
   AddPyMethodDefs(methods, THNPModule_device_methods());
   AddPyMethodDefs(methods, THNPModule_memory_methods());
   AddPyMethodDefs(methods, THNPModule_get_methods());
