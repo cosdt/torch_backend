@@ -212,10 +212,6 @@ C10_BACKEND_API NPUStream getDefaultNPUStream(c10::DeviceIndex device_index = -1
 C10_BACKEND_API NPUStream getCurrentNPUStream(c10::DeviceIndex device_index = -1);
 
 
-C10_BACKEND_API bool npuSynchronizeDevice(bool check_error = true);
-
-C10_BACKEND_API bool npuSynchronizeUsedDevices(bool check_error = true);
-
 /**
  * Set the current stream on the device of the passed in stream to be
  * the passed in stream.  Yes, you read that right: this function

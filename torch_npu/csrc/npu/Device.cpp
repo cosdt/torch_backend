@@ -44,7 +44,7 @@ void BindGetDeviceProperties(PyObject* module) {
 PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
   pybind11::gil_scoped_release no_gil;
-  c10_npu::npuSynchronizeDevice();
+  c10_npu::device_synchronize();
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }

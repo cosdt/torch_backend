@@ -11,6 +11,7 @@
 #include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/npu/Memory.h"
 #include "torch_npu/csrc/npu/Module.h"
+#include "npu/adapter/acl_device_adapter.h"
 
 PyObject* module;
 
@@ -41,22 +42,14 @@ PyObject* THPModule_npu_shutdown(PyObject* /* unused */) {
   // Return aclrtSynchronizeDevice result. If sync device fails, release host
   // resources forcibly, only record WARN logs when acl interface of stream
   // or event fails.
-  bool success = true;
-  try {
-    ASCEND_LOGI("NPU shutdown synchronize device.");
-    success = c10_npu::npuSynchronizeUsedDevices(false);
-  } catch (std::exception& e) {
-    ASCEND_LOGE("npuSynchronizeDevice failed err=:%s", e.what());
-    success = false;
-  }
-  if (!success) {
-    ASCEND_LOGE("NPU shutdown synchronize device failed.");
-  }
+  ASCEND_LOGI("NPU shutdown synchronize device.");
+  acl_adapter::synchronize_all_device();
 
   NPUCachingHostAllocator_emptyCache();
+ 
   try {
     ASCEND_LOGI("NPU shutdown NPUCachingAllocator emptyCache.");
-    c10_npu::NPUCachingAllocator::emptyCache(success);
+    c10_npu::NPUCachingAllocator::emptyCache();
   } catch (std::exception& e) {
     ASCEND_LOGE("NPUCachingAllocator::emptyCache failed err=:%s", e.what());
   }
