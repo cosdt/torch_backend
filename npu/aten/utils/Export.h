@@ -20,7 +20,7 @@
 #define OP_PLUGIN_HIDDEN
 #endif // _MSC_VER
 #if defined(__GNUC__)
-#define OP_PLUGIN_HIDDEN __attribute__((visibility("default")))
+#define OP_PLUGIN_HIDDEN __attribute__((visibility("hidden")))
 #else // __GNUC__
 #define OP_PLUGIN_HIDDEN
 #endif // __GNUC__
