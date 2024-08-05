@@ -30,4 +30,6 @@ aclError ResetUsedDevices();
 
 std::vector<c10::DeviceIndex> GetUsedDevices();
 
+void synchronize_all_device();
+
 } // namespace acl_adapter

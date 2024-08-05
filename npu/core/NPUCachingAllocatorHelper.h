@@ -34,7 +34,7 @@ class CachingAllocatorHelper
   }
 
   virtual void deviceSynchronize() override {
-    c10_npu::synchronize_device();
+    c10_npu::device_synchronize();
   }
 
   int memFree(void* devPtr) override {

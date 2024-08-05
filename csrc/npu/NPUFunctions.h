@@ -28,9 +28,7 @@ C10_BACKEND_API c10::DeviceIndex current_device();
 
 C10_BACKEND_API void set_device(c10::DeviceIndex device);
 
-C10_BACKEND_API void synchronize_device();
-
-C10_BACKEND_API void synchronize_all_device();
+C10_BACKEND_API void device_synchronize();
 
 // this function has to be called from callers performing npu synchronizing
 // operations, to raise proper error or warning
