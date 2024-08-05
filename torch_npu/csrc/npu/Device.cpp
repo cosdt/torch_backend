@@ -11,6 +11,7 @@
 #include "csrc/npu/NPUGuard.h"
 #include "torch_npu/csrc/npu/Device.h"
 #include "torch_npu/csrc/npu/Module.h"
+#define CHANGE_UNIT_SIZE 1024.0
 
 void RegisterNPUDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
