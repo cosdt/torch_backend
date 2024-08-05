@@ -22,7 +22,7 @@
 #include "csrc/core/EventPool.h"
 #include "csrc/npu/NPUFunctions.h"
 
-namespace c10_backend::CachingAllocator {
+namespace c10::backend::CachingAllocator {
 
 C10_DEFINE_REGISTRY(FreeNPUMemoryCallbacksRegistry, FreeMemoryCallback);
 
@@ -2033,7 +2033,8 @@ class DeviceCachingAllocator {
       for (auto& stream : streams) {
         setDevice(stream.device_index());
 
-        EventPool<c10::Event>::Event event = create_event_internal(stream.device_index());
+        EventPool<c10::Event>::Event event =
+            create_event_internal(stream.device_index());
         event->record(stream);
 
         block->event_count++;
@@ -2435,4 +2436,4 @@ BackendStaticInitializer backend_static_initializer;
 void registerHelper(CachingAllocatorHelper* helper_) {
   helper = helper_;
 }
-} // namespace c10_backend::CachingAllocator
+} // namespace c10::backend::CachingAllocator

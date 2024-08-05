@@ -12,7 +12,7 @@
 namespace c10_npu::NPUCachingAllocator {
 
 class CachingAllocatorHelper
-    : public c10_backend::CachingAllocator::CachingAllocatorHelper {
+    : public c10::backend::CachingAllocator::CachingAllocatorHelper {
  public:
   void insertEventWrapper(c10::DeviceIndex device, std::function<void()> fn)
       override {

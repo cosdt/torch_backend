@@ -69,8 +69,8 @@ torch::CapturedTraceback* getFromContext(
 PyObject* THNPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
 
-  using c10_backend::CachingAllocator::BlockInfo;
-  using c10_backend::CachingAllocator::SegmentInfo;
+  using c10::backend::CachingAllocator::BlockInfo;
+  using c10::backend::CachingAllocator::SegmentInfo;
 
   py::str device_s = "device";
   py::str address_s = "address";
@@ -164,7 +164,7 @@ PyObject* THNPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
   py::str oom_s = "oom";
   py::str device_free_s = "device_free";
 
-  using namespace c10_backend::CachingAllocator;
+  using namespace c10::backend::CachingAllocator;
 
   auto action_to_str = [&](TraceEntry::Action action) {
     switch (action) {
@@ -294,10 +294,10 @@ PyObject* THNPModule_memoryStats(PyObject* _unused, PyObject* arg) {
       PTA_ERROR(ErrCode::PARAM));
   const int device = (int)THPUtils_unpackLong(arg);
 
-  using c10_backend::CachingAllocator::DeviceStats;
-  using c10_backend::CachingAllocator::Stat;
-  using c10_backend::CachingAllocator::StatArray;
-  using c10_backend::CachingAllocator::StatType;
+  using c10::backend::CachingAllocator::DeviceStats;
+  using c10::backend::CachingAllocator::Stat;
+  using c10::backend::CachingAllocator::StatArray;
+  using c10::backend::CachingAllocator::StatType;
 
   const auto statToDict = [](const Stat& stat) {
     py::dict dict;

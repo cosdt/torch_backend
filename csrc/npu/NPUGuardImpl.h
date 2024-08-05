@@ -14,7 +14,7 @@
 
 namespace c10_npu {
 namespace impl {
-struct NPUGuardImpl final : public c10_backend::impl::PrivateUse1GuardImpl {
+struct NPUGuardImpl final : public c10::backend::impl::PrivateUse1GuardImpl {
   NPUGuardImpl() = default;
 
   explicit NPUGuardImpl(c10::DeviceType t) {

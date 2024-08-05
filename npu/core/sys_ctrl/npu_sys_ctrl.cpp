@@ -40,9 +40,9 @@ NpuSysCtrl::NpuSysCtrl(c10::DeviceIndex device_id) : need_finalize_(true){
 
   // Init allocator
   static c10_npu::NPUCachingAllocator::CachingAllocatorHelper helper;
-  c10_backend::CachingAllocator::registerHelper(&helper);
+  c10::backend::CachingAllocator::registerHelper(&helper);
   const auto num_devices = c10_npu::device_count_ensure_non_zero();
-  c10_backend::CachingAllocator::init(num_devices);
+  c10::backend::CachingAllocator::init(num_devices);
 
   c10_npu::NPUCachingAllocator::init(c10_backend::CachingAllocator::get());
 

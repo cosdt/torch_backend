@@ -4,7 +4,7 @@
 
 namespace c10_npu::NPUCachingAllocator {
 
-using namespace c10_backend::CachingAllocator;
+using namespace c10::backend::CachingAllocator;
 
 class NPUAllocator : public c10::Allocator {
  public:

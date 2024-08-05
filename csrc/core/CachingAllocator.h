@@ -6,7 +6,7 @@
 #include <c10/util/SmallVector.h>
 #include <atomic>
 
-namespace c10_backend::CachingAllocator {
+namespace c10::backend::CachingAllocator {
 
 // Caching allocator will execute every registered callback if it unable to find
 // block inside of already allocated area.
@@ -295,4 +295,4 @@ inline void attachOutOfMemoryObserver(OutOfMemoryObserver observer) {
   return get()->attachOutOfMemoryObserver(observer);
 }
 
-} // namespace c10_backend::CachingAllocator
+} // namespace c10::backend::CachingAllocator

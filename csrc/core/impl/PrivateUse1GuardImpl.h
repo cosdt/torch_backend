@@ -4,7 +4,7 @@
 #include <c10/core/impl/InlineDeviceGuard.h>
 #include <c10/macros/Macros.h>
 
-namespace c10_backend::impl {
+namespace c10::backend::impl {
 
 /**
  * All classes which inherit from PrivateUse1GuardImpl should be declared
@@ -24,4 +24,4 @@ struct PrivateUse1GuardImpl : public c10::impl::DeviceGuardImplInterface {
   }
 };
 
-} // namespace c10_backend::impl
+} // namespace c10::backend::impl

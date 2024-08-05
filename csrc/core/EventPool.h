@@ -4,7 +4,7 @@
 #include <c10/util/Exception.h>
 #include <mutex>
 
-namespace c10_backend {
+namespace c10::backend {
 
 // Note: create device events when concurrently invoked from multiple threads
 // can be very expensive (at least on certain device/driver combinations). Thus,
@@ -58,4 +58,4 @@ class EventPool {
   std::vector<PerDevicePool> pools_;
   std::function<std::unique_ptr<T>()> create_event_;
 };
-} // namespace c10_backend
+} // namespace c10::backend
