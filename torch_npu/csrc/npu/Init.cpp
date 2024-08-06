@@ -6,6 +6,8 @@
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUGeneratorImpl.h"
 
+namespace torch::backend::init {
+
 static PyObject* THNPModule_initExtension(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS {
     pybind11::gil_scoped_release no_gil;
@@ -40,8 +42,6 @@ static PyObject* THNPModule_initExtension(PyObject* self, PyObject* noargs) {
 static PyMethodDef THNPModule_methods[] = {
     {"_npu_init", (PyCFunction)THNPModule_initExtension, METH_NOARGS, nullptr},
     {nullptr, nullptr, 0, nullptr}};
-
-namespace torch::backend::init {
 
 PyMethodDef* python_functions() {
   return THNPModule_methods;

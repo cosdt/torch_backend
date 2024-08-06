@@ -14,6 +14,8 @@
 
 #define CHANGE_UNIT_SIZE 1024.0
 
+namespace torch::backend::device {
+
 void RegisterNPUDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   py::class_<c10::npu::NPUDeviceProp>(m, "_NPUDeviceProperties")
@@ -119,8 +121,6 @@ static struct PyMethodDef THNPModule_methods[] = {
      METH_VARARGS,
      nullptr},
     {nullptr}};
-
-namespace torch::backend::device {
 
 PyMethodDef* python_functions() {
   return THNPModule_methods;

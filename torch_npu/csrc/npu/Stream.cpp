@@ -5,6 +5,8 @@
 #include <torch/csrc/THP.h>
 #include "csrc/npu/NPUGuard.h"
 
+namespace torch::backend::stream {
+
 PyObject* THNPStreamClass = nullptr;
 
 static PyObject* THNPStream_pynew(
@@ -341,8 +343,6 @@ static struct PyMethodDef THNPModule_methods[] = {
      METH_VARARGS | METH_KEYWORDS,
      nullptr},
     {nullptr}};
-
-namespace torch::backend::stream {
 
 PyMethodDef* python_functions() {
   return THNPModule_methods;

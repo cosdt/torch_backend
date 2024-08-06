@@ -5,13 +5,13 @@
 #include "csrc/core/Macros.h"
 #include "csrc/npu/NPUStream.h"
 
+namespace torch::backend::stream {
+
 struct THNPStream : THPStream {
   c10::npu::NPUStream npu_stream;
 };
 
 TORCH_BACKEND_API void THNPStream_init(PyObject* module);
-
-namespace torch::backend::stream {
 
 TORCH_BACKEND_API PyMethodDef* python_functions();
 

@@ -70,14 +70,18 @@ static PyObject* THNPEvent_get_device(THNPEvent* self, void* unused) {
   END_HANDLE_TH_ERRORS
 }
 
-static PyObject* THNPEvent_record(THNPEvent* self, THNPStream* stream) {
+static PyObject* THNPEvent_record(
+    THNPEvent* self,
+    torch::backend::stream::THNPStream* stream) {
   HANDLE_TH_ERRORS
   self->npu_event.record(stream->npu_stream);
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }
 
-static PyObject* THNPEvent_wait(THNPEvent* self, THNPStream* stream) {
+static PyObject* THNPEvent_wait(
+    THNPEvent* self,
+    torch::backend::stream::THNPStream* stream) {
   HANDLE_TH_ERRORS {
     pybind11::gil_scoped_release no_gil;
     self->npu_event.block(stream->npu_stream);

@@ -7,6 +7,8 @@
 #include <torch/csrc/utils/python_numbers.h>
 #include "csrc/npu/NPUCachingAllocator.h"
 
+namespace torch::backend::memory {
+
 PyObject* THNPModule_setMemoryFraction(PyObject* _unused, PyObject* args) {
   HANDLE_TH_ERRORS
   PyObject* fraction_o = nullptr;
@@ -384,8 +386,6 @@ static struct PyMethodDef THNPModule_methods[] = {
      METH_NOARGS,
      nullptr},
     {nullptr}};
-
-namespace torch::backend::memory {
 
 PyMethodDef* python_functions() {
   return THNPModule_methods;

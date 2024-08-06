@@ -29,11 +29,11 @@ PyObject* initModule() {
       PyModuleDef_HEAD_INIT, "torch_npu._C", nullptr, -1, methods.data()};
   module = PyModule_Create(&torchnpu_module);
 
-  THNPStream_init(module);
+  torch::backend::stream::THNPStream_init(module);
   THNPEvent_init(module);
 
-  RegisterNPUDeviceProperties(module);
-  BindGetDeviceProperties(module);
+  torch::backend::device::RegisterNPUDeviceProperties(module);
+  torch::backend::device::BindGetDeviceProperties(module);
   torch::installCapturedTracebackPython();
   return module;
 }
