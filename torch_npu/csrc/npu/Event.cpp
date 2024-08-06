@@ -8,6 +8,8 @@
 #include "torch_npu/csrc/npu/Event.h"
 #include "torch_npu/csrc/npu/Stream.h"
 
+namespace torch::backend::event {
+
 PyObject* THNPEventClass = nullptr;
 
 static PyObject* THNPEvent_pynew(
@@ -172,7 +174,7 @@ PyTypeObject THNPEventType = {
     THNPEvent_pynew, /* tp_new */
 };
 
-void THNPEvent_init(PyObject* module) {
+void init(PyObject* module) {
   THNPEventClass = (PyObject*)&THNPEventType;
   if (PyType_Ready(&THNPEventType) < 0) {
     throw python_error();
@@ -183,3 +185,5 @@ void THNPEvent_init(PyObject* module) {
     throw python_error();
   }
 }
+
+} // namespace torch::backend::event

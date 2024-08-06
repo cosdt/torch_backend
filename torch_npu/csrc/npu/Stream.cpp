@@ -198,7 +198,7 @@ PyTypeObject THNPStreamType = {
     THNPStream_pynew, /* tp_new */
 };
 
-void THNPStream_init(PyObject* module) {
+void init(PyObject* module) {
   Py_INCREF(THPStreamClass);
   THNPStreamType.tp_base = THPStreamClass;
   THNPStreamClass = (PyObject*)&THNPStreamType;

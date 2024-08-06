@@ -16,7 +16,7 @@
 
 namespace torch::backend::device {
 
-void RegisterNPUDeviceProperties(PyObject* module) {
+void registerDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   py::class_<c10::npu::NPUDeviceProp>(m, "_NPUDeviceProperties")
       .def_readonly("name", &c10::npu::NPUDeviceProp::name)
@@ -35,7 +35,7 @@ void RegisterNPUDeviceProperties(PyObject* module) {
   });
 }
 
-void BindGetDeviceProperties(PyObject* module) {
+void bindGetDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   m.def(
       "_npu_getDeviceProperties",
@@ -43,6 +43,11 @@ void BindGetDeviceProperties(PyObject* module) {
         return c10::npu::getDeviceProperties(deviceid);
       },
       py::return_value_policy::reference);
+}
+
+void init(PyObject* module) {
+  registerDeviceProperties(module);
+  bindGetDeviceProperties(module);
 }
 
 PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {

@@ -11,6 +11,8 @@
 #include "torch_npu/csrc/npu/Memory.h"
 #include "torch_npu/csrc/npu/Stream.h"
 
+#define BACKEND_MODULE_NAME "torch_npu._C"
+
 PyObject* module;
 static std::vector<PyMethodDef> methods;
 
@@ -25,15 +27,14 @@ PyObject* initModule() {
   THPUtils_addPyMethodDefs(methods, torch::backend::stream::python_functions());
   THPUtils_addPyMethodDefs(methods, torch::backend::tensor::python_functions());
 
-  static struct PyModuleDef torchnpu_module = {
-      PyModuleDef_HEAD_INIT, "torch_npu._C", nullptr, -1, methods.data()};
-  module = PyModule_Create(&torchnpu_module);
+  static struct PyModuleDef torch_backend_module = {
+      PyModuleDef_HEAD_INIT, BACKEND_MODULE_NAME, nullptr, -1, methods.data()};
+  module = PyModule_Create(&torch_backend_module);
 
-  torch::backend::stream::THNPStream_init(module);
-  THNPEvent_init(module);
+  torch::backend::stream::init(module);
+  torch::backend::event::init(module);
+  torch::backend::device::init(module);
 
-  torch::backend::device::RegisterNPUDeviceProperties(module);
-  torch::backend::device::BindGetDeviceProperties(module);
   torch::installCapturedTracebackPython();
   return module;
 }
