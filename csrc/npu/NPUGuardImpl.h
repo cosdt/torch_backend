@@ -10,7 +10,6 @@
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace c10::npu {
 namespace impl {
@@ -79,9 +78,6 @@ struct NPUGuardImpl final : public c10::backend::impl::PrivateUse1GuardImpl {
   void createEvent(aclrtEvent* acl_event, const c10::EventFlag flag) const {
     auto flag_ = ACL_EVENT_SYNC;
     NPU_CHECK_ERROR(aclrtCreateEventWithFlag(acl_event, flag_));
-    ASCEND_LOGI(
-        "Event: aclrtCreateEventWithFlag is successfully executed, event=%p",
-        *acl_event);
   }
 
   void destroyEvent(void* event, const c10::DeviceIndex device_index)
@@ -94,9 +90,6 @@ struct NPUGuardImpl final : public c10::backend::impl::PrivateUse1GuardImpl {
     NPU_CHECK_WARN(c10::npu::SetDevice(device_index));
     NPU_CHECK_WARN(aclrtDestroyEvent(acl_event));
     NPU_CHECK_WARN(c10::npu::SetDevice(orig_device));
-    ASCEND_LOGI(
-        "Event: aclrtDestroyEvent is successfully executed, event=%p",
-        acl_event);
   }
 
   void record(
@@ -124,15 +117,8 @@ struct NPUGuardImpl final : public c10::backend::impl::PrivateUse1GuardImpl {
     if (!npu_event) {
       auto flag_ = ACL_EVENT_SYNC;
       NPU_CHECK_ERROR(aclrtCreateEventWithFlag(&npu_event, flag_));
-      ASCEND_LOGI(
-          "Event: aclrtCreateEventWithFlag is successfully executed, event=%p",
-          npu_event);
     }
     NPU_CHECK_ERROR(aclrtRecordEvent(npu_event, npu_stream));
-    ASCEND_LOGI(
-        "Event: aclrtRecordEvent is successfully executed, stream=%p, event=%p",
-        npu_stream.stream(),
-        npu_event);
     // Makes the void* point to the (possibly just allocated) NPU event
     *event = npu_event;
 
@@ -148,10 +134,6 @@ struct NPUGuardImpl final : public c10::backend::impl::PrivateUse1GuardImpl {
     const auto orig_device = getDevice();
     setDevice(stream.device());
     NPU_CHECK_ERROR(aclrtStreamWaitEvent(npu_stream, npu_event));
-    ASCEND_LOGI(
-        "Event: aclrtStreamWaitEvent is successfully executed, stream=%p, event=%p",
-        npu_stream.stream(),
-        npu_event);
     setDevice(orig_device);
   }
 

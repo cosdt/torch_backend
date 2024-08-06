@@ -9,6 +9,7 @@
 #include "csrc/npu/NPUDeviceProp.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUGuard.h"
+
 #include "torch_npu/csrc/npu/Device.h"
 
 #define CHANGE_UNIT_SIZE 1024.0
@@ -87,8 +88,7 @@ PyObject* THNPModule_npuCanDeviceAccessPeer_wrap(
   PyObject* value_1 = nullptr;
   PyObject* value_2 = nullptr;
   if (!PyArg_ParseTuple(args, "OO", &value_1, &value_2)) {
-    throw torch::TypeError(
-        "Pybind failed to parse parameters." + PTA_ERROR(ErrCode::TYPE));
+    throw torch::TypeError("Pybind failed to parse parameters.");
   }
   c10::DeviceIndex device_id = THPUtils_unpackDeviceIndex(value_1);
   c10::DeviceIndex peer_device_id = THPUtils_unpackDeviceIndex(value_2);

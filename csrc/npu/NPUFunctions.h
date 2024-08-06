@@ -16,7 +16,6 @@
 #include "csrc/core/Macros.h"
 #include "csrc/npu/NPUDeviceProp.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/npu_log.h"
 
 namespace c10::npu {
 
@@ -55,8 +54,6 @@ C10_BACKEND_API c10::DeviceIndex MaybeExchangeDevice(c10::DeviceIndex device);
 C10_BACKEND_API void SetTargetDevice();
 
 C10_BACKEND_API aclrtContext GetDeviceContext(c10::DeviceIndex device);
-
-aclError ResetUsedDevices();
 
 enum class SyncDebugMode { L_DISABLED = 0, L_WARN, L_ERROR };
 

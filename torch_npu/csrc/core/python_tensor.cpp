@@ -54,8 +54,7 @@ static PyObject* Tensor_new(
       c10::npu::device_count() != 0,
       "type ",
       tensor_type.name,
-      " not available.",
-      PTA_ERROR(ErrCode::TYPE))
+      " not available.")
 
   return THPVariable_Wrap(torch::utils::legacy_tensor_ctor(
       tensor_type.get_dispatch_key(),
@@ -189,8 +188,7 @@ static THPObjectPtr get_tensor_dict() {
   auto tensor_type = (PyTypeObject*)tensor_class.get();
   TORCH_CHECK(
       tensor_type->tp_base,
-      "missing base type for Tensor",
-      PTA_ERROR(ErrCode::TYPE));
+      "missing base type for Tensor");
 
   auto res = THPObjectPtr(PyDict_New());
   if (!res) {

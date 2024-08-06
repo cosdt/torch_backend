@@ -10,6 +10,7 @@
 #include "npu/core/register/OptionRegister.h"
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/interface/AclOpCompileInterface.h"
+#include "npu/adapter/acl_device_adapter.h"
 #ifdef SUCCESS
 #undef SUCCESS
 #endif
@@ -65,7 +66,7 @@ NpuSysCtrl::~NpuSysCtrl() {
   c10::npu::NPUCachingAllocator::emptyCache();
 
   NPU_CHECK_WARN(c10::npu::DestroyUsedStreams());
-  NPU_CHECK_WARN(c10::npu::ResetUsedDevices());
+  NPU_CHECK_WARN(acl_adapter::ResetUsedDevices());
   // Maintain a basic point of view, who applies for the resource, the
   // resource is released by whom. If aclInit is not a PTA call, then
   // aclFinalize should not be a PTA call either.
