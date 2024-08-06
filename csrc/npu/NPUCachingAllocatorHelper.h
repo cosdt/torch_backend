@@ -7,7 +7,6 @@
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/acl/include/acl/acl_rt.h"
-#include "npu/core/npu_log.h"
 
 namespace c10::npu::NPUCachingAllocator {
 
@@ -18,10 +17,10 @@ class CachingAllocatorHelper
       override {
     aclrtContext compiler_ctx = aclrtContext();
     aclError ret_ctx = aclrtGetCurrentContext(&compiler_ctx);
-    NPU_CHECK_ERROR(aclrtSetCurrentContext(c10::npu::GetDeviceContext(device)));
+    aclrtSetCurrentContext(c10::npu::GetDeviceContext(device));
     fn();
     if (ret_ctx == ACL_ERROR_NONE) {
-      NPU_CHECK_ERROR(aclrtSetCurrentContext(compiler_ctx));
+      aclrtSetCurrentContext(compiler_ctx);
     }
   }
 

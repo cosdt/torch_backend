@@ -198,10 +198,6 @@ aclrtContext GetDeviceContext(c10::DeviceIndex device) {
   return acl_adapter::GetDeviceContext(device);
 }
 
-aclError ResetUsedDevices() {
-  return acl_adapter::ResetUsedDevices();
-}
-
 std::mutex* getFreeMutex() {
   static std::mutex npu_free_mutex;
   return &npu_free_mutex;
@@ -214,7 +210,6 @@ void get_device_properties(
   device_name = aclrtGetSocName();
   if (device_name == nullptr) {
     device_prop->name = " ";
-    ASCEND_LOGE("NPU get device name fail.");
   } else {
     device_prop->name = std::string(device_name);
   }

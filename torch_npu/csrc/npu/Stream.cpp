@@ -4,10 +4,6 @@
 #include <torch/csrc/Device.h>
 #include <torch/csrc/THP.h>
 #include "csrc/npu/NPUGuard.h"
-#include "npu/acl/include/acl/acl.h"
-#include "npu/acl/include/acl/acl_base.h"
-#include "npu/acl/include/acl/acl_rt.h"
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 PyObject* THNPStreamClass = nullptr;
 
@@ -86,19 +82,13 @@ static PyObject* THNPStream_get_npu_stream(THNPStream* self, void* unused) {
 
 static PyObject* THNPStream_get_priority(THNPStream* self, void* unused) {
   HANDLE_TH_ERRORS
-  TORCH_CHECK(
-      false,
-      "NPU dose not support Stream.get_priority() currently.",
-      PTA_ERROR(ErrCode::NOT_SUPPORT));
+  TORCH_CHECK(false, "NPU dose not support Stream.get_priority() currently.");
   END_HANDLE_TH_ERRORS
 }
 
 static PyObject* THNPStream_priority_range() {
   HANDLE_TH_ERRORS
-  TORCH_CHECK(
-      false,
-      "NPU does not support Stream.priority_range() currently.",
-      PTA_ERROR(ErrCode::NOT_SUPPORT));
+  TORCH_CHECK(false, "NPU does not support Stream.priority_range() currently.");
   END_HANDLE_TH_ERRORS
 }
 
@@ -224,14 +214,12 @@ std::vector<c10::optional<c10::npu::NPUStream>>
 THNPUtils_PySequence_to_NPUStreamList(PyObject* obj) {
   if (!PySequence_Check(obj)) {
     throw std::runtime_error(
-        "Expected a sequence in THNPUtils_PySequence_to_NPUStreamList" +
-        PTA_ERROR(ErrCode::PARAM));
+        "Expected a sequence in THNPUtils_PySequence_to_NPUStreamList");
   }
   THPObjectPtr seq = THPObjectPtr(PySequence_Fast(obj, nullptr));
   if (seq.get() == nullptr) {
     throw std::runtime_error(
-        "expected PySequence, but got " + std::string(THPUtils_typename(obj)) +
-        PTA_ERROR(ErrCode::PARAM));
+        "expected PySequence, but got " + std::string(THPUtils_typename(obj)));
   }
 
   std::vector<c10::optional<c10::npu::NPUStream>> streams;
@@ -249,8 +237,7 @@ THNPUtils_PySequence_to_NPUStreamList(PyObject* obj) {
       streams.emplace_back();
     } else {
       std::runtime_error(
-          "Unknown data type found in stream list. Need torch_npu.npu.Stream or None" +
-          PTA_ERROR(ErrCode::TYPE));
+          "Unknown data type found in stream list. Need torch_npu.npu.Stream or None");
     }
   }
   return streams;
@@ -261,9 +248,8 @@ PyObject* THNPModule_getCurrentStream_wrap(
     PyObject* device_index) {
   HANDLE_TH_ERRORS
   TORCH_CHECK(
-      THPUtils_checkLong(device_index),
-      "invalid argument to getCurrentStream",
-      PTA_ERROR(ErrCode::PARAM));
+      THPUtils_checkLong(device_index), "invalid argument to getCurrentStream");
+
   c10::DeviceIndex device = THPUtils_unpackDeviceIndex(device_index);
   auto stream = c10::npu::getCurrentNPUStream(device);
   PyObject* output_tuple = PyTuple_New(3);
@@ -286,9 +272,8 @@ PyObject* THNPModule_getDefaultStream_wrap(
     PyObject* device_index) {
   HANDLE_TH_ERRORS
   TORCH_CHECK(
-      THPUtils_checkLong(device_index),
-      "invalid argument to getDefaultStream",
-      PTA_ERROR(ErrCode::PARAM));
+      THPUtils_checkLong(device_index), "invalid argument to getDefaultStream");
+
   c10::DeviceIndex device = THPUtils_unpackDeviceIndex(device_index);
   auto stream = c10::npu::getDefaultNPUStream(device);
   PyObject* output_tuple = PyTuple_New(3);

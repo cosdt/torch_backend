@@ -7,7 +7,6 @@
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace c10::npu {
 /*
@@ -132,9 +131,6 @@ struct C10_BACKEND_API NPUEvent {
   void synchronize() const {
     if (is_created_) {
       NPU_CHECK_ERROR(aclrtSynchronizeEvent(event_));
-      ASCEND_LOGI(
-          "Event: aclrtSynchronizeEvent is successfully executed, event=%p",
-          event_);
     }
   }
 
@@ -151,9 +147,6 @@ struct C10_BACKEND_API NPUEvent {
     device_index_ = device_index;
     NPUGuard guard(device_index_);
     NPU_CHECK_ERROR(aclrtCreateEventExWithFlag(&event_, flags_));
-    ASCEND_LOGI(
-        "Event: aclrtCreateEventWithFlag is successfully executed, event=%p",
-        event_);
     is_created_ = true;
   }
 

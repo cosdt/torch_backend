@@ -20,7 +20,6 @@
 #include "csrc/core/CachingAllocator.h"
 #include "csrc/core/CachingAllocatorHelper.h"
 #include "csrc/core/EventPool.h"
-#include "csrc/npu/NPUFunctions.h"
 
 namespace c10::backend::CachingAllocator {
 
@@ -323,13 +322,12 @@ struct ExpandableSegment {
         segment_size_(size) {
     size_t device_free;
     size_t device_total;
-    NPU_CHECK_ERROR(helper->memGetInfo(&device_free, &device_total));
+    helper->memGetInfo(&device_free, &device_total);
     // we allocate enough address space for 1 1/8 the total memory on the
     // device. This allows for some cases where we have to unmap pages earlier
     // in the segment to put them at the end.
     max_handles_ = numSegments(device_total + device_total / 8);
-    NPU_CHECK_ERROR(helper->memAddressReserve(
-        &ptr_, segment_size_ * max_handles_, 0, NULL));
+    helper->memAddressReserve(&ptr_, segment_size_ * max_handles_, 0, NULL);
   }
 
   // begin must be aligned to segment_size_.
@@ -354,24 +352,23 @@ struct ExpandableSegment {
         for (auto j : c10::irange(begin, i)) {
           auto h = handles_.at(j).value();
           handles_.at(j) = c10::nullopt;
-          NPU_CHECK_ERROR(helper->memRelease(h));
+          helper->memRelease(h);
         }
         trimHandles();
         return rangeFromHandles(begin, begin);
       }
-      NPU_CHECK_ERROR(status, "memCreate");
       handles_.at(i) = handle;
     }
     for (auto i : c10::irange(begin, end)) {
-      NPU_CHECK_ERROR(helper->memMap(
+      helper->memMap(
           ptr_ + i * segment_size_,
           segment_size_,
           0,
           handles_.at(i).value(),
-          0));
+          0);
     }
-    NPU_CHECK_ERROR(helper->memSetAccess(
-        ptr_ + begin * segment_size_, (end - begin) * segment_size_, device_));
+    helper->memSetAccess(
+        ptr_ + begin * segment_size_, (end - begin) * segment_size_, device_);
     return rangeFromHandles(begin, end);
   }
 
@@ -399,7 +396,7 @@ struct ExpandableSegment {
   ~ExpandableSegment() {
     forEachAllocatedRange(
         [&](size_t begin, size_t end) { unmapHandles(begin, end); });
-    NPU_CHECK_ERROR(helper->memAddressFree(ptr_, segment_size_ * max_handles_));
+    helper->memAddressFree(ptr_, segment_size_ * max_handles_);
   }
 
  private:
@@ -411,13 +408,12 @@ struct ExpandableSegment {
     // cannot call c10::npu::stream_synchronize because
     // it might grab the GIL which can lead to a deadlock
     // Locking order must be GIL -> Allocator Lock
-    NPU_CHECK_ERROR(helper->synchronizeStream(stream_));
+    helper->synchronizeStream(stream_);
     for (auto i : c10::irange(begin, end)) {
       MemGenericAllocationHandle h = handles_.at(i).value();
       handles_.at(i) = c10::nullopt;
-      NPU_CHECK_ERROR(
-          helper->memUnmap(ptr_ + segment_size_ * i, segment_size_));
-      NPU_CHECK_ERROR(helper->memRelease(h));
+      helper->memUnmap(ptr_ + segment_size_ * i, segment_size_);
+      helper->memRelease(h);
     }
     trimHandles();
   }
@@ -557,7 +553,7 @@ class CachingAllocatorConfig {
   static CachingAllocatorConfig& instance() {
     static CachingAllocatorConfig* s_instance = ([]() {
       auto inst = new CachingAllocatorConfig();
-      const char* env = getenv("PYTORCH_NPU_ALLOC_CONF");
+      const char* env = getenv("PYTORCH_ALLOC_CONF");
       inst->parseArgs(env);
       return inst;
     })();
@@ -579,9 +575,9 @@ class CachingAllocatorConfig {
     void* ptr = nullptr;
     auto status = helper->memAddressReserve(&ptr, 512, 0, NULL, 1);
     if (status == MEM_SUCCESS) {
-      NPU_CHECK_ERROR(helper->memAddressFree(ptr, 512));
+      helper->memAddressFree(ptr, 512);
     } else {
-      TORCH_NPU_WARN_ONCE(
+      TORCH_WARN_ONCE(
           "expandable_segments feature is not supportted and "
           "the possible cause is that driver and firmware packages do not match.");
       m_expandable_segments = false;
@@ -683,10 +679,9 @@ size_t CachingAllocatorConfig::parseExpandableSegments(
       void* ptr = nullptr;
       auto status = helper->memAddressReserve(&ptr, 512, 0, NULL, 1);
       if (status == MEM_SUCCESS) {
-        NPU_CHECK_ERROR(helper->memAddressFree(ptr, 512));
+        helper->memAddressFree(ptr, 512);
       } else {
-        NPU_CHECK_SUPPORTED_OR_ERROR(status);
-        TORCH_NPU_WARN_ONCE(
+        TORCH_WARN_ONCE(
             "expandable_segments setting failure, now change to expandable_segments = false.");
         m_expandable_segments = false;
       }
@@ -737,7 +732,7 @@ void CachingAllocatorConfig::parseArgs(const char* env) {
         m_max_split_size != std::numeric_limits<size_t>::max() ||
         m_garbage_collection_threshold != 0) {
       m_expandable_segments = false;
-      TORCH_NPU_WARN_ONCE(
+      TORCH_WARN_ONCE(
           "`max_split_size_mb` or `garbage_collection_threshold` is enabled, and the "
           "`expandable_segments` is changed to `false` by default.");
     }
@@ -890,84 +885,82 @@ class DeviceCachingAllocator {
     }
 
     if (!block_found) {
-      if (params.err == MEM_ALLOCATION_ERROR) {
-        size_t device_free;
-        size_t device_total;
-        NPU_CHECK_ERROR(helper->memGetInfo(&device_free, &device_total));
+      TORCH_INTERNAL_ASSERT(params.err == MEM_ALLOCATION_ERROR);
 
-        std::string allowed_info;
-        if (set_fraction) {
-          allowed_info = format_size(allowed_memory_maximum) + " allowed; ";
-        }
-        stats.num_ooms += 1;
+      size_t device_free;
+      size_t device_total;
+      helper->memGetInfo(&device_free, &device_total);
 
-        record_trace(
-            TraceEntry::OOM,
-            device_free,
-            params.size(),
-            params.stream(),
-            params.device(),
-            std::move(context));
-        auto observers_local = oom_observers_;
-
-        // Make sure we do not have the device lock before calling our
-        // observers which might need hold the GIL
-        // It is safe to release at this point because will no longer
-        // be reading any allocator state.
-
-        lock.unlock();
-
-        for (const auto& obs : observers_local) {
-          obs(device,
-              alloc_size,
-              set_fraction ? allowed_memory_maximum : device_total,
-              device_free);
-        }
-        // "total capacity": total global memory on NPU
-        // "allowed": memory is allowed to use, which set by fraction.
-        // "already allocated": memory allocated by the program using the
-        //                      caching allocator
-        // "free": free memory as reported by the NPU API
-        // "cached": memory held by the allocator but not used by the program
-        //
-        // The "allocated" amount  does not include memory allocated outside
-        // of the caching allocator, such as memory allocated by other programs
-        // or memory held by the driver.
-        //
-        // The sum of "allocated" + "free" + "cached" may be less than the
-        // total capacity due to memory held by the driver and usage by other
-        // programs.
-        //
-        // Note that at this point free_cached_blocks has already returned all
-        // possible "cached" memory to the driver. The only remaining "cached"
-        // memory is split from a larger block that is partially in-use.
-        AT_ERROR(
-            "NPU out of memory. Tried to allocate ",
-            format_size(alloc_size),
-            " (NPU ",
-            device,
-            "; ",
-            format_size(device_total),
-            " total capacity; ",
-            format_size(
-                stats.allocated_bytes[static_cast<size_t>(StatType::AGGREGATE)]
-                    .current),
-            " already allocated; ",
-            format_size(
-                stats.active_bytes[static_cast<size_t>(StatType::AGGREGATE)]
-                    .current),
-            " current active; ",
-            format_size(device_free),
-            " free; ",
-            allowed_info,
-            format_size(
-                stats.reserved_bytes[static_cast<size_t>(StatType::AGGREGATE)]
-                    .current),
-            " reserved in total by PyTorch)",
-            " If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.");
-      } else {
-        NPU_CHECK_ERROR(params.err);
+      std::string allowed_info;
+      if (set_fraction) {
+        allowed_info = format_size(allowed_memory_maximum) + " allowed; ";
       }
+      stats.num_ooms += 1;
+
+      record_trace(
+          TraceEntry::OOM,
+          device_free,
+          params.size(),
+          params.stream(),
+          params.device(),
+          std::move(context));
+      auto observers_local = oom_observers_;
+
+      // Make sure we do not have the device lock before calling our
+      // observers which might need hold the GIL
+      // It is safe to release at this point because will no longer
+      // be reading any allocator state.
+
+      lock.unlock();
+
+      for (const auto& obs : observers_local) {
+        obs(device,
+            alloc_size,
+            set_fraction ? allowed_memory_maximum : device_total,
+            device_free);
+      }
+      // "total capacity": total global memory on NPU
+      // "allowed": memory is allowed to use, which set by fraction.
+      // "already allocated": memory allocated by the program using the
+      //                      caching allocator
+      // "free": free memory as reported by the NPU API
+      // "cached": memory held by the allocator but not used by the program
+      //
+      // The "allocated" amount  does not include memory allocated outside
+      // of the caching allocator, such as memory allocated by other programs
+      // or memory held by the driver.
+      //
+      // The sum of "allocated" + "free" + "cached" may be less than the
+      // total capacity due to memory held by the driver and usage by other
+      // programs.
+      //
+      // Note that at this point free_cached_blocks has already returned all
+      // possible "cached" memory to the driver. The only remaining "cached"
+      // memory is split from a larger block that is partially in-use.
+      AT_ERROR(
+          "NPU out of memory. Tried to allocate ",
+          format_size(alloc_size),
+          " (NPU ",
+          device,
+          "; ",
+          format_size(device_total),
+          " total capacity; ",
+          format_size(
+              stats.allocated_bytes[static_cast<size_t>(StatType::AGGREGATE)]
+                  .current),
+          " already allocated; ",
+          format_size(
+              stats.active_bytes[static_cast<size_t>(StatType::AGGREGATE)]
+                  .current),
+          " current active; ",
+          format_size(device_free),
+          " free; ",
+          allowed_info,
+          format_size(
+              stats.reserved_bytes[static_cast<size_t>(StatType::AGGREGATE)]
+                  .current),
+          " reserved in total by PyTorch)",
+          " If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.");
     }
 
     bool split_remainder = should_split(params.block, params.size());
@@ -987,8 +980,8 @@ class DeviceCachingAllocator {
 
     TORCH_INTERNAL_ASSERT(
         params.err == MEM_SUCCESS && params.block != nullptr &&
-            params.block->ptr != nullptr,
-        PTA_ERROR(ErrCode::PTR));
+        params.block->ptr != nullptr);
+
     Block* block = params.block;
     Block* remaining = nullptr;
 
@@ -1153,7 +1146,7 @@ class DeviceCachingAllocator {
   void setMemoryFraction(double fraction) {
     size_t device_free;
     size_t device_total;
-    NPU_CHECK_ERROR(helper->memGetInfo(&device_free, &device_total));
+    helper->memGetInfo(&device_free, &device_total);
     allowed_memory_maximum = static_cast<size_t>(fraction * device_total);
     set_fraction = true;
   }
@@ -1379,8 +1372,7 @@ class DeviceCachingAllocator {
       Block* to_map,
       size_t size,
       const std::shared_ptr<c10::GatheredContext>& ctx) {
-    TORCH_INTERNAL_ASSERT(
-        !to_map->mapped && size <= to_map->size, PTA_ERROR(ErrCode::VALUE));
+    TORCH_INTERNAL_ASSERT(!to_map->mapped && size <= to_map->size);
     TORCH_INTERNAL_ASSERT(
         !to_map->context_when_allocated); // unmapped blocks should not keep
                                           // history
@@ -1391,8 +1383,7 @@ class DeviceCachingAllocator {
       return false;
     }
     TORCH_INTERNAL_ASSERT(
-        mapped_range.ptr == to_map->ptr && mapped_range.size >= size,
-        PTA_ERROR(ErrCode::INTERNAL));
+        mapped_range.ptr == to_map->ptr && mapped_range.size >= size);
 
     BlockPool& pool = *to_map->pool;
     pool.unmapped.erase(to_map);
@@ -1455,7 +1446,7 @@ class DeviceCachingAllocator {
         !map_block(candidate, std::min(candidate->size, size), ctx)) {
       return nullptr;
     }
-    TORCH_INTERNAL_ASSERT(candidate->mapped, PTA_ERROR(ErrCode::INTERNAL));
+    TORCH_INTERNAL_ASSERT(candidate->mapped);
 
     while (candidate->size < size) {
       // invariant: free -> unmapped -> *
@@ -1476,9 +1467,7 @@ class DeviceCachingAllocator {
   void free_block(
       Block* block,
       const std::shared_ptr<c10::GatheredContext>& context) {
-    AT_ASSERT(
-        !block->allocated && block->event_count == 0,
-        PTA_ERROR(ErrCode::VALUE));
+    AT_ASSERT(!block->allocated && block->event_count == 0);
 
     record_trace(
         TraceEntry::FREE_COMPLETED,
@@ -1545,7 +1534,7 @@ class DeviceCachingAllocator {
       return 0;
     }
 
-    AT_ASSERT(dst->is_split() && src->is_split(), PTA_ERROR(ErrCode::VALUE));
+    AT_ASSERT(dst->is_split() && src->is_split());
 
     if (dst->prev == src) {
       dst->ptr = src->ptr;
@@ -1863,15 +1852,15 @@ class DeviceCachingAllocator {
   void release_expandable_segment(Block* block) {
     TORCH_INTERNAL_ASSERT(
         block->size == block->expandable_segment_->size(),
-        "block disagrees with segment",
-        PTA_ERROR(ErrCode::INTERNAL));
-    TORCH_INTERNAL_ASSERT(!block->mapped, PTA_ERROR(ErrCode::INTERNAL));
+        "block disagrees with segment");
+    TORCH_INTERNAL_ASSERT(!block->mapped);
+
     auto it = std::find(
         expandable_segments_.begin(),
         expandable_segments_.end(),
         block->expandable_segment_);
-    TORCH_INTERNAL_ASSERT(
-        it != expandable_segments_.end(), PTA_ERROR(ErrCode::INTERNAL));
+    TORCH_INTERNAL_ASSERT(it != expandable_segments_.end());
+
     expandable_segments_.erase(it);
     block->pool->unmapped.erase(block);
     delete block->expandable_segment_;
@@ -1883,8 +1872,7 @@ class DeviceCachingAllocator {
   void release_block(
       Block* block,
       const std::shared_ptr<c10::GatheredContext>& context) {
-    TORCH_INTERNAL_ASSERT(
-        !block->expandable_segment_, PTA_ERROR(ErrCode::VALUE));
+    TORCH_INTERNAL_ASSERT(!block->expandable_segment_);
 
     record_trace(
         TraceEntry::SEGMENT_FREE,
@@ -2029,7 +2017,7 @@ class DeviceCachingAllocator {
   void insert_events(Block* block) {
     helper->insertEventWrapper(block->device, [&]() {
       stream_set streams(std::move(block->stream_uses));
-      AT_ASSERT(block->stream_uses.empty(), PTA_ERROR(ErrCode::VALUE));
+      AT_ASSERT(block->stream_uses.empty());
       for (auto& stream : streams) {
         setDevice(stream.device_index());
 
@@ -2119,18 +2107,17 @@ class DeviceCachingAllocator {
 };
 
 bool force_uncached_allocator() {
-  static bool force_uncached =
-      getenv("PYTORCH_NO_NPU_MEMORY_CACHING") != nullptr;
+  static bool force_uncached = getenv("PYTORCH_NO_MEMORY_CACHING") != nullptr;
   if (force_uncached) {
-    TORCH_NPU_WARN_ONCE(
-        "PYTORCH_NO_NPU_MEMORY_CACHING is enabled, and the `expandable_segments` is changed to false by default.");
+    TORCH_WARN_ONCE(
+        "PYTORCH_NO_MEMORY_CACHING is enabled, and the `expandable_segments` is changed to false by default.");
   }
   return force_uncached;
 }
 
 static void uncached_delete(void* ptr) {
   helper->deviceSynchronize();
-  NPU_CHECK_ERROR(helper->memFree(ptr));
+  helper->memFree(ptr);
 }
 
 void local_raw_delete(void* ptr);
@@ -2204,14 +2191,12 @@ class DefaultCachingAllocator : public CachingAllocator {
         0 <= device && device < device_allocator.size(),
         "Allocator not initialized for device ",
         device,
-        ": did you call init?",
-        PTA_ERROR(ErrCode::PARAM));
+        ": did you call init?");
     TORCH_INTERNAL_ASSERT(
         0 <= fraction && fraction <= 1,
         "invalid fraction:",
         fraction,
-        ". Please set within (0, 1).",
-        PTA_ERROR(ErrCode::PARAM));
+        ". Please set within (0, 1).");
 
     setDevice(device);
 
@@ -2271,10 +2256,7 @@ class DefaultCachingAllocator : public CachingAllocator {
 
     Block* block = get_allocated_block(ptr.get());
     // block must not be null reaching here
-    TORCH_INTERNAL_ASSERT(
-        block != nullptr,
-        "No allocated block can be found",
-        PTA_ERROR(ErrCode::NOT_FOUND));
+    TORCH_INTERNAL_ASSERT(block != nullptr, "No allocated block can be found");
     device_allocator[block->device]->recordStream(block, stream);
   }
 
@@ -2289,7 +2271,7 @@ class DefaultCachingAllocator : public CachingAllocator {
     // guarantee tensors won't be accidentally freed by one process while
     // they are still being used in another
     if (ptr.get_deleter() != &local_raw_delete) {
-      TORCH_NPU_WARN_ONCE(
+      TORCH_WARN_ONCE(
           "Tensor not is not allocated by CachingAllocator, skip eraseStream.");
       return;
     }
@@ -2329,7 +2311,7 @@ class DefaultCachingAllocator : public CachingAllocator {
     if (force_uncached_allocator()) {
       deleteFunc = &uncached_delete;
       size_t alloc_size = size + 32;
-      NPU_CHECK_ERROR(helper->memAlloc(&devPtr, alloc_size));
+      helper->memAlloc(&devPtr, alloc_size);
     } else {
       if (size != 0) {
         this->malloc(&devPtr, device, size, helper->getCurrentStream(device));
@@ -2359,10 +2341,7 @@ class DefaultCachingAllocator : public CachingAllocator {
 
   void assertValidDevice(c10::DeviceIndex device) {
     int device_num = deviceCount();
-    AT_ASSERTM(
-        0 <= device && device < device_num,
-        "Invalid device argument.",
-        PTA_ERROR(ErrCode::PARAM));
+    AT_ASSERTM(0 <= device && device < device_num, "Invalid device argument.");
   }
 
   DeviceStats getDeviceStats(c10::DeviceIndex device) override {

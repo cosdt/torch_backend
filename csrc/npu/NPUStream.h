@@ -12,7 +12,6 @@
 #include "npu/acl/include/acl/acl.h"
 #include "npu/acl/include/acl/acl_op.h"
 #include "npu/core/NPUException.h"
-#include "npu/core/npu_log.h"
 
 /*
  * Stream pool note.

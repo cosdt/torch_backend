@@ -15,7 +15,6 @@
 #include "csrc/npu/NPUCachingHostAllocator.h"
 #include "csrc/npu/NPUEvent.h"
 #include "csrc/npu/NPUFunctions.h"
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
 namespace c10::npu {
 using Block = at::HostBlock<NPUStream>;

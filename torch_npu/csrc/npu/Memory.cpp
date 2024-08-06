@@ -6,7 +6,6 @@
 #include <torch/csrc/utils/python_arg_parser.h>
 #include <torch/csrc/utils/python_numbers.h>
 #include "csrc/npu/NPUCachingAllocator.h"
-#include "npu/core/NPUException.h"
 
 PyObject* THNPModule_setMemoryFraction(PyObject* _unused, PyObject* args) {
   HANDLE_TH_ERRORS
@@ -35,8 +34,8 @@ PyObject* THNPModule_resetAccumulatedMemoryStats(
   HANDLE_TH_ERRORS
   TORCH_CHECK(
       THPUtils_checkLong(arg),
-      "invalid argument to reset_accumulated_memory_stats",
-      PTA_ERROR(ErrCode::PARAM));
+      "invalid argument to reset_accumulated_memory_stats");
+
   const int device = (int)THPUtils_unpackLong(arg);
   c10::npu::NPUCachingAllocator::resetAccumulatedStats(device);
   END_HANDLE_TH_ERRORS
@@ -46,9 +45,8 @@ PyObject* THNPModule_resetAccumulatedMemoryStats(
 PyObject* THNPModule_resetPeakMemoryStats(PyObject* _unused, PyObject* arg) {
   HANDLE_TH_ERRORS
   TORCH_CHECK(
-      THPUtils_checkLong(arg),
-      "invalid argument to reset_peak_memory_stats",
-      PTA_ERROR(ErrCode::PARAM));
+      THPUtils_checkLong(arg), "invalid argument to reset_peak_memory_stats");
+
   const int device = (int)THPUtils_unpackLong(arg);
   c10::npu::NPUCachingAllocator::resetPeakStats(device);
   END_HANDLE_TH_ERRORS
@@ -264,7 +262,7 @@ PyObject* THNPModule_npuCachingAllocator_raw_alloc(
     return nullptr;
   }
   ssize_t size = PyLong_AsSsize_t(size_o);
-  aclrtStream stream = static_cast<aclrtStream>(PyLong_AsVoidPtr(stream_o));
+  void* stream = static_cast<void*>(PyLong_AsVoidPtr(stream_o));
   void* mem =
       c10::npu::NPUCachingAllocator::raw_alloc_with_stream(size, stream);
   return PyLong_FromVoidPtr(mem);
@@ -289,10 +287,8 @@ PyObject* THNPModule_getAllocatorBackend(PyObject* _unused, PyObject* noargs) {
 
 PyObject* THNPModule_memoryStats(PyObject* _unused, PyObject* arg) {
   HANDLE_TH_ERRORS
-  TORCH_CHECK(
-      THPUtils_checkLong(arg),
-      "invalid argument to memory_allocated",
-      PTA_ERROR(ErrCode::PARAM));
+  TORCH_CHECK(THPUtils_checkLong(arg), "invalid argument to memory_allocated");
+
   const int device = (int)THPUtils_unpackLong(arg);
 
   using c10::backend::CachingAllocator::DeviceStats;
