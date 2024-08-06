@@ -120,6 +120,10 @@ static struct PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr}};
 
-PyMethodDef* THNPModule_device_methods() {
+namespace torch::backend::device {
+
+PyMethodDef* python_functions() {
   return THNPModule_methods;
 }
+
+} // namespace torch::backend::device

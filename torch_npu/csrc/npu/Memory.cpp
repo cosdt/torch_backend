@@ -385,6 +385,10 @@ static struct PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr}};
 
-PyMethodDef* THNPModule_memory_methods() {
+namespace torch::backend::memory {
+
+PyMethodDef* python_functions() {
   return THNPModule_methods;
 }
+
+} // namespace torch::backend::memory

@@ -1,7 +1,7 @@
 #include <ATen/Parallel.h>
 #include <Python.h>
-#include <torch/csrc/utils.h>
 #include <torch/csrc/profiler/python/combined_traceback.h>
+#include <torch/csrc/utils.h>
 
 #include "torch_npu/csrc/core/python_tensor.h"
 #include "torch_npu/csrc/npu/Device.h"
@@ -18,11 +18,11 @@ extern "C" C10_EXPORT PyObject* initModule();
 PyObject* initModule() {
   at::internal::lazy_init_num_threads();
 
-  THPUtils_addPyMethodDefs(methods, THNPModule_init_methods());
-  THPUtils_addPyMethodDefs(methods, THNPModule_lock_methods());
-  THPUtils_addPyMethodDefs(methods, THNPModule_device_methods());
-  THPUtils_addPyMethodDefs(methods, THNPModule_memory_methods());
-  THPUtils_addPyMethodDefs(methods, THNPModule_stream_methods());
+  THPUtils_addPyMethodDefs(methods, torch::backend::init::python_functions());
+  THPUtils_addPyMethodDefs(methods, torch::backend::lock::python_functions());
+  THPUtils_addPyMethodDefs(methods, torch::backend::device::python_functions());
+  THPUtils_addPyMethodDefs(methods, torch::backend::memory::python_functions());
+  THPUtils_addPyMethodDefs(methods, torch::backend::stream::python_functions());
   THPUtils_addPyMethodDefs(methods, torch::backend::tensor::python_functions());
 
   static struct PyModuleDef torchnpu_module = {

@@ -3,4 +3,8 @@
 #include <Python.h>
 #include "csrc/core/Macros.h"
 
-TORCH_BACKEND_API PyMethodDef* THNPModule_lock_methods();
+namespace torch::backend::lock {
+
+TORCH_BACKEND_API PyMethodDef* python_functions();
+
+} // namespace torch::backend::lock

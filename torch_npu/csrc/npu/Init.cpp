@@ -41,6 +41,10 @@ static PyMethodDef THNPModule_methods[] = {
     {"_npu_init", (PyCFunction)THNPModule_initExtension, METH_NOARGS, nullptr},
     {nullptr, nullptr, 0, nullptr}};
 
-PyMethodDef* THNPModule_init_methods() {
+namespace torch::backend::init {
+
+PyMethodDef* python_functions() {
   return THNPModule_methods;
 }
+
+} // namespace torch::backend::init

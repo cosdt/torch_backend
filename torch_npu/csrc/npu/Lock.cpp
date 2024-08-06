@@ -49,6 +49,10 @@ static PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr, nullptr, 0, nullptr}};
 
-PyMethodDef* THNPModule_lock_methods() {
+namespace torch::backend::lock {
+
+PyMethodDef* python_functions() {
   return THNPModule_methods;
 }
+
+} // namespace torch::backend::lock
