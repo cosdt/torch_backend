@@ -2,7 +2,7 @@
 #include <ATen/EmptyTensor.h>
 #include <ATen/Utils.h>
 
-namespace at {
+namespace c10::backend {
 
 BaseGeneratorImpl::BaseGeneratorImpl(DeviceIndex device_index)
     : GeneratorImpl{
@@ -31,4 +31,4 @@ uint64_t BaseGeneratorImpl::seed() {
   this->set_current_seed(random);
   return random;
 }
-} // namespace at
+} // namespace c10::backend

@@ -24,7 +24,7 @@ LOAD_FUNCTION(aclopCompileAndExecuteV2)
 LOAD_FUNCTION(aclrtCtxSetSysParamOpt)
 
 aclError AclSetCompileopt(aclCompileOpt opt, const char* value) {
-  bool ge_init_disable = c10_npu::option::OptionsManager::CheckGeInitDisable();
+  bool ge_init_disable = c10::npu::option::OptionsManager::CheckGeInitDisable();
   if (ge_init_disable) {
     return ACL_ERROR_NONE;
   }

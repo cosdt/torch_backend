@@ -1,9 +1,9 @@
 #include "AsyncTaskQueueInterface.h"
 #include <ATen/record_function.h>
-#include "npu/core/register/OptionsManager.h"
 #include "npu/acl/include/acl/acl_rt.h"
+#include "npu/core/register/OptionsManager.h"
 
-namespace c10_npu {
+namespace c10::npu {
 namespace queue {
 std::atomic<uint64_t> QueueParas::g_correlation_id{0};
 std::map<int64_t, std::string> CopyParas::COPY_PARAS_MAP{
@@ -61,14 +61,14 @@ AsyncCopyTask::AsyncCopyTask(
 void AsyncCopyTask::LaunchCopyTask() {
   RECORD_FUNCTION(
       CopyParas::COPY_PARAS_MAP[copyParam_.kind], std::vector<c10::IValue>({}));
-    c10_npu::NPUStream stream = c10_npu::getCurrentNPUStream();
-    NPU_CHECK_ERROR(aclrtMemcpyAsync(
-        copyParam_.dst,
-        copyParam_.dstLen,
-        copyParam_.src,
-        copyParam_.srcLen,
-        copyParam_.kind,
-        stream));
+  c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
+  NPU_CHECK_ERROR(aclrtMemcpyAsync(
+      copyParam_.dst,
+      copyParam_.dstLen,
+      copyParam_.src,
+      copyParam_.srcLen,
+      copyParam_.kind,
+      stream));
 }
 
 aclError LaunchAsyncCopyTask(
@@ -83,4 +83,4 @@ aclError LaunchAsyncCopyTask(
 }
 
 } // namespace queue
-} // namespace c10_npu
+} // namespace c10::npu

@@ -4,6 +4,6 @@
 
 TEST(DeviceGuardTest, StaticType) {
   EXPECT_EQ(
-      c10_backend::impl::PrivateUse1GuardImpl::static_type,
+      c10::backend::impl::PrivateUse1GuardImpl::static_type,
       c10::DeviceType::PrivateUse1);
 }

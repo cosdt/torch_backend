@@ -8,7 +8,7 @@
 
 #include <cstddef>
 
-namespace c10_npu {
+namespace c10::npu {
 
 // This code is kind of boilerplatey.  See Note [Whither the DeviceGuard
 // boilerplate]
@@ -18,8 +18,8 @@ namespace c10_npu {
 /// more efficient than DeviceGuard (it compiles to straight line
 /// NPUSetDevice/NPUGetDevice calls); however, it can only be used
 /// from code that links against NPU directly.
-struct NPUGuard : public c10_backend::PrivateUse1Guard<impl::NPUGuardImpl> {
-  using PrivateUse1Guard = c10_backend::PrivateUse1Guard<impl::NPUGuardImpl>;
+struct NPUGuard : public c10::backend::PrivateUse1Guard<impl::NPUGuardImpl> {
+  using PrivateUse1Guard = c10::backend::PrivateUse1Guard<impl::NPUGuardImpl>;
   using PrivateUse1Guard::PrivateUse1Guard;
 
   // Copy is not allowed
@@ -34,9 +34,9 @@ struct NPUGuard : public c10_backend::PrivateUse1Guard<impl::NPUGuardImpl> {
 /// A variant of OptionalDeviceGuard that is specialized for NPU.  See
 /// NPUGuard for when you can use this.
 struct OptionalNPUGuard
-    : public c10_backend::OptionalPrivateUse1Guard<impl::NPUGuardImpl> {
+    : public c10::backend::OptionalPrivateUse1Guard<impl::NPUGuardImpl> {
   using OptionalPrivateUse1Guard =
-      c10_backend::OptionalPrivateUse1Guard<impl::NPUGuardImpl>;
+      c10::backend::OptionalPrivateUse1Guard<impl::NPUGuardImpl>;
   using OptionalPrivateUse1Guard::OptionalPrivateUse1Guard;
 
   // Copy is not allowed
@@ -109,7 +109,7 @@ struct NPUStreamGuard {
   }
 
  private:
-  c10::impl::InlineStreamGuard<c10_npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
 };
 
 /// A variant of OptionalStreamGuard that is specialized for NPU.  See NPUGuard
@@ -178,7 +178,7 @@ struct OptionalNPUStreamGuard {
   }
 
  private:
-  c10::impl::InlineOptionalStreamGuard<c10_npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineOptionalStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
 };
 
 /// A variant of MultiStreamGuard that is specialized for NPU.
@@ -197,7 +197,7 @@ struct NPUMultiStreamGuard {
   NPUMultiStreamGuard& operator=(NPUMultiStreamGuard&& other) = delete;
 
  private:
-  c10::impl::InlineMultiStreamGuard<c10_npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineMultiStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
 
   static std::vector<c10::Stream> unwrapStreams(
       at::ArrayRef<NPUStream> NPUStreams) {
@@ -210,4 +210,4 @@ struct NPUMultiStreamGuard {
   }
 };
 
-} // namespace c10_npu
+} // namespace c10::npu

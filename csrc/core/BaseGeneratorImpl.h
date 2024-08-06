@@ -2,7 +2,7 @@
 
 #include <ATen/core/Generator.h>
 
-namespace at {
+namespace c10::backend {
 struct C10_API BaseGeneratorImpl : public GeneratorImpl {
   BaseGeneratorImpl(DeviceIndex device_index);
 
@@ -25,4 +25,4 @@ struct C10_API BaseGeneratorImpl : public GeneratorImpl {
   uint64_t seed_ = default_rng_seed_val;
 };
 
-} // namespace at
+} // namespace c10::backend

@@ -1,25 +1,25 @@
 #include "csrc/npu/NPUHooks.h"
+#include "csrc/core/Register.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStorageImpl.h"
 #include "npu/aten/common/ResizeNpu.h"
 #include "npu/framework/FormatHelper.h"
-#include "csrc/core/Register.h"
 
-namespace c10_npu {
+namespace c10::npu {
 
 TORCH_DECLARE_REGISTRY(PrivateUse1HooksRegistry, NPUHooks, NPUHooksArgs);
 
-AT_REGISTER_PRIVATEUSE1_HOOKS_INTERFACE(c10_npu::get_npu_hooks());
+AT_REGISTER_PRIVATEUSE1_HOOKS_INTERFACE(c10::npu::get_npu_hooks());
 
 C10_DEFINE_REGISTRY(PrivateUse1HooksRegistry, NPUHooks, NPUHooksArgs)
 
 void NPUHooks::initPrivateUse1() const {
-  c10_npu::TryInitDevice();
+  c10::npu::TryInitDevice();
 }
 
 bool NPUHooks::hasPrimaryContext(c10::DeviceIndex device_index) const {
-  return c10_npu::hasPrimaryContext(device_index);
+  return c10::npu::hasPrimaryContext(device_index);
 }
 
 void NPUHooks::resizePrivateUse1Bytes(
@@ -51,4 +51,4 @@ at::PrivateUse1HooksInterface* get_npu_hooks() {
   c10::call_once(once, [] { npu_hooks = new NPUHooks(); });
   return npu_hooks;
 }
-} // namespace c10_npu
+} // namespace c10::npu

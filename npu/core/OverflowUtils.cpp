@@ -1,8 +1,8 @@
 #include <ATen/ATen.h>
 
+#include "npu/aten/OpInterface.h"
 #include "npu/core/OverflowUtils.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
-#include "npu/aten/OpInterface.h"
 
 namespace torch_npu {
 namespace utils {

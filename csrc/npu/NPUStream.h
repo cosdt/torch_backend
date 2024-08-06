@@ -2,13 +2,12 @@
 
 #include <c10/core/DeviceGuard.h>
 #include <c10/core/Stream.h>
-#include <c10/util/SmallVector.h>
 #include <c10/core/impl/GPUTrace.h>
+#include <c10/util/SmallVector.h>
 #include <cstdint>
 #include <mutex>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/core/Macros.h"
 #include "csrc/core/Macros.h"
 #include "npu/acl/include/acl/acl.h"
 #include "npu/acl/include/acl/acl_op.h"
@@ -57,7 +56,7 @@
  * a kernel on the same stream from two different threads.
  */
 
-namespace c10_npu {
+namespace c10::npu {
 
 static constexpr int max_compile_time_stream_priorities = 2;
 
@@ -72,7 +71,8 @@ class C10_BACKEND_API NPUStream {
   /// Construct a NPUStream from a Stream.  This construction is checked,
   /// and will raise an error if the Stream is not, in fact, a NPU stream.
   explicit NPUStream(c10::Stream stream) : stream_(stream) {
-    TORCH_CHECK(stream_.device_type() == c10::DeviceType::PrivateUse1,
+    TORCH_CHECK(
+        stream_.device_type() == c10::DeviceType::PrivateUse1,
         PTA_ERROR(ErrCode::TYPE));
   }
 
@@ -180,10 +180,12 @@ class C10_BACKEND_API NPUStream {
  * isHighPriority to true, or a stream for a specific device by setting device
  * (defaulting to the current NPU stream.)
  */
-C10_BACKEND_API NPUStream getStreamFromPool(const bool isHighPriority = false, c10::DeviceIndex device = -1);
+C10_BACKEND_API NPUStream getStreamFromPool(
+    const bool isHighPriority = false,
+    c10::DeviceIndex device = -1);
 
-C10_BACKEND_API NPUStream getStreamFromPool(const int priority, c10::DeviceIndex device = -1);
-
+C10_BACKEND_API NPUStream
+getStreamFromPool(const int priority, c10::DeviceIndex device = -1);
 
 /**
  * Get a NPUStream from a externally allocated one.
@@ -192,7 +194,8 @@ C10_BACKEND_API NPUStream getStreamFromPool(const int priority, c10::DeviceIndex
  * want to operate on a non-torch allocated stream for data exchange or similar
  * purposes
  */
-C10_BACKEND_API NPUStream getStreamFromExternal(aclrtStream ext_stream, c10::DeviceIndex device_index);
+C10_BACKEND_API NPUStream
+getStreamFromExternal(aclrtStream ext_stream, c10::DeviceIndex device_index);
 
 /**
  * Get the default NPU stream, for the passed NPU device, or for the
@@ -200,7 +203,8 @@ C10_BACKEND_API NPUStream getStreamFromExternal(aclrtStream ext_stream, c10::Dev
  * where most computation occurs when you aren't explicitly using
  * streams.
  */
-C10_BACKEND_API NPUStream getDefaultNPUStream(c10::DeviceIndex device_index = -1);
+C10_BACKEND_API NPUStream
+getDefaultNPUStream(c10::DeviceIndex device_index = -1);
 
 /**
  * Get the current NPU stream, for the passed NPU device, or for the
@@ -209,8 +213,8 @@ C10_BACKEND_API NPUStream getDefaultNPUStream(c10::DeviceIndex device_index = -1
  * be different if someone called 'setCurrentNPUStream' or used 'StreamGuard'
  * or 'NPUStreamGuard'.
  */
-C10_BACKEND_API NPUStream getCurrentNPUStream(c10::DeviceIndex device_index = -1);
-
+C10_BACKEND_API NPUStream
+getCurrentNPUStream(c10::DeviceIndex device_index = -1);
 
 /**
  * Set the current stream on the device of the passed in stream to be
@@ -227,12 +231,12 @@ C10_BACKEND_API void setCurrentNPUStream(NPUStream stream);
 std::ostream& operator<<(std::ostream& stream, const NPUStream& s);
 
 aclError DestroyUsedStreams();
-} // namespace c10_npu
+} // namespace c10::npu
 
 namespace std {
 template <>
-struct hash<c10_npu::NPUStream> {
-  size_t operator()(c10_npu::NPUStream s) const noexcept {
+struct hash<c10::npu::NPUStream> {
+  size_t operator()(c10::npu::NPUStream s) const noexcept {
     return std::hash<c10::Stream>{}(s.unwrap());
   }
 };

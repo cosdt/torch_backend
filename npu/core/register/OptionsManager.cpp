@@ -4,7 +4,7 @@
 #include "npu/core/register/OptionRegister.h"
 #include "npu/core/register/OptionsManager.h"
 
-namespace c10_npu {
+namespace c10::npu {
 namespace option {
 
 using namespace std;
@@ -132,4 +132,4 @@ std::unordered_map<std::string, std::string> OptionsManager::ParsePerfConfig(
 }
 
 } // namespace option
-} // namespace c10_npu
+} // namespace c10::npu

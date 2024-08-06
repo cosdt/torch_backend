@@ -3,7 +3,7 @@
 #include "csrc/npu/NPUContext.h"
 
 TEST(NPUGeneratorImpl, TestSingletonDefaultGenerator) {
-  if (!c10_npu::is_available()) {
+  if (!c10::npu::is_available()) {
     GTEST_SKIP() << "NPU is not available";
   }
 
@@ -13,7 +13,7 @@ TEST(NPUGeneratorImpl, TestSingletonDefaultGenerator) {
 }
 
 TEST(NPUGeneratorImpl, TestCloning) {
-  if (!c10_npu::is_available()) {
+  if (!c10::npu::is_available()) {
     GTEST_SKIP() << "NPU is not available";
   }
 
@@ -31,7 +31,7 @@ TEST(NPUGeneratorImpl, TestCloning) {
 }
 
 TEST(NPUGeneratorImpl, TestGetSetCurrentSeed) {
-  if (!c10_npu::is_available()) {
+  if (!c10::npu::is_available()) {
     GTEST_SKIP() << "NPU is not available";
   }
 
@@ -47,7 +47,7 @@ TEST(NPUGeneratorImpl, TestDeviceType) {
 }
 
 TEST(NPUGeneratorImpl, TestGetSetOffset) {
-  if (!c10_npu::is_available()) {
+  if (!c10::npu::is_available()) {
     GTEST_SKIP() << "NPU is not available";
   }
 
@@ -58,7 +58,7 @@ TEST(NPUGeneratorImpl, TestGetSetOffset) {
 }
 
 TEST(NPUGeneratorImpl, TestGetSetPhiloxOffset) {
-  if (!c10_npu::is_available()) {
+  if (!c10::npu::is_available()) {
     GTEST_SKIP() << "NPU is not available";
   }
 

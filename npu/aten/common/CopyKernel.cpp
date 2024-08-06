@@ -3,6 +3,7 @@
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
+#include "npu/aten/OpInterface.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/core/NPUException.h"
@@ -12,7 +13,6 @@
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
-#include "npu/aten/OpInterface.h"
 
 namespace at_npu {
 namespace native {
@@ -97,8 +97,8 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
           self.device().index());
     }
     guard.reset_device(self.device());
-    c10_npu::NPUStream dst_stream =
-        c10_npu::getCurrentNPUStream(self.device().index());
+    c10::npu::NPUStream dst_stream =
+        c10::npu::getCurrentNPUStream(self.device().index());
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(dst_stream, -1));
     guard.reset_device(src.device());
   }
@@ -110,7 +110,7 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
   copy_d2d_dtype(self, src, non_blocking);
   // synchronize src stream for different devices copy
   if (self.device().index() != src.device().index()) {
-    c10_npu::NPUStream copy_stream = c10_npu::getCurrentNPUStream();
+    c10::npu::NPUStream copy_stream = c10::npu::getCurrentNPUStream();
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(copy_stream, -1));
   }
 }
@@ -124,7 +124,7 @@ void copy_between_host_and_device(
     aclrtMemcpyKind kind,
     bool non_blocking) {
   int64_t nbytes = dst.numel() * dst.element_size();
-  c10_npu::NPUStream stream = c10_npu::getCurrentNPUStream();
+  c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
 
   if (non_blocking) {
     auto ret = CalcuOpUtil::LaunchAsyncCopyTaskWithModeSwitch(
@@ -150,7 +150,7 @@ void copy_between_host_and_device(
     NPU_CHECK_ERROR(ret, "aclrtMemcpy");
     if (error != ACL_ERROR_NONE) {
       C10_NPU_SHOW_ERR_MSG();
-      if (c10_npu::option::OptionsManager::IsResumeModeEnable()) {
+      if (c10::npu::option::OptionsManager::IsResumeModeEnable()) {
         TORCH_NPU_WARN(
             "ACL stream synchronize failed, error code:",
             error,

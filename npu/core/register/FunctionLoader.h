@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace c10_npu {
+namespace c10::npu {
 namespace option {
 
 /**
@@ -88,19 +88,19 @@ class FunctionRegisterBuilder {
 
 } // namespace register_function
 
-#define REGISTER_LIBRARY(soName)                                              \
-  auto library_##soName = ::std::unique_ptr<c10_npu::option::FunctionLoader>( \
-      new c10_npu::option::FunctionLoader(#soName));                          \
-  static c10_npu::option::register_function::FunctionRegisterBuilder          \
+#define REGISTER_LIBRARY(soName)                                               \
+  auto library_##soName = ::std::unique_ptr<c10::npu::option::FunctionLoader>( \
+      new c10::npu::option::FunctionLoader(#soName));                          \
+  static c10::npu::option::register_function::FunctionRegisterBuilder          \
       register_library_##soName(#soName, library_##soName);
 
-#define REGISTER_FUNCTION(soName, funcName)                          \
-  static c10_npu::option::register_function::FunctionRegisterBuilder \
+#define REGISTER_FUNCTION(soName, funcName)                           \
+  static c10::npu::option::register_function::FunctionRegisterBuilder \
       register_function_##funcName(#soName, #funcName);
 
-#define GET_FUNCTION(soName, funcName)                                      \
-  c10_npu::option::register_function::FunctionRegister::GetInstance()->Get( \
+#define GET_FUNCTION(soName, funcName)                                       \
+  c10::npu::option::register_function::FunctionRegister::GetInstance()->Get( \
       #soName, #funcName);
 
 } // namespace option
-} // namespace c10_npu
+} // namespace c10::npu

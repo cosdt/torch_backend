@@ -27,7 +27,7 @@ static std::vector<at::Generator> default_gens_npu;
  * Warning: this function must only be called once!
  */
 static void initNPUGenVector() {
-  num_npus = c10_npu::device_count();
+  num_npus = c10::npu::device_count();
   npu_gens_init_flag.resize(num_npus);
   default_gens_npu.resize(num_npus);
 }
@@ -46,7 +46,7 @@ const at::Generator& getDefaultNPUGenerator(c10::DeviceIndex device_index) {
   std::call_once(num_npu_init_flag, initNPUGenVector);
   c10::DeviceIndex idx = device_index;
   if (idx == -1) {
-    idx = c10_npu::current_device();
+    idx = c10::npu::current_device();
   } else {
     TORCH_CHECK(idx >= 0 && idx < num_npus, PTA_ERROR(ErrCode::VALUE));
   }
@@ -64,7 +64,7 @@ at::Generator createNPUGenerator(c10::DeviceIndex device_index) {
   std::call_once(num_npu_init_flag, initNPUGenVector);
   c10::DeviceIndex idx = device_index;
   if (idx == -1) {
-    idx = c10_npu::current_device();
+    idx = c10::npu::current_device();
   }
   TORCH_CHECK(
       idx >= 0 && idx < num_npus,

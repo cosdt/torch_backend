@@ -1,7 +1,7 @@
 #ifndef NPUVARIABLES_H
 #define NPUVARIABLES_H
 
-namespace c10_npu {
+namespace c10::npu {
 enum class SocVersion {
   UnsupportedSocVersion = -1,
   Ascend910PremiumA = 100,
@@ -38,5 +38,5 @@ const SocVersion& GetSocVersion();
 bool IsSupportInfNan();
 
 bool IsBF16Supported();
-} // namespace c10_npu
+} // namespace c10::npu
 #endif

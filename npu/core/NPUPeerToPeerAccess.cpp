@@ -2,10 +2,10 @@
 
 #include <c10/util/Exception.h>
 #include <c10/util/irange.h>
-#include "csrc/npu/NPUFunctions.h"
 #include <npu/acl/include/acl/acl_rt.h>
-#include "npu/core/NPUPeerToPeerAccess.h"
+#include "csrc/npu/NPUFunctions.h"
 #include "npu/core/NPUException.h"
+#include "npu/core/NPUPeerToPeerAccess.h"
 
 // A maximum of 8 P2P links can be created on a NPU device
 #define C10_P2P_ACCESS_MAX_NPUS 8
@@ -14,7 +14,7 @@ namespace at_npu {
 namespace native {
 
 NpuP2pCtrl::NpuP2pCtrl() {
-  num_devices_ = c10_npu::device_count();
+  num_devices_ = c10::npu::device_count();
 
   device_enabled_count_.clear();
   device_enabled_count_.resize(num_devices_, 1);

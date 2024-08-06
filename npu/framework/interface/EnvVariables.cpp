@@ -85,10 +85,10 @@ bool IsAllowFP32ToFP16() {
   // must_keep_origin_dtype, and the default value for others is
   // allow_fp32_to_fp16.
   bool is_allow_fp32_to_fp16 =
-      c10_npu::GetSocVersion() < c10_npu::SocVersion::Ascend910B1;
+      c10::npu::GetSocVersion() < c10::npu::SocVersion::Ascend910B1;
 
   static const std::string precision_mode = "ACL_PRECISION_MODE";
-  auto precision_mode_val = c10_npu::option::GetOption(precision_mode);
+  auto precision_mode_val = c10::npu::option::GetOption(precision_mode);
   if (precision_mode_val.has_value()) {
     if (precision_mode_val.value() == "must_keep_origin_dtype") {
       is_allow_fp32_to_fp16 = false;
@@ -137,7 +137,7 @@ REGISTER_OPTION_BOOL_FUNCTION_UNIQ(
 
 REGISTER_OPTION_HOOK(ALLOW_CONV_HF32, [](const std::string& val) {
   static const std::string mm_hf32_option_name = "ALLOW_MATMUL_HF32";
-  auto mm_hf32_val = c10_npu::option::GetOption(mm_hf32_option_name);
+  auto mm_hf32_val = c10::npu::option::GetOption(mm_hf32_option_name);
   // default value is False;
   std::string mm_hf32 = "0";
   if (mm_hf32_val.has_value() && (mm_hf32_val.value() == "enable")) {
@@ -159,7 +159,7 @@ REGISTER_OPTION_BOOL_FUNCTION_ALL_CASE(
 
 REGISTER_OPTION_HOOK(ALLOW_MATMUL_HF32, [](const std::string& val) {
   static const std::string conv_hf32_option_name = "ALLOW_CONV_HF32";
-  auto conv_hf32_val = c10_npu::option::GetOption(conv_hf32_option_name);
+  auto conv_hf32_val = c10::npu::option::GetOption(conv_hf32_option_name);
   // default value is True;
   std::string conv_hf32 = "1";
   if (conv_hf32_val.has_value() && (conv_hf32_val.value() == "disable")) {

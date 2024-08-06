@@ -3,13 +3,13 @@
 #include <cstdint>
 #include <utility>
 #include "csrc/core/Macros.h"
-#include "csrc/npu/NPUStream.h"
 #include "csrc/npu/NPUGuard.h"
+#include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
-namespace c10_npu {
+namespace c10::npu {
 /*
  * NPUEvents are movable not copyable wrappers around NPU's events.
  * NPUEvents are constructed lazily when first recorded.
@@ -26,13 +26,16 @@ struct C10_BACKEND_API NPUEvent {
         NPUGuard guard(device_index_);
         NPU_CHECK_ERROR(aclrtDestroyEvent(event_));
       }
-    } catch (...) { /* No throw */ }
+    } catch (...) { /* No throw */
+    }
   }
 
   NPUEvent(const NPUEvent&) = delete;
   NPUEvent& operator=(const NPUEvent&) = delete;
 
-  NPUEvent(NPUEvent&& other) noexcept { moveHelper(std::move(other)); }
+  NPUEvent(NPUEvent&& other) noexcept {
+    moveHelper(std::move(other));
+  }
   NPUEvent& operator=(NPUEvent&& other) noexcept {
     if (this != &other) {
       moveHelper(std::move(other));
@@ -40,7 +43,9 @@ struct C10_BACKEND_API NPUEvent {
     return *this;
   }
 
-  operator aclrtEvent() const { return event(); }
+  operator aclrtEvent() const {
+    return event();
+  }
 
   // aclrtEvent do not support Less than operator until now
 
@@ -52,9 +57,15 @@ struct C10_BACKEND_API NPUEvent {
     }
   }
 
-  bool isCreated() const { return is_created_; }
-  c10::DeviceIndex device_index() const { return device_index_; }
-  aclrtEvent event() const { return event_; }
+  bool isCreated() const {
+    return is_created_;
+  }
+  c10::DeviceIndex device_index() const {
+    return device_index_;
+  }
+  aclrtEvent event() const {
+    return event_;
+  }
 
   bool query() const {
     if (!is_created_) {
@@ -69,10 +80,13 @@ struct C10_BACKEND_API NPUEvent {
     return false;
   }
 
-  void record() { record(getCurrentNPUStream()); }
+  void record() {
+    record(getCurrentNPUStream());
+  }
 
   void recordOnce(const NPUStream& stream) {
-    if (!was_recorded_) record(stream);
+    if (!was_recorded_)
+      record(stream);
   }
 
   void record(const NPUStream& stream) {
@@ -101,7 +115,8 @@ struct C10_BACKEND_API NPUEvent {
   }
 
   float elapsed_time(const NPUEvent& other) const {
-    TORCH_CHECK(is_created_ && other.isCreated(),
+    TORCH_CHECK(
+        is_created_ && other.isCreated(),
         "Both events must be recorded before calculating elapsed time.",
         PTA_ERROR(ErrCode::INTERNAL));
     float time_ms = 0;
@@ -151,4 +166,4 @@ struct C10_BACKEND_API NPUEvent {
   }
 };
 
-} // namespace c10_npu
+} // namespace c10::npu

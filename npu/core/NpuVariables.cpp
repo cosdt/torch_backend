@@ -5,7 +5,7 @@
 #include "npu/core/NpuVariables.h"
 #include "npu/core/register/OptionsManager.h"
 
-namespace c10_npu {
+namespace c10::npu {
 static SocVersion g_curSocVersion = SocVersion::UnsupportedSocVersion;
 
 static std::map<std::string, SocVersion> socVersionMap = {
@@ -58,7 +58,7 @@ const SocVersion& GetSocVersion() {
 }
 
 bool IsSupportInfNan() {
-  if (!c10_npu::option::OptionsManager::CheckInfNanModeEnable()) {
+  if (!c10::npu::option::OptionsManager::CheckInfNanModeEnable()) {
     return false;
   }
   const static bool supportInfNan = []() -> bool {
@@ -72,4 +72,4 @@ bool IsSupportInfNan() {
 bool IsBF16Supported() {
   return GetSocVersion() >= SocVersion::Ascend910B1;
 }
-} // namespace c10_npu
+} // namespace c10::npu

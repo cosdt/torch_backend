@@ -16,13 +16,13 @@
 #include <c10/util/irange.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/npu/NPUCachingAllocator.h"
+#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/npu/NPUTensorImpl.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/aten/common/ResizeNpu.h"
 #include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUTensorImpl.h"
-#include "csrc/npu/NPUCachingAllocator.h"
 #include "npu/core/NPUException.h"
 #include "npu/framework/InferFormat.h"
 #include "npu/framework/StorageDescHelper.h"
@@ -121,7 +121,7 @@ at::Tensor NPUNativeFunctions::empty(
       OPS_ERROR(ErrCode::NOT_SUPPORT));
   check_size_nonnegative(size);
   c10::DeviceGuard guard_(device_);
-  c10::Allocator* allocator = c10_npu::NPUCachingAllocator::get();
+  c10::Allocator* allocator = c10::npu::NPUCachingAllocator::get();
   int64_t nelements = c10::multiply_integers(size);
   auto dtype = c10::scalarTypeToTypeMeta(dtype_or_default(dtype_opt));
   int64_t size_bytes = nelements * dtype.itemsize();
@@ -312,7 +312,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
       OPS_ERROR(ErrCode::NOT_SUPPORT));
   check_size_nonnegative(size);
   c10::DeviceGuard guard_(device_);
-  c10::Allocator* allocator = c10_npu::NPUCachingAllocator::get();
+  c10::Allocator* allocator = c10::npu::NPUCachingAllocator::get();
   // when the shape and format are not match, fix format here.
   aclFormat format =
       InferFormat::GuessStorageFormat(size, (aclFormat)dst_format);

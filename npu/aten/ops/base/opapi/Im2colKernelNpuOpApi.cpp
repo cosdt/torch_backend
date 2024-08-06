@@ -21,30 +21,48 @@
 namespace op_api {
 using npu_preparation = at_npu::native::OpPreparation;
 
-at::Tensor &im2col_out(const at::Tensor &self, at::IntArrayRef kernel_size, at::IntArrayRef dilation,
-                       at::IntArrayRef padding, at::IntArrayRef stride, at::Tensor &result)
-{
-    DO_COMPATIBILITY(aclnnIm2col, acl_op::im2col_out(self, kernel_size, dilation, padding, stride, result));
-    if (c10_npu::GetSocVersion() < c10_npu::SocVersion::Ascend910B1) {
-        return acl_op::im2col_out(self, kernel_size, dilation, padding, stride, result);
-    }
-    auto output_size = op_infer::image_to_col_npu_output_size(self, kernel_size, stride, dilation, padding);
-    npu_preparation::check_tensor({self}, result, result.scalar_type(), output_size);
-    EXEC_NPU_CMD(aclnnIm2col, self, kernel_size, dilation, padding, stride, result);
-    return result;
+at::Tensor& im2col_out(
+    const at::Tensor& self,
+    at::IntArrayRef kernel_size,
+    at::IntArrayRef dilation,
+    at::IntArrayRef padding,
+    at::IntArrayRef stride,
+    at::Tensor& result) {
+  DO_COMPATIBILITY(
+      aclnnIm2col,
+      acl_op::im2col_out(self, kernel_size, dilation, padding, stride, result));
+  if (c10::npu::GetSocVersion() < c10::npu::SocVersion::Ascend910B1) {
+    return acl_op::im2col_out(
+        self, kernel_size, dilation, padding, stride, result);
+  }
+  auto output_size = op_infer::image_to_col_npu_output_size(
+      self, kernel_size, stride, dilation, padding);
+  npu_preparation::check_tensor(
+      {self}, result, result.scalar_type(), output_size);
+  EXEC_NPU_CMD(
+      aclnnIm2col, self, kernel_size, dilation, padding, stride, result);
+  return result;
 }
 
-at::Tensor im2col(const at::Tensor &self, at::IntArrayRef kernel_size, at::IntArrayRef dilation,
-                  at::IntArrayRef padding, at::IntArrayRef stride)
-{
-    DO_COMPATIBILITY(aclnnIm2col, acl_op::im2col(self, kernel_size, dilation, padding, stride));
-    if (c10_npu::GetSocVersion() < c10_npu::SocVersion::Ascend910B1) {
-        return acl_op::im2col(self, kernel_size, dilation, padding, stride);
-    }
-    auto output_size = op_infer::image_to_col_npu_output_size(self, kernel_size, stride, dilation, padding);
-    at::Tensor result = npu_preparation::apply_tensor_without_format(self, output_size);
-    EXEC_NPU_CMD(aclnnIm2col, self, kernel_size, dilation, padding, stride, result);
-    return result;
+at::Tensor im2col(
+    const at::Tensor& self,
+    at::IntArrayRef kernel_size,
+    at::IntArrayRef dilation,
+    at::IntArrayRef padding,
+    at::IntArrayRef stride) {
+  DO_COMPATIBILITY(
+      aclnnIm2col,
+      acl_op::im2col(self, kernel_size, dilation, padding, stride));
+  if (c10::npu::GetSocVersion() < c10::npu::SocVersion::Ascend910B1) {
+    return acl_op::im2col(self, kernel_size, dilation, padding, stride);
+  }
+  auto output_size = op_infer::image_to_col_npu_output_size(
+      self, kernel_size, stride, dilation, padding);
+  at::Tensor result =
+      npu_preparation::apply_tensor_without_format(self, output_size);
+  EXEC_NPU_CMD(
+      aclnnIm2col, self, kernel_size, dilation, padding, stride, result);
+  return result;
 }
 
-}  // namespace op_api
+} // namespace op_api

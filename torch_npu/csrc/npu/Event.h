@@ -5,7 +5,7 @@
 #include "csrc/npu/NPUEvent.h"
 
 struct THNPEvent {
-  PyObject_HEAD c10_npu::NPUEvent npu_event;
+  PyObject_HEAD c10::npu::NPUEvent npu_event;
 };
 extern PyObject* THNPEventClass;
 

@@ -2,7 +2,7 @@
 #include <iostream>
 #include "csrc/core/CachingAllocator.h"
 
-namespace c10_npu::NPUCachingAllocator {
+namespace c10::npu::NPUCachingAllocator {
 class DefaultNPUAllocator final : public NPUAllocator {
  public:
   void init(CachingAllocator* delegate) {
@@ -77,4 +77,4 @@ REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &defaultNPUAllocator);
 void init(CachingAllocator* delegate) {
   defaultNPUAllocator.init(delegate);
 }
-} // namespace c10_npu::NPUCachingAllocator
+} // namespace c10::npu::NPUCachingAllocator

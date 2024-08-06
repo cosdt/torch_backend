@@ -5,15 +5,15 @@
 #include <vector>
 
 #include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/NPUGuard.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/adapter/acl_device_adapter.h"
 #include "npu/core/NPUException.h"
-#include "csrc/npu/NPUGuard.h"
 
 #define C10_COMPILE_TIME_MAX_NPUS 16
 
-namespace c10_npu {
+namespace c10::npu {
 namespace {
 
 // Global stream state and constants
@@ -146,7 +146,7 @@ c10::StreamId makeStreamId(StreamIdType st, size_t si) {
 }
 
 static void initGlobalStreamState() {
-  num_npus = c10_npu::device_count();
+  num_npus = c10::npu::device_count();
   // Check if the number of NPUs matches the expected compile-time max number
   // of NPUs.
   AT_ASSERTM(
@@ -215,7 +215,9 @@ static uint32_t get_idx(std::atomic<uint32_t>& counter) {
   return raw_idx % kStreamsPerPool;
 }
 
-NPUStream NPUStreamForId(c10::DeviceIndex device_index, c10::StreamId stream_id) {
+NPUStream NPUStreamForId(
+    c10::DeviceIndex device_index,
+    c10::StreamId stream_id) {
   return NPUStream(
       NPUStream::UNCHECKED,
       c10::Stream(
@@ -276,14 +278,16 @@ NPUStream getStreamFromPool(const int priority, c10::DeviceIndex device_index) {
       device_flags[device_index], initDeviceStreamState, device_index);
 
   auto pri_idx = -priority;
-  pri_idx =
-      std::min(pri_idx, max_compile_time_stream_priorities - 1); // pri_idx is zero-based
+  pri_idx = std::min(
+      pri_idx, max_compile_time_stream_priorities - 1); // pri_idx is zero-based
   const auto idx = get_idx(priority_counters[pri_idx][device_index]);
   StreamIdType id_type = StreamIdType(pri_idx + 1);
   return NPUStreamForId(device_index, makeStreamId(id_type, idx));
 }
 
-NPUStream getStreamFromPool(const bool isHighPriority, c10::DeviceIndex device) {
+NPUStream getStreamFromPool(
+    const bool isHighPriority,
+    c10::DeviceIndex device) {
   initNPUStreamsOnce();
   int priority = isHighPriority ? -max_compile_time_stream_priorities + 1 : 0;
   return getStreamFromPool(priority, device);
@@ -345,4 +349,4 @@ aclError DestroyUsedStreams() {
   NPU_CHECK_ERROR(SetDevice(cur_device));
   return ACL_ERROR_NONE;
 }
-} // namespace c10_npu
+} // namespace c10::npu

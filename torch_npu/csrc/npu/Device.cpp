@@ -15,10 +15,10 @@
 
 void RegisterNPUDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
-  py::class_<c10_npu::NPUDeviceProp>(m, "_NPUDeviceProperties")
-      .def_readonly("name", &c10_npu::NPUDeviceProp::name)
-      .def_readonly("total_memory", &c10_npu::NPUDeviceProp::totalGlobalMem)
-      .def("__repr__", [](const c10_npu::NPUDeviceProp& prop) {
+  py::class_<c10::npu::NPUDeviceProp>(m, "_NPUDeviceProperties")
+      .def_readonly("name", &c10::npu::NPUDeviceProp::name)
+      .def_readonly("total_memory", &c10::npu::NPUDeviceProp::totalGlobalMem)
+      .def("__repr__", [](const c10::npu::NPUDeviceProp& prop) {
         std::ostringstream stream;
         stream << "_NPUDeviceProperties(name='" << prop.name
                << "', total_memory="
@@ -28,7 +28,7 @@ void RegisterNPUDeviceProperties(PyObject* module) {
       });
 
   m.def("_npu_isHistoryEnabled", []() {
-    return c10_npu::NPUCachingAllocator::isHistoryEnabled();
+    return c10::npu::NPUCachingAllocator::isHistoryEnabled();
   });
 }
 
@@ -36,8 +36,8 @@ void BindGetDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   m.def(
       "_npu_getDeviceProperties",
-      [](c10::DeviceIndex deviceid) -> c10_npu::NPUDeviceProp* {
-        return c10_npu::getDeviceProperties(deviceid);
+      [](c10::DeviceIndex deviceid) -> c10::npu::NPUDeviceProp* {
+        return c10::npu::getDeviceProperties(deviceid);
       },
       py::return_value_policy::reference);
 }
@@ -45,7 +45,7 @@ void BindGetDeviceProperties(PyObject* module) {
 PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
   pybind11::gil_scoped_release no_gil;
-  c10_npu::device_synchronize();
+  c10::npu::device_synchronize();
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }
@@ -59,7 +59,7 @@ PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
   }
 
   auto device = THPUtils_unpackLong(arg);
-  c10_npu::set_device(static_cast<c10::DeviceIndex>(device));
+  c10::npu::set_device(static_cast<c10::DeviceIndex>(device));
 
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
@@ -69,14 +69,14 @@ PyObject* THNPModule_getDevice_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
   torch::utils::device_lazy_init(at::kPrivateUse1);
   // NOLINTNEXTLINE(bugprone-signed-char-misuse)
-  auto device = static_cast<int32_t>(c10_npu::current_device());
+  auto device = static_cast<int32_t>(c10::npu::current_device());
   return THPUtils_packInt32(device);
   END_HANDLE_TH_ERRORS
 }
 
 PyObject* THNPModule_getDeviceCount_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  return THPUtils_packUInt64(c10_npu::device_count());
+  return THPUtils_packUInt64(c10::npu::device_count());
   END_HANDLE_TH_ERRORS
 }
 
@@ -93,7 +93,8 @@ PyObject* THNPModule_npuCanDeviceAccessPeer_wrap(
   c10::DeviceIndex device_id = THPUtils_unpackDeviceIndex(value_1);
   c10::DeviceIndex peer_device_id = THPUtils_unpackDeviceIndex(value_2);
   int32_t can_access_peer = 0;
-  NPU_CHECK_ERROR(aclrtDeviceCanAccessPeer(&can_access_peer, device_id, peer_device_id));
+  NPU_CHECK_ERROR(
+      aclrtDeviceCanAccessPeer(&can_access_peer, device_id, peer_device_id));
   auto can_device_access_peer = can_access_peer != 0;
   return PyBool_FromLong(can_device_access_peer);
   END_HANDLE_TH_ERRORS

@@ -1,6 +1,6 @@
 #include <c10/core/Device.h>
 #include <c10/util/irange.h>
-namespace c10_backend::CachingAllocator {
+namespace c10::backend::CachingAllocator {
 static const int MEM_SUCCESS = 0;
 static const int MEM_ALLOCATION_ERROR = 1;
 
@@ -90,4 +90,4 @@ class CachingAllocatorHelper {
 
 // register CachingAllocatorHelper for DefaultCachingAllocator.
 void registerHelper(CachingAllocatorHelper* helper);
-} // namespace c10_backend::CachingAllocator
+} // namespace c10::backend::CachingAllocator

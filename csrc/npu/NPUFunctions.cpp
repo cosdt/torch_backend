@@ -4,7 +4,7 @@
 #include "csrc/npu/NPUStream.h"
 #include "npu/adapter/acl_device_adapter.h"
 
-namespace c10_npu {
+namespace c10::npu {
 
 int device_count_impl() {
   int count = 0;
@@ -44,12 +44,12 @@ c10::DeviceIndex device_count_ensure_non_zero() {
 
 c10::DeviceIndex current_device() {
   c10::DeviceIndex cur_device = -1;
-  NPU_CHECK_ERROR(c10_npu::GetDevice(&cur_device));
+  NPU_CHECK_ERROR(c10::npu::GetDevice(&cur_device));
   return cur_device;
 }
 
 void set_device(c10::DeviceIndex device) {
-  NPU_CHECK_ERROR(c10_npu::SetDevice(device));
+  NPU_CHECK_ERROR(c10::npu::SetDevice(device));
 }
 
 void device_synchronize() {
@@ -143,7 +143,7 @@ aclError SetDevice(c10::DeviceIndex device) {
 
 aclError MaybeSetDevice(c10::DeviceIndex device) {
   if (hasPrimaryContext(device)) {
-    return c10_npu::SetDevice(device);
+    return c10::npu::SetDevice(device);
   }
   targetDeviceIndex = device;
   return ACL_ERROR_NONE;
@@ -190,7 +190,7 @@ c10::DeviceIndex MaybeExchangeDevice(c10::DeviceIndex to_device) {
 
 void SetTargetDevice() {
   if (targetDeviceIndex >= 0) {
-    NPU_CHECK_ERROR(c10_npu::SetDevice(targetDeviceIndex));
+    NPU_CHECK_ERROR(c10::npu::SetDevice(targetDeviceIndex));
   }
 }
 
@@ -208,7 +208,7 @@ std::mutex* getFreeMutex() {
 }
 
 void get_device_properties(
-    c10_npu::NPUDeviceProp* device_prop,
+    c10::npu::NPUDeviceProp* device_prop,
     c10::DeviceIndex device) {
   const char* device_name;
   device_name = aclrtGetSocName();
@@ -220,4 +220,4 @@ void get_device_properties(
   }
 }
 
-} // namespace c10_npu
+} // namespace c10::npu

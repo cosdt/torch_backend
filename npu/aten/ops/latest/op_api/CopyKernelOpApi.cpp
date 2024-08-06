@@ -18,10 +18,10 @@
 #include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
+#include "npu/aten/utils/op_api_common.h"
 #include "npu/core/NPUPeerToPeerAccess.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
-#include "npu/aten/utils/op_api_common.h"
 
 namespace at_npu {
 namespace native {
@@ -35,7 +35,7 @@ void copy_between_host_and_device_opapi(
     aclrtMemcpyKind kind,
     bool non_blocking) {
   int64_t nbytes = dst.numel() * dst.element_size();
-  c10_npu::NPUStream stream = c10_npu::getCurrentNPUStream();
+  c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
 
   if (non_blocking) {
     auto ret = CalcuOpUtil::LaunchAsyncCopyTaskWithModeSwitch(
@@ -61,7 +61,7 @@ void copy_between_host_and_device_opapi(
     NPU_CHECK_ERROR(ret, "aclrtMemcpy");
     if (error != ACL_ERROR_NONE) {
       C10_NPU_SHOW_ERR_MSG();
-      if (c10_npu::option::OptionsManager::IsResumeModeEnable()) {
+      if (c10::npu::option::OptionsManager::IsResumeModeEnable()) {
         TORCH_NPU_WARN(
             "ACL stream synchronize failed, error code:",
             error,
@@ -185,8 +185,8 @@ void copy_d2d_baseformat_opapi(
           dst.device().index());
     }
     guard.reset_device(dst.device());
-    c10_npu::NPUStream dst_stream =
-        c10_npu::getCurrentNPUStream(dst.device().index());
+    c10::npu::NPUStream dst_stream =
+        c10::npu::getCurrentNPUStream(dst.device().index());
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(dst_stream, -1));
     guard.reset_device(src.device());
   } else {
@@ -196,7 +196,7 @@ void copy_d2d_baseformat_opapi(
   }
   EXEC_NPU_CMD(aclnnInplaceCopy, dst, src);
   if (dst.device().index() != src.device().index()) {
-    c10_npu::NPUStream copy_stream = c10_npu::getCurrentNPUStream();
+    c10::npu::NPUStream copy_stream = c10::npu::getCurrentNPUStream();
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(copy_stream, -1));
   }
 }

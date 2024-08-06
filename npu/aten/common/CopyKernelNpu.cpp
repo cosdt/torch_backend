@@ -1,15 +1,15 @@
 #include <ATen/record_function.h>
 #include <c10/core/Scalar.h>
 
-#include "npu/aten/common/InnerNpuNativeFunction.h"
-#include "npu/core/NPUBridge.h"
 #include "csrc/npu/NPUStorageImpl.h"
 #include "csrc/npu/NPUStream.h"
+#include "npu/aten/OpInterface.h"
+#include "npu/aten/common/InnerNpuNativeFunction.h"
+#include "npu/core/NPUBridge.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/framework/utils/CalcuOpUtil.h"
 #include "npu/framework/utils/OpAdapter.h"
-#include "npu/aten/OpInterface.h"
 
 namespace at_npu {
 namespace native {
@@ -46,7 +46,7 @@ void copy_d2d_by_memcpy(
   }
 
   // The current logic is only used in single op mode.
-  aclError error = c10_npu::queue::LaunchAsyncCopyTask(
+  aclError error = c10::npu::queue::LaunchAsyncCopyTask(
       dst.data_ptr(),
       size * dst.element_size(),
       src.data_ptr(),

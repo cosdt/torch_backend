@@ -6,7 +6,7 @@
 
 #include "csrc/core/impl/PrivateUse1GuardImpl.h"
 
-namespace c10_backend {
+namespace c10::backend {
 
 // This code is kind of boilerplatey.  See Note [Whither the DeviceGuard
 // boilerplate]
@@ -143,4 +143,4 @@ struct OptionalPrivateUse1Guard {
   c10::impl::InlineOptionalDeviceGuard<T> guard_;
 };
 
-} // namespace c10_backend
+} // namespace c10::backend

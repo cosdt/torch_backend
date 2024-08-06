@@ -4,7 +4,7 @@
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl_rt.h"
 
-namespace c10_npu {
+namespace c10::npu {
 namespace queue {
 struct CopyParas {
   void* dst = nullptr;
@@ -60,4 +60,4 @@ aclError LaunchAsyncCopyTask(
     aclrtMemcpyKind kind);
 
 } // namespace queue
-} // namespace c10_npu
+} // namespace c10::npu

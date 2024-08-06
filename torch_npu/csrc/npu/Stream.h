@@ -6,7 +6,7 @@
 #include "csrc/npu/NPUStream.h"
 
 struct THNPStream : THPStream {
-  c10_npu::NPUStream npu_stream;
+  c10::npu::NPUStream npu_stream;
 };
 
 TORCH_BACKEND_API void THNPStream_init(PyObject* module);

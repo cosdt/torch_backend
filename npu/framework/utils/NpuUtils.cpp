@@ -3,9 +3,9 @@
 
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
 #include "csrc/npu/NPUFunctions.h"
+#include "csrc/npu/NPUStorageImpl.h"
+#include "npu/core/NPUBridge.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/StorageDescHelper.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
@@ -260,8 +260,8 @@ bool NpuUtils::IsOomError(aclError ret, int index) {
     // free devcie cached memory when return value of the first op execution is
     // oom
     if (index == 1) {
-      NPU_CHECK_ERROR(c10_npu::GetDevice(&deviceId));
-      c10_npu::NPUCachingAllocator::emptyDeviceCache(deviceId);
+      NPU_CHECK_ERROR(c10::npu::GetDevice(&deviceId));
+      c10::npu::NPUCachingAllocator::emptyDeviceCache(deviceId);
       return true;
     }
     AT_ERROR("NPU out of memory. device id: ", deviceId);
