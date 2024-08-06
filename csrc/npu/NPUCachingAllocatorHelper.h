@@ -2,7 +2,7 @@
 
 #include <c10/util/Optional.h>
 #include <c10/util/irange.h>
-#include "csrc/core/CachingAllocatorHelper.h"
+#include "csrc/core/allocator/CachingAllocatorHelper.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/acl/include/acl/acl_base.h"

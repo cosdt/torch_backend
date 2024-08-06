@@ -1,6 +1,6 @@
 #pragma once
 
-#include "csrc/core/CachingAllocator.h"
+#include "csrc/core/allocator/CachingAllocator.h"
 
 namespace c10::npu::NPUCachingAllocator {
 

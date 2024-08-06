@@ -11,7 +11,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "csrc/core/EventPool.h"
+#include "csrc/core/allocator/EventPool.h"
 #include "csrc/npu/NPUCachingHostAllocator.h"
 #include "csrc/npu/NPUEvent.h"
 #include "csrc/npu/NPUFunctions.h"

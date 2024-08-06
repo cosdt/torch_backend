@@ -4,8 +4,6 @@
 #include <c10/core/impl/InlineDeviceGuard.h>
 #include <c10/core/impl/InlineStreamGuard.h>
 
-#include "csrc/core/impl/PrivateUse1GuardImpl.h"
-
 namespace c10::backend {
 
 // This code is kind of boilerplatey.  See Note [Whither the DeviceGuard

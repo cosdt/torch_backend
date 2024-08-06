@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "csrc/core/impl/PrivateUse1GuardImpl.h"
+#include "csrc/core/guard/PrivateUse1GuardImpl.h"
 
 TEST(DeviceGuardTest, StaticType) {
   EXPECT_EQ(
