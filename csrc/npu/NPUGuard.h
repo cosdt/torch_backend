@@ -3,7 +3,7 @@
 #include <c10/core/DeviceType.h>
 #include <c10/core/impl/InlineDeviceGuard.h>
 #include <c10/core/impl/InlineStreamGuard.h>
-#include "csrc/core/PrivateUse1Guard.h"
+#include "csrc/core/guard/PrivateUse1Guard.h"
 #include "csrc/npu/NPUGuardImpl.h"
 
 #include <cstddef>

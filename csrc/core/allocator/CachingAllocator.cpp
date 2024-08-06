@@ -17,9 +17,9 @@
 #include <c10/util/flat_hash_map.h>
 #include <c10/util/irange.h>
 
-#include "csrc/core/CachingAllocator.h"
-#include "csrc/core/CachingAllocatorHelper.h"
-#include "csrc/core/EventPool.h"
+#include "csrc/core/allocator/CachingAllocator.h"
+#include "csrc/core/allocator/CachingAllocatorHelper.h"
+#include "csrc/core/allocator/EventPool.h"
 
 namespace c10::backend::CachingAllocator {
 

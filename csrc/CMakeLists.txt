@@ -3,6 +3,8 @@ FILE(GLOB _BACKEND_SRCS
     aten/*.cpp
     aten/generated/*.cpp
     core/*.cpp
+    core/allocator/*.cpp
+    core/generator/*.cpp
     npu/*.cpp)
 
 FILE(GLOB _EXCLUDE

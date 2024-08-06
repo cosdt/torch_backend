@@ -6,7 +6,7 @@
 
 #include <npu/acl/include/acl/acl.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/core/impl/PrivateUse1GuardImpl.h"
+#include "csrc/core/guard/PrivateUse1GuardImpl.h"
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUStream.h"
 #include "npu/core/NPUException.h"
