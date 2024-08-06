@@ -2,6 +2,8 @@
 #include <pybind11/pybind11.h>
 #include "csrc/npu/NPUFunctions.h"
 
+namespace torch::backend::lock {
+
 // We need to ensure that as long as a thread will NEVER loose the GIL as long
 // as it holds the NPU mutex. Otherwise another thread might be scheduled and
 // try to e.g. allocate a new tensor which will cause a deadlock. It's enough to
@@ -49,6 +51,8 @@ static PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr, nullptr, 0, nullptr}};
 
-PyMethodDef* THNPModule_lock_methods() {
+PyMethodDef* python_functions() {
   return THNPModule_methods;
 }
+
+} // namespace torch::backend::lock

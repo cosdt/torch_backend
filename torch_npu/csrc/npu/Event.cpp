@@ -8,6 +8,8 @@
 #include "torch_npu/csrc/npu/Event.h"
 #include "torch_npu/csrc/npu/Stream.h"
 
+namespace torch::backend::event {
+
 PyObject* THNPEventClass = nullptr;
 
 static PyObject* THNPEvent_pynew(
@@ -70,14 +72,18 @@ static PyObject* THNPEvent_get_device(THNPEvent* self, void* unused) {
   END_HANDLE_TH_ERRORS
 }
 
-static PyObject* THNPEvent_record(THNPEvent* self, THNPStream* stream) {
+static PyObject* THNPEvent_record(
+    THNPEvent* self,
+    torch::backend::stream::THNPStream* stream) {
   HANDLE_TH_ERRORS
   self->npu_event.record(stream->npu_stream);
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }
 
-static PyObject* THNPEvent_wait(THNPEvent* self, THNPStream* stream) {
+static PyObject* THNPEvent_wait(
+    THNPEvent* self,
+    torch::backend::stream::THNPStream* stream) {
   HANDLE_TH_ERRORS {
     pybind11::gil_scoped_release no_gil;
     self->npu_event.block(stream->npu_stream);
@@ -168,7 +174,7 @@ PyTypeObject THNPEventType = {
     THNPEvent_pynew, /* tp_new */
 };
 
-void THNPEvent_init(PyObject* module) {
+void init(PyObject* module) {
   THNPEventClass = (PyObject*)&THNPEventType;
   if (PyType_Ready(&THNPEventType) < 0) {
     throw python_error();
@@ -179,3 +185,5 @@ void THNPEvent_init(PyObject* module) {
     throw python_error();
   }
 }
+
+} // namespace torch::backend::event

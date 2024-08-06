@@ -14,7 +14,9 @@
 
 #define CHANGE_UNIT_SIZE 1024.0
 
-void RegisterNPUDeviceProperties(PyObject* module) {
+namespace torch::backend::device {
+
+void registerDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   py::class_<c10::npu::NPUDeviceProp>(m, "_NPUDeviceProperties")
       .def_readonly("name", &c10::npu::NPUDeviceProp::name)
@@ -33,7 +35,7 @@ void RegisterNPUDeviceProperties(PyObject* module) {
   });
 }
 
-void BindGetDeviceProperties(PyObject* module) {
+void bindGetDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   m.def(
       "_npu_getDeviceProperties",
@@ -41,6 +43,11 @@ void BindGetDeviceProperties(PyObject* module) {
         return c10::npu::getDeviceProperties(deviceid);
       },
       py::return_value_policy::reference);
+}
+
+void init(PyObject* module) {
+  registerDeviceProperties(module);
+  bindGetDeviceProperties(module);
 }
 
 PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
@@ -120,6 +127,8 @@ static struct PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr}};
 
-PyMethodDef* THNPModule_device_methods() {
+PyMethodDef* python_functions() {
   return THNPModule_methods;
 }
+
+} // namespace torch::backend::device

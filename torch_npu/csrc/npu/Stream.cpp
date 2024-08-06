@@ -5,6 +5,8 @@
 #include <torch/csrc/THP.h>
 #include "csrc/npu/NPUGuard.h"
 
+namespace torch::backend::stream {
+
 PyObject* THNPStreamClass = nullptr;
 
 static PyObject* THNPStream_pynew(
@@ -196,7 +198,7 @@ PyTypeObject THNPStreamType = {
     THNPStream_pynew, /* tp_new */
 };
 
-void THNPStream_init(PyObject* module) {
+void init(PyObject* module) {
   Py_INCREF(THPStreamClass);
   THNPStreamType.tp_base = THPStreamClass;
   THNPStreamClass = (PyObject*)&THNPStreamType;
@@ -342,6 +344,8 @@ static struct PyMethodDef THNPModule_methods[] = {
      nullptr},
     {nullptr}};
 
-PyMethodDef* THNPModule_stream_methods() {
+PyMethodDef* python_functions() {
   return THNPModule_methods;
 }
+
+} // namespace torch::backend::stream

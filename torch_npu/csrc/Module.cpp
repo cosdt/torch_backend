@@ -1,7 +1,7 @@
 #include <ATen/Parallel.h>
 #include <Python.h>
-#include <torch/csrc/utils.h>
 #include <torch/csrc/profiler/python/combined_traceback.h>
+#include <torch/csrc/utils.h>
 
 #include "torch_npu/csrc/core/python_tensor.h"
 #include "torch_npu/csrc/npu/Device.h"
@@ -11,6 +11,8 @@
 #include "torch_npu/csrc/npu/Memory.h"
 #include "torch_npu/csrc/npu/Stream.h"
 
+#define BACKEND_MODULE_NAME "torch_npu._C"
+
 PyObject* module;
 static std::vector<PyMethodDef> methods;
 
@@ -18,22 +20,21 @@ extern "C" C10_EXPORT PyObject* initModule();
 PyObject* initModule() {
   at::internal::lazy_init_num_threads();
 
-  THPUtils_addPyMethodDefs(methods, THNPModule_init_methods());
-  THPUtils_addPyMethodDefs(methods, THNPModule_lock_methods());
-  THPUtils_addPyMethodDefs(methods, THNPModule_device_methods());
-  THPUtils_addPyMethodDefs(methods, THNPModule_memory_methods());
-  THPUtils_addPyMethodDefs(methods, THNPModule_stream_methods());
+  THPUtils_addPyMethodDefs(methods, torch::backend::init::python_functions());
+  THPUtils_addPyMethodDefs(methods, torch::backend::lock::python_functions());
+  THPUtils_addPyMethodDefs(methods, torch::backend::device::python_functions());
+  THPUtils_addPyMethodDefs(methods, torch::backend::memory::python_functions());
+  THPUtils_addPyMethodDefs(methods, torch::backend::stream::python_functions());
   THPUtils_addPyMethodDefs(methods, torch::backend::tensor::python_functions());
 
-  static struct PyModuleDef torchnpu_module = {
-      PyModuleDef_HEAD_INIT, "torch_npu._C", nullptr, -1, methods.data()};
-  module = PyModule_Create(&torchnpu_module);
+  static struct PyModuleDef torch_backend_module = {
+      PyModuleDef_HEAD_INIT, BACKEND_MODULE_NAME, nullptr, -1, methods.data()};
+  module = PyModule_Create(&torch_backend_module);
 
-  THNPStream_init(module);
-  THNPEvent_init(module);
+  torch::backend::stream::init(module);
+  torch::backend::event::init(module);
+  torch::backend::device::init(module);
 
-  RegisterNPUDeviceProperties(module);
-  BindGetDeviceProperties(module);
   torch::installCapturedTracebackPython();
   return module;
 }
