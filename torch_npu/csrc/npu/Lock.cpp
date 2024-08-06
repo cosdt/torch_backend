@@ -1,5 +1,5 @@
 #include "torch_npu/csrc/npu/Lock.h"
-#include <pybind11/gil.h>
+#include <pybind11/pybind11.h>
 #include "csrc/npu/NPUFunctions.h"
 
 // We need to ensure that as long as a thread will NEVER loose the GIL as long
