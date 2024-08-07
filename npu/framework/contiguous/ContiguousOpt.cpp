@@ -1,6 +1,6 @@
 #include "npu/framework/contiguous/ContiguousOpt.h"
 #include <ATen/quantized/QTensorImpl.h>
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 
 namespace at_npu {
 namespace native {

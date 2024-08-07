@@ -1,8 +1,8 @@
 #include <ATen/record_function.h>
 #include <c10/core/Scalar.h>
 
-#include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/aten/OpInterface.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/core/NPUBridge.h"

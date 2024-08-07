@@ -3,8 +3,8 @@
 #include <ATen/ATen.h>
 
 #include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/StorageDescHelper.h"

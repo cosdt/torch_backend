@@ -4,12 +4,12 @@
 #include <torch/csrc/utils.h>
 
 #include "torch_backend/csrc/core/python_tensor.h"
-#include "torch_backend/csrc/npu/Device.h"
-#include "torch_backend/csrc/npu/Event.h"
-#include "torch_backend/csrc/npu/Init.h"
-#include "torch_backend/csrc/npu/Lock.h"
-#include "torch_backend/csrc/npu/Memory.h"
-#include "torch_backend/csrc/npu/Stream.h"
+#include "torch_backend/csrc/backend/Device.h"
+#include "torch_backend/csrc/backend/Event.h"
+#include "torch_backend/csrc/backend/Init.h"
+#include "torch_backend/csrc/backend/Lock.h"
+#include "torch_backend/csrc/backend/Memory.h"
+#include "torch_backend/csrc/backend/Stream.h"
 
 #define BACKEND_MODULE_NAME "torch_backend._C"
 

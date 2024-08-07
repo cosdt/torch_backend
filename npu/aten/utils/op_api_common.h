@@ -25,7 +25,7 @@
 #include <type_traits>
 #include <vector>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/aten/utils/KernelNpuOutputSize.h"
 #include "npu/aten/utils/OpConstants.h"
 #include "npu/aten/utils/OpUtils.h"

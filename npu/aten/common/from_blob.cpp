@@ -1,9 +1,9 @@
 #include "npu/aten/common/from_blob.h"
 #include <ATen/Utils.h>
 #include <c10/core/Allocator.h>
-#include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUFunctions.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/aten/common/TensorFactories.h"
 #include "npu/core/NPUException.h"
 #include "npu/framework/StorageDescHelper.h"

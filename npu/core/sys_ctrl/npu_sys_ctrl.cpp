@@ -1,8 +1,8 @@
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
-#include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUCachingHostAllocator.h"
-#include "csrc/npu/NPUFunctions.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/acl/include/acl/acl_op_compiler.h"
 #include "npu/core/NpuVariables.h"
 #include "npu/framework/interface/AclOpCompileInterface.h"
@@ -27,7 +27,7 @@ NpuSysCtrl::NpuSysCtrl(c10::DeviceIndex device_id) : need_finalize_(true) {
   if (ret != ACL_ERROR_NONE) {
     device_id = (device_id == -1) ? 0 : device_id;
     NPU_CHECK_ERROR(c10::npu::SetDevice(device_id));
-  } 
+  }
 
   // set default jit_Compile value from Get acl defalut value
   c10::npu::option::SetOption("jitCompile", "disable");

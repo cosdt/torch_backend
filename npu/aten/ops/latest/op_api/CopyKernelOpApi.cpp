@@ -16,7 +16,7 @@
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
-#include "csrc/npu/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/aten/utils/op_api_common.h"
 #include "npu/core/NPUPeerToPeerAccess.h"

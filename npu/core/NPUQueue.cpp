@@ -1,6 +1,6 @@
 #include "npu/core/NPUQueue.h"
-#include "csrc/npu/NPUFunctions.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/core/npu_log.h"
 #include "npu/framework/OpParamMaker.h"
 #include "npu/framework/utils/NpuUtils.h"

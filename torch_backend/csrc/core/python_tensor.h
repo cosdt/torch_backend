@@ -1,7 +1,7 @@
 #include <torch/csrc/utils/tensor_new.h>
 
 #include "csrc/core/Macros.h"
-#include "csrc/npu/NPUFunctions.h"
+#include "csrc/backend/NPUFunctions.h"
 
 namespace torch::backend::tensor {
 

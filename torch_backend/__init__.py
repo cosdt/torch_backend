@@ -8,12 +8,12 @@ import torch
 
 import torch_backend
 import torch_backend._C
-import torch_backend.npu
-from .meta import _meta_registrations
+import torch_backend.backend
+import meta
 
 torch.utils.rename_privateuse1_backend("npu")
 # rename device name to 'npu' and register funcs
-torch._register_device_module("npu", torch_backend.npu)
+torch._register_device_module("npu", torch_backend.backend)
 unsupported_dtype = [
     torch.quint8,
     torch.quint4x2,

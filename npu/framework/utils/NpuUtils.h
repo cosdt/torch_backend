@@ -10,7 +10,7 @@
 #include "npu/acl/include/acl/acl.h"
 #include "npu/acl/include/ge/ge_error_codes.h"
 
-#include "csrc/npu/NPUCachingAllocator.h"
+#include "csrc/backend/NPUCachingAllocator.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/interface/AclOpCompileInterface.h"
 

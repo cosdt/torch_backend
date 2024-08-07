@@ -3,8 +3,8 @@
 
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUFunctions.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/core/NPUBridge.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/StorageDescHelper.h"

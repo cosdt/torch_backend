@@ -1,6 +1,6 @@
 #include "npu/framework/OpCmdHelper.h"
 #include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/InferFormat.h"
 #include "npu/framework/OpParamMaker.h"

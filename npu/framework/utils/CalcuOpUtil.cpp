@@ -1,8 +1,8 @@
 #include <ATen/record_function.h>
 
-#include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUFunctions.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/aten/mirror/NPUMemoryOverlap.h"

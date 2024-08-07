@@ -1,11 +1,11 @@
 #ifndef __PULGIN_NATIVE_UTILS_OP_PARAM_MAKER__
 #define __PULGIN_NATIVE_UTILS_OP_PARAM_MAKER__
 
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStream.h"
 
 #include <thread>
 #include "csrc/core/Macros.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"

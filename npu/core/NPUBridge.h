@@ -1,7 +1,7 @@
 #pragma once
 #include <c10/core/StorageImpl.h>
-#include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUTensorImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/NPUTensorImpl.h"
 
 namespace torch_backend {
 

@@ -16,9 +16,9 @@
 #include <c10/util/irange.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUTensorImpl.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/NPUTensorImpl.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/aten/common/ResizeNpu.h"

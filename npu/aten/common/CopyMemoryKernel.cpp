@@ -1,7 +1,7 @@
 #include <ATen/ATen.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/acl/include/acl/acl.h"
 #include "npu/core/NPUBridge.h"
 #include "npu/core/NPUException.h"

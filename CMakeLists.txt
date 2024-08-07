@@ -178,7 +178,7 @@ else()
   message(FATAL_ERROR "Cannot find installed Python head file directory")
 endif()
 
-# libtroch_npu
+# libtorch_backend
 set(ATEN_SRCS)
 set(CORE_SRCS)
 set(FRAMEWORK_SRCS)
@@ -202,7 +202,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/npu/adapter)
 add_subdirectory(${PROJECT_SOURCE_DIR}/csrc)
 
 # libtorch_backend_python
-add_subdirectory(${TORCHNPU_CSRC_ROOT}/npu)
+add_subdirectory(${TORCHNPU_CSRC_ROOT}/backend)
 add_subdirectory(${TORCHNPU_CSRC_ROOT}/core)
 
 link_directories(${PYTORCH_INSTALL_DIR}/lib)

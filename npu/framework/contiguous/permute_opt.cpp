@@ -1,5 +1,5 @@
 #include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
 #include "npu/framework/utils/OpAdapter.h"
 #include "npu/aten/OpInterface.h"

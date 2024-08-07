@@ -5,8 +5,8 @@
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "npu/aten/common/ResizeNpu.h"
 #include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUCachingAllocator.h"
+#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/NPUCachingAllocator.h"
 #include "npu/framework/StorageDescHelper.h"
 
 namespace at_npu {

@@ -2,7 +2,7 @@
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/utils/NpuStorageOffsetGuard.h"
 #include "npu/framework/utils/OpAdapter.h"

@@ -2,7 +2,7 @@
 
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "npu/aten/OpInterface.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"

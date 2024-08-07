@@ -5,7 +5,7 @@ FILE(GLOB _BACKEND_SRCS
     core/*.cpp
     core/allocator/*.cpp
     core/generator/*.cpp
-    npu/*.cpp)
+    backend/*.cpp)
 
 FILE(GLOB _EXCLUDE
     aten/generated/python_functions*

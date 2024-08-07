@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/framework/utils/NPUDefinition.h"
 
 namespace at_npu {
