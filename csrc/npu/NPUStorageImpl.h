@@ -10,7 +10,7 @@
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/acl/include/acl/acl_rt.h"
 
-namespace torch_npu {
+namespace torch_backend {
 
 struct NPUStorageDesc {
  public:
@@ -53,4 +53,4 @@ c10::intrusive_ptr<c10::StorageImpl> make_npu_storage_impl(
     c10::Allocator* allocator,
     bool resizable);
 
-} // namespace torch_npu
+} // namespace torch_backend

@@ -3,15 +3,15 @@
 #include <torch/csrc/profiler/python/combined_traceback.h>
 #include <torch/csrc/utils.h>
 
-#include "torch_npu/csrc/core/python_tensor.h"
-#include "torch_npu/csrc/npu/Device.h"
-#include "torch_npu/csrc/npu/Event.h"
-#include "torch_npu/csrc/npu/Init.h"
-#include "torch_npu/csrc/npu/Lock.h"
-#include "torch_npu/csrc/npu/Memory.h"
-#include "torch_npu/csrc/npu/Stream.h"
+#include "torch_backend/csrc/core/python_tensor.h"
+#include "torch_backend/csrc/npu/Device.h"
+#include "torch_backend/csrc/npu/Event.h"
+#include "torch_backend/csrc/npu/Init.h"
+#include "torch_backend/csrc/npu/Lock.h"
+#include "torch_backend/csrc/npu/Memory.h"
+#include "torch_backend/csrc/npu/Stream.h"
 
-#define BACKEND_MODULE_NAME "torch_npu._C"
+#define BACKEND_MODULE_NAME "torch_backend._C"
 
 PyObject* module;
 static std::vector<PyMethodDef> methods;

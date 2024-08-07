@@ -10,7 +10,7 @@
 #include "csrc/npu/NPUFunctions.h"
 #include "csrc/npu/NPUGuard.h"
 
-#include "torch_npu/csrc/npu/Device.h"
+#include "torch_backend/csrc/npu/Device.h"
 
 #define CHANGE_UNIT_SIZE 1024.0
 

@@ -4,9 +4,9 @@ import contextlib
 
 import torch
 
-import torch_npu
-import torch_npu._C
-from torch_npu.utils.error_code import ErrCode, pta_error
+import torch_backend
+import torch_backend._C
+from torch_backend.utils.error_code import ErrCode, pta_error
 from .device import (
     synchronize,
     device_count,
@@ -72,7 +72,7 @@ def set_stream(stream):
     """
     if stream is None:
         return
-    torch_npu._C._npu_setStream(stream_id=stream.stream_id,
+    torch_backend._C._npu_setStream(stream_id=stream.stream_id,
                                 device_index=stream.device_index,
                                 device_type=stream.device_type)
 
@@ -83,13 +83,13 @@ def current_stream(device=None):
     Arguments:
         device (torch.device or int, optional): selected device. Returns
             the currently selected :class:`Stream` for the current device, given
-            by :func:`~torch_npu.npu.current_device`, if :attr:`device` is ``None``
+            by :func:`~torch_backend.npu.current_device`, if :attr:`device` is ``None``
             (default).
     """
-    torch_npu.npu._lazy_init()
-    streamdata = torch_npu._C._npu_getCurrentStream(
+    torch_backend.npu._lazy_init()
+    streamdata = torch_backend._C._npu_getCurrentStream(
         _get_device_index(device, optional=True))
-    return torch_npu.npu.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
+    return torch_backend.npu.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
 
 
 def default_stream(device=None):
@@ -98,13 +98,13 @@ def default_stream(device=None):
     Arguments:
         device (torch.device or int, optional): selected device. Returns
             the default :class:`Stream` for the current device, given by
-            :func:`~torch_npu.npu.current_device`, if :attr:`device` is ``None``
+            :func:`~torch_backend.npu.current_device`, if :attr:`device` is ``None``
             (default).
     """
-    torch_npu.npu._lazy_init()
-    streamdata = torch_npu._C._npu_getDefaultStream(
+    torch_backend.npu._lazy_init()
+    streamdata = torch_backend._C._npu_getDefaultStream(
         _get_device_index(device, optional=True))
-    return torch_npu.npu.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
+    return torch_backend.npu.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
 
 
 def set_sync_debug_mode(debug_mode):
@@ -130,13 +130,13 @@ def set_sync_debug_mode(debug_mode):
                 "invalid value of debug_mode, expected one of `default`, `warn`, `error`" + pta_error(ErrCode.PARAM)
             )
 
-    torch_npu._C._npu_set_sync_debug_mode(debug_mode)
+    torch_backend._C._npu_set_sync_debug_mode(debug_mode)
 
 
 def get_sync_debug_mode():
     r"""Returns current value of debug mode for npu synchronizing operations."""
 
-    return torch_npu._C._npu_get_sync_debug_mode()
+    return torch_backend._C._npu_get_sync_debug_mode()
 
 
 def _dummy_type(name):
@@ -149,17 +149,17 @@ def _dummy_type(name):
     return type(name, (object,), {"__init__": init_err})
 
 
-if not hasattr(torch_npu._C, '_NPUStreamBase'):
+if not hasattr(torch_backend._C, '_NPUStreamBase'):
     # Define dummy base classes
-    torch_npu._C.__dict__['_NPUStreamBase'] = _dummy_type('NPUStreamBase')
-    torch_npu._C.__dict__['_NPUEventBase'] = _dummy_type('NPUEventBase')
+    torch_backend._C.__dict__['_NPUStreamBase'] = _dummy_type('NPUStreamBase')
+    torch_backend._C.__dict__['_NPUEventBase'] = _dummy_type('NPUEventBase')
 
 
 def is_support_inf_nan():
-    torch_npu.npu._lazy_init()
-    return torch_npu._C._npu_is_support_inf_nan()
+    torch_backend.npu._lazy_init()
+    return torch_backend._C._npu_is_support_inf_nan()
 
 
 def is_bf16_supported():
-    torch_npu.npu._lazy_init()
-    return torch_npu._C._npu_is_bf16_supported()
+    torch_backend.npu._lazy_init()
+    return torch_backend._C._npu_is_bf16_supported()

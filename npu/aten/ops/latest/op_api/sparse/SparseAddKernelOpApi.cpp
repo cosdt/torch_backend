@@ -29,11 +29,11 @@ at::Tensor& add_out_dense_sparse_npu(
     const at::sparse::SparseTensor& sparse,
     const at::Scalar& value)
 {
-    TORCH_CHECK(torch_npu::utils::is_npu(dense), "sparse add: expected 'self' to be a NPU tensor",
+    TORCH_CHECK(torch_backend::utils::is_npu(dense), "sparse add: expected 'self' to be a NPU tensor",
         OPS_ERROR(ErrCode::VALUE));
-    TORCH_CHECK(torch_npu::utils::is_npu(sparse), "sparse add: expected 'other' to be a NPU tensor",
+    TORCH_CHECK(torch_backend::utils::is_npu(sparse), "sparse add: expected 'other' to be a NPU tensor",
         OPS_ERROR(ErrCode::VALUE));
-    TORCH_CHECK(torch_npu::utils::is_npu(r_), "sparse add: expected 'out' to be a NPU tensor",
+    TORCH_CHECK(torch_backend::utils::is_npu(r_), "sparse add: expected 'out' to be a NPU tensor",
         OPS_ERROR(ErrCode::VALUE));
 
     TORCH_CHECK(dense.sizes().equals(sparse.sizes()),
@@ -110,11 +110,11 @@ at::sparse::SparseTensor& add_out_sparse(
     TORCH_CHECK(src.is_sparse(), "add(sparse, dense) is not supported. Use add(dense, sparse) instead.",
         OPS_ERROR(ErrCode::VALUE));
 
-    TORCH_CHECK(torch_npu::utils::is_npu(t), "add: expected 'self' to be NPU, but got ", t.device(),
+    TORCH_CHECK(torch_backend::utils::is_npu(t), "add: expected 'self' to be NPU, but got ", t.device(),
         OPS_ERROR(ErrCode::VALUE));
-    TORCH_CHECK(torch_npu::utils::is_npu(src), "add: expected 'other' to be NPU, but got ", src.device(),
+    TORCH_CHECK(torch_backend::utils::is_npu(src), "add: expected 'other' to be NPU, but got ", src.device(),
         OPS_ERROR(ErrCode::VALUE));
-    TORCH_CHECK(torch_npu::utils::is_npu(r_), "add: expected 'out' to be NPU, but got ", r_.device(),
+    TORCH_CHECK(torch_backend::utils::is_npu(r_), "add: expected 'out' to be NPU, but got ", r_.device(),
         OPS_ERROR(ErrCode::VALUE));
 
     auto common_dtype = at::result_type(t, src);

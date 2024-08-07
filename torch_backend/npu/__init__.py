@@ -80,7 +80,7 @@ import torch
 from torch.storage import _LegacyStorage, _warn_typed_storage_removal
 from torch._utils import classproperty
 
-import torch_npu
+import torch_backend
 from .utils import (  # noqa 401
     synchronize,
     device_count,
@@ -145,7 +145,7 @@ def init():
 
     Does nothing if the NPU state is already initialized.
     """
-    torch_npu.npu._lazy_init()
+    torch_backend.npu._lazy_init()
 
 
 def _lazy_init():
@@ -180,7 +180,7 @@ def _lazy_init():
                 "multiprocessing, you must use the 'spawn' start method"
             )
 
-        torch_npu._C._npu_init()
+        torch_backend._C._npu_init()
 
         _original_pid = os.getpid()
         # Some of the queued calls may reentrantly call _lazy_init();
@@ -199,7 +199,7 @@ def _after_fork(arg):
     if _initialized and _original_pid != os.getpid():
         _initialized = False
         _is_internal_in_bad_fork = True
-        torch_npu._C._npu_set_run_yet_variable_to_false()  # type: ignore[attr-defined]
+        torch_backend._C._npu_set_run_yet_variable_to_false()  # type: ignore[attr-defined]
 
 
 _register_after_fork(_after_fork, _after_fork)
@@ -267,7 +267,7 @@ def _get_rng_state_offset(device: Union[int, str, torch.device] = "npu") -> int:
 
 
 def is_available():
-    if not hasattr(torch_npu._C, "_npu_setDevice"):
+    if not hasattr(torch_backend._C, "_npu_setDevice"):
         return False
     return device_count() > 0
 

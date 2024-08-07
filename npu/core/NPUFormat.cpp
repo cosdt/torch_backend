@@ -27,9 +27,9 @@ int64_t get_npu_format(const at::Tensor& self) {
 }
 
 std::vector<int64_t> get_npu_storage_sizes(const at::Tensor& self) {
-  torch_npu::utils::torch_check_npu(self);
+  torch_backend::utils::torch_check_npu(self);
   auto storage_sizes =
-      torch_npu::NPUBridge::GetNpuStorageImpl(self)->npu_desc_.storage_sizes_;
+      torch_backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_.storage_sizes_;
   std::vector<int64_t> vec_storage_sizes(
       storage_sizes.begin(), storage_sizes.end());
   return vec_storage_sizes;

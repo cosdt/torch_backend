@@ -36,7 +36,7 @@ static at::Tensor &add_out_npu_nocheck(
     at::Tensor &result)
 {
     // executing the NPU operator
-    if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+    if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
         c10::Scalar others = other.item();
         EXEC_NPU_CMD(aclnnAdds, self, others, alpha, result);
     } else {
@@ -48,7 +48,7 @@ static at::Tensor &add_out_npu_nocheck(
 static at::Tensor &inplace_add_out_npu_no_check(at::Tensor &self, const at::Tensor &other, const at::Scalar &alpha)
 {
     // check if other scalar tensor
-    if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+    if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
         c10::Scalar other_scalar = other.item();
         EXEC_NPU_CMD(aclnnInplaceAdds, self, other_scalar, alpha);
     } else {
@@ -61,7 +61,7 @@ static at::Tensor self_tensor_to_device(const at::Tensor &tensor, const at::Scal
                                         const c10::Device device)
 {
     if (npu_preparation::is_scalar_wrapped_to_tensor(tensor) ||
-        (tensor.dim() == 0 && !torch_npu::utils::is_npu(tensor))) {
+        (tensor.dim() == 0 && !torch_backend::utils::is_npu(tensor))) {
         at::Scalar scalar = tensor.item();
         return npu_preparation::copy_scalar_to_device(scalar, result_type, device);
     }

@@ -22,9 +22,9 @@ from torch.nn.parallel.parallel_apply import get_a_var
 from torch.nn.parallel.scatter_gather import gather, scatter_kwargs
 from torch.nn.parallel.replicate import replicate
 
-import torch_npu
-from torch_npu.utils.syncbatchnorm import SyncBatchNorm as sync_batch_norm
-from torch_npu.utils.error_code import ErrCode, pta_error
+import torch_backend
+from torch_backend.utils.syncbatchnorm import SyncBatchNorm as sync_batch_norm
+from torch_backend.utils.error_code import ErrCode, pta_error
 
 origin_mpdl_iter_init = _MultiProcessingDataLoaderIter.__init__
 
@@ -44,7 +44,7 @@ def npu(self, device=None):
         Module: self
     """
     device = torch.device("npu")
-    if torch_npu.npu.is_available():
+    if torch_backend.npu.is_available():
         with torch.no_grad():
             self.cast_weight(device)
     return self._apply(lambda t: t.npu(device))
@@ -61,7 +61,7 @@ def to(self, *args, **kwargs):
             warnings.warn(
                 "Complex modules are a new feature under active development whose design may change, "
                 "and some modules might not work as expected when using complex tensors as parameters or buffers. ")
-    if torch_npu.npu.is_available():
+    if torch_backend.npu.is_available():
         with torch.no_grad():
             self.cast_weight(device)
 
@@ -78,30 +78,30 @@ def cast_weight(self, device):
     def _format_cast(module, class_name):
         if issubclass(class_name, torch.nn.Linear) and not torch.npu.get_mm_bmm_format_nd():
             module.weight.data = module.weight.data.to(device)
-            module.weight.data = torch_npu.npu_format_cast(module.weight.data, 29)  # ACL_FORMAT_FRACTAL_NZ
+            module.weight.data = torch_backend.npu_format_cast(module.weight.data, 29)  # ACL_FORMAT_FRACTAL_NZ
         if issubclass(class_name, torch.nn.MultiheadAttention) and \
            module.q_proj_weight is not None and \
            not torch.npu.get_mm_bmm_format_nd():
             module.q_proj_weight.data = module.q_proj_weight.data.to(device)
-            module.q_proj_weight.data = torch_npu.npu_format_cast(module.q_proj_weight.data, 29)
+            module.q_proj_weight.data = torch_backend.npu_format_cast(module.q_proj_weight.data, 29)
             module.k_proj_weight.data = module.k_proj_weight.data.to(device)
-            module.k_proj_weight.data = torch_npu.npu_format_cast(module.k_proj_weight.data, 29)
+            module.k_proj_weight.data = torch_backend.npu_format_cast(module.k_proj_weight.data, 29)
             module.v_proj_weight.data = module.v_proj_weight.data.to(device)
-            module.v_proj_weight.data = torch_npu.npu_format_cast(module.v_proj_weight.data, 29)
+            module.v_proj_weight.data = torch_backend.npu_format_cast(module.v_proj_weight.data, 29)
 
         if torch.npu.is_jit_compile_false():
             return
         if issubclass(class_name, (torch.nn.BatchNorm2d, torch.nn.BatchNorm1d)):
             if module.affine:
                 module.weight.data = module.weight.data.to(device)
-                module.weight.data = torch_npu.npu_format_cast(module.weight.data, 3)  # ACL_FORMAT_NC1HWC0
+                module.weight.data = torch_backend.npu_format_cast(module.weight.data, 3)  # ACL_FORMAT_NC1HWC0
                 module.bias.data = module.bias.data.to(device)
-                module.bias.data = torch_npu.npu_format_cast(module.bias.data, 3)
+                module.bias.data = torch_backend.npu_format_cast(module.bias.data, 3)
             if module.track_running_stats:
                 module.running_mean.data = module.running_mean.data.to(device)
-                module.running_mean.data = torch_npu.npu_format_cast(module.running_mean.data, 3)
+                module.running_mean.data = torch_backend.npu_format_cast(module.running_mean.data, 3)
                 module.running_var.data = module.running_var.data.to(device)
-                module.running_var.data = torch_npu.npu_format_cast(module.running_var.data, 3)
+                module.running_var.data = torch_backend.npu_format_cast(module.running_var.data, 3)
         if issubclass(class_name, torch.nn.BatchNorm3d):
             # at present can not cast 1d to NDC1HWC0
             return
@@ -111,12 +111,12 @@ def cast_weight(self, device):
             if hasattr(module, "weight") and module.weight is not None and \
                     "weight" in dict(module.named_parameters()):
                 module.weight.data = module.weight.data.to(device)
-                module.weight.data = torch_npu.npu_format_cast(module.weight.data, 4)  # ACL_FORMAT_FRACTAL_Z
+                module.weight.data = torch_backend.npu_format_cast(module.weight.data, 4)  # ACL_FORMAT_FRACTAL_Z
         if issubclass(class_name, torch.nn.LazyConv3d):
             return
         if issubclass(class_name, torch.nn.Conv3d):
             module.weight.data = module.weight.data.to(device)
-            module.weight.data = torch_npu.npu_format_cast(module.weight.data.half(), 33).float()  # ACL_FRACTAL_Z_3D
+            module.weight.data = torch_backend.npu_format_cast(module.weight.data.half(), 33).float()  # ACL_FRACTAL_Z_3D
 
     if device is None or "npu" not in str(device):
         return
@@ -257,7 +257,7 @@ def _syncbn_forward(self, input1: torch.Tensor) -> torch.Tensor:
 
 def _mpdl_iter_init(self, *args, **kwargs):
     try:
-        torch_npu.npu.synchronize()
+        torch_backend.npu.synchronize()
     except:
         pass
     origin_mpdl_iter_init(self, *args, **kwargs)

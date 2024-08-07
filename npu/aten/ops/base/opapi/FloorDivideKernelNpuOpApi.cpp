@@ -26,7 +26,7 @@ using npu_preparation = at_npu::native::OpPreparation;
  */
 static at::Tensor& floor_divide_out_npu_opapi(const at::Tensor& self, const at::Tensor& other, at::Tensor& result) {
   // executing the NPU operator
-  if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+  if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
     c10::Scalar others = other.item();
     EXEC_NPU_CMD(aclnnFloorDivides, self, others, result);
   } else {
@@ -47,7 +47,7 @@ static at::Tensor self_tensor_to_device(const at::Tensor& tensor, const at::Scal
 
 static at::Tensor& inplace_floor_divide_out_npu_opapi(at::Tensor& self, const at::Tensor& other) {
   // executing the NPU operator
-  if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+  if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
     c10::Scalar others = other.item();
     EXEC_NPU_CMD(aclnnInplaceFloorDivides, self, others);
   } else {

@@ -260,8 +260,8 @@ class Clean(distutils.command.clean.clean):
             "aten/NPUNativeFunctions.h",
             "aten/CustomRegisterSchema.cpp",
             "aten/ForeachRegister.cpp",
-            "torch_npu/utils/custom_ops.py",
-            "torch_npu/version.py",
+            "torch_backend/utils/custom_ops.py",
+            "torch_backend/version.py",
         ]
         for remove_file in remove_files:
             file_path = os.path.join(BASE_DIR, remove_file)
@@ -273,11 +273,11 @@ def get_src_py_and_dst():
     ret = []
 
     # ret = glob.glob(
-    #     os.path.join(BASE_DIR, "torch_npu", '**/*.yaml'),
+    #     os.path.join(BASE_DIR, "torch_backend", '**/*.yaml'),
     #     recursive=True) + glob.glob(
-    #     os.path.join(BASE_DIR, "torch_npu", 'acl.json'),
+    #     os.path.join(BASE_DIR, "torch_backend", 'acl.json'),
     #     recursive=True) + glob.glob(
-    #     os.path.join(BASE_DIR, "torch_npu", 'contrib/apis_config.json'),
+    #     os.path.join(BASE_DIR, "torch_backend", 'contrib/apis_config.json'),
     #     recursive=True)
 
     header_files = [
@@ -293,18 +293,18 @@ def get_src_py_and_dst():
 
     for src in glob_header_files:
         dst = os.path.join(
-            os.path.join(BASE_DIR, "torch_npu/include/third_party"),
+            os.path.join(BASE_DIR, "torch_backend/include/third_party"),
             os.path.relpath(src, os.path.join(BASE_DIR, "third_party")),
         )
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         ret.append((src, dst))
 
     header_files = [
-        "torch_npu/csrc/*.h",
-        "torch_npu/csrc/*/*.h",
-        "torch_npu/csrc/*/*/*.h",
-        "torch_npu/csrc/*/*/*/*.h",
-        "torch_npu/csrc/*/*/*/*/*.h",
+        "torch_backend/csrc/*.h",
+        "torch_backend/csrc/*/*.h",
+        "torch_backend/csrc/*/*/*.h",
+        "torch_backend/csrc/*/*/*/*.h",
+        "torch_backend/csrc/*/*/*/*/*.h",
     ]
     glob_header_files = []
     for regex_pattern in header_files:
@@ -314,8 +314,8 @@ def get_src_py_and_dst():
 
     for src in glob_header_files:
         dst = os.path.join(
-            os.path.join(BASE_DIR, "torch_npu/include/torch_npu"),
-            os.path.relpath(src, os.path.join(BASE_DIR, "torch_npu")),
+            os.path.join(BASE_DIR, "torch_backend/include/torch_backend"),
+            os.path.relpath(src, os.path.join(BASE_DIR, "torch_backend")),
         )
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         ret.append((src, dst))
@@ -340,7 +340,7 @@ def build_deps():
     build_type_dir = os.path.join(build_dir)
     os.makedirs(build_type_dir, exist_ok=True)
 
-    output_lib_path = os.path.join(BASE_DIR, "torch_npu")
+    output_lib_path = os.path.join(BASE_DIR, "torch_backend")
     os.makedirs(output_lib_path, exist_ok=True)
 
     cmake_args = [
@@ -407,14 +407,14 @@ def configure_extension_build():
 
     extension = []
     C = CppExtension(
-        "torch_npu._C",
-        sources=["torch_npu/csrc/stub.c"],
-        libraries=["torch_npu_python"],
+        "torch_backend._C",
+        sources=["torch_backend/csrc/stub.c"],
+        libraries=["torch_backend_python"],
         include_dirs=include_directories,
         extra_compile_args=extra_compile_args
         + ["-fstack-protector-all"]
         + ['-D__FILENAME__="stub.c"'],
-        library_dirs=["lib", os.path.join(BASE_DIR, "torch_npu/lib")],
+        library_dirs=["lib", os.path.join(BASE_DIR, "torch_backend/lib")],
         extra_link_args=extra_link_args + ["-Wl,-rpath,$ORIGIN/lib"],
         define_macros=[("_GLIBCXX_USE_CXX11_ABI", "0"), ("GLIBCXX_USE_CXX11_ABI", "0")],
     )
@@ -470,7 +470,7 @@ def main():
         report(e)
         sys.exit(1)
 
-    generate_version("torch_npu/version.py")
+    generate_version("torch_backend/version.py")
 
     if RUN_BUILD_DEPS:
         build_deps()
@@ -488,7 +488,7 @@ def main():
         long_description = fdesc.read()
 
     setup(
-        name=os.environ.get("TORCH_NPU_PACKAGE_NAME", "torch_npu"),
+        name=os.environ.get("TORCH_NPU_PACKAGE_NAME", "torch_backend"),
         version=VERSION,
         description="NPU bridge for PyTorch",
         long_description=long_description,
@@ -497,7 +497,7 @@ def main():
         cmdclass=cmdclass,
         packages=packages,
         package_data={
-            "torch_npu": [
+            "torch_backend": [
                 "*.so",
                 "lib/*.so*",
             ],
@@ -522,7 +522,7 @@ def main():
         keywords="pytorch, machine learning",
         entry_points={
             'torch.backends': [
-                'torch_npu = torch_npu:_autoload',
+                'torch_backend = torch_backend:_autoload',
             ],
         }
     )

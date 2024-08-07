@@ -1,9 +1,9 @@
 #include "csrc/npu/NPUStorageImpl.h"
 #include "csrc/core/Register.h"
 
-namespace torch_npu {
+namespace torch_backend {
 
-C10_SET_STORAGE_IMPL_CREATE(&torch_npu::make_npu_storage_impl);
+C10_SET_STORAGE_IMPL_CREATE(&torch_backend::make_npu_storage_impl);
 
 NPUStorageImpl::NPUStorageImpl(
     use_byte_size_t use_byte_size,
@@ -44,4 +44,4 @@ c10::intrusive_ptr<c10::StorageImpl> make_npu_storage_impl(
   return npu_storage_impl;
 }
 
-} // namespace torch_npu
+} // namespace torch_backend

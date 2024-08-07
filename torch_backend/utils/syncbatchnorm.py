@@ -2,8 +2,8 @@ import torch
 import torch.distributed as dist
 from torch.autograd.function import Function
 
-import torch_npu
-from torch_npu.utils.error_code import ErrCode, ops_error
+import torch_backend
+from torch_backend.utils.error_code import ErrCode, ops_error
 
 
 __all__ = ["SyncBatchNorm"]
@@ -17,7 +17,7 @@ class SyncBatchNorm(Function):
         input_shape = input_tensor.shape
         input_tensor_ = input_tensor.reshape(input_shape[0], input_shape[1], 1, -1)
         # calculate sum/sum_square for input.
-        sum_val, sum_square_val = torch_npu.batch_norm_reduce(input_tensor_, eps)
+        sum_val, sum_square_val = torch_backend.batch_norm_reduce(input_tensor_, eps)
 
         count = torch.full((1,),
                            input_tensor.numel() // input_tensor.size(1),
@@ -40,7 +40,7 @@ class SyncBatchNorm(Function):
                              ops_error(ErrCode.VALUE))
 
         # calculate global mean & invstd
-        mean, invstd = torch_npu.batch_norm_gather_stats_update(input_tensor,
+        mean, invstd = torch_backend.batch_norm_gather_stats_update(input_tensor,
                                                                 sum_all,
                                                                 square_sum_all,
                                                                 running_mean,

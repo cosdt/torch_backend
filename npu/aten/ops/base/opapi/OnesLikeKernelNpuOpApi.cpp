@@ -30,7 +30,7 @@ at::Tensor ones_like(const at::Tensor &self,
   DO_COMPATIBILITY(aclnnInplaceOne, acl_op::ones_like(self, dtype_opt, layout_opt, device_opt,
                                                       pin_memory_opt, optional_memory_format));
   auto device = c10::device_or_default(device_opt);
-  if (!torch_npu::utils::is_npu(device)) {
+  if (!torch_backend::utils::is_npu(device)) {
     auto result = at::empty_like(self, dtype_opt, layout_opt, device_opt, pin_memory_opt, optional_memory_format);
     return op_api::fill_(result, 1.);
   }

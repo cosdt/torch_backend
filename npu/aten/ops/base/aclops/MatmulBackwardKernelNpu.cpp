@@ -98,7 +98,7 @@ std::tuple<at::Tensor, at::Tensor> matmul_backward(const at::Tensor &grad, const
         return std::make_tuple(grad_self, grad_other);
     }
 
-    if (torch_npu::utils::is_npu(self) && torch_npu::utils::is_npu(other) && self.scalar_type() == at::kHalf &&
+    if (torch_backend::utils::is_npu(self) && torch_backend::utils::is_npu(other) && self.scalar_type() == at::kHalf &&
         other.scalar_type() == at::kHalf && at_npu::native::env::CheckBmmV2Enable()) {
         grad_self = mask[0] ? at_npu::native::matmul_by_bmmV2(grad, other.transpose(-1, -2)) : grad_self;
         grad_other = mask[1] ? at_npu::native::matmul_by_bmmV2(self.transpose(-1, -2), grad) : grad_other;

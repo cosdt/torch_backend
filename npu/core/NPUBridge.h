@@ -3,7 +3,7 @@
 #include "csrc/npu/NPUStorageImpl.h"
 #include "csrc/npu/NPUTensorImpl.h"
 
-namespace torch_npu {
+namespace torch_backend {
 
 class NPUBridge {
  public:
@@ -22,4 +22,4 @@ class NPUBridge {
   // tensor to NPUTensorImpl
   static NPUTensorImpl* GetNpuTensorImpl(const at::Tensor& tensor);
 };
-} // namespace torch_npu
+} // namespace torch_backend

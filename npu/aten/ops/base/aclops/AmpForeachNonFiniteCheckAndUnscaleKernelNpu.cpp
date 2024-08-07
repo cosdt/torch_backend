@@ -27,7 +27,7 @@ const int FLOAT_STATUS_OP_DIMS_SIZE = 8;
 bool _amp_foreach_non_finite_check(at::TensorList scaled_grads) {
   TORCH_NPU_WARN_ONCE("Non finite check on NPU device!");
 
-  auto options = at::TensorOptions(torch_npu::utils::get_npu_device_type())
+  auto options = at::TensorOptions(torch_backend::utils::get_npu_device_type())
                      .dtype(at::kFloat);
   at::Tensor float_status = at::zeros({FLOAT_STATUS_OP_DIMS_SIZE}, options);
   auto ans = acl_op::npu_get_float_status(float_status);
@@ -46,7 +46,7 @@ void _amp_foreach_non_finite_check_and_unscale_(
     const at::Tensor& inv_scale) {
   TORCH_NPU_WARN_ONCE("Non finite check and unscale on NPU device!");
   TORCH_CHECK(
-      torch_npu::utils::is_npu(inv_scale),
+      torch_backend::utils::is_npu(inv_scale),
       "inv_scale must be NPU-Tensor" + OPS_ERROR(ErrCode::PARAM));
   TORCH_CHECK(
       inv_scale.numel() == 1,
@@ -78,7 +78,7 @@ void _amp_foreach_non_finite_check_and_unscale_(
     auto expected_dtype = scaled_grads[0].dtype();
     for (const auto& t : scaled_grads) {
       TORCH_CHECK(
-          torch_npu::utils::is_npu(t),
+          torch_backend::utils::is_npu(t),
           "one of scaled_grads was not a NPU tensor." +
               OPS_ERROR(ErrCode::PARAM));
       TORCH_CHECK(

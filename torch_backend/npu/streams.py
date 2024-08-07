@@ -1,11 +1,11 @@
 import ctypes
 
 from torch._streambase import _StreamBase, _EventBase
-import torch_npu
-import torch_npu._C
+import torch_backend
+import torch_backend._C
 
 
-class Stream(torch_npu._C._NPUStreamBase, _StreamBase):
+class Stream(torch_backend._C._NPUStreamBase, _StreamBase):
     r"""Wrapper around a NPU stream.
 
     A NPU stream is a linear sequence of execution that belongs to a specific
@@ -21,7 +21,7 @@ class Stream(torch_npu._C._NPUStreamBase, _StreamBase):
     """
 
     def __new__(cls, device=None, priority=0, **kwargs):
-        with torch_npu.npu.device(device):
+        with torch_backend.npu.device(device):
             return super(Stream, cls).__new__(cls, priority=priority, **kwargs)
 
     def wait_event(self, event):
@@ -105,11 +105,11 @@ class Stream(torch_npu._C._NPUStreamBase, _StreamBase):
         return hash((self.npu_stream, self.device))
 
     def __repr__(self):
-        return ('<torch_npu.npu.Stream device={0} npu_stream={1:#x}>'
+        return ('<torch_backend.npu.Stream device={0} npu_stream={1:#x}>'
                 .format(self.device, self.npu_stream))
 
 
-class Event(torch_npu._C._NPUEventBase, _EventBase):
+class Event(torch_backend._C._NPUEventBase, _EventBase):
     r"""Wrapper around a NPU event.
 
     NPU events are synchronization markers that can be used to monitor the
@@ -136,21 +136,21 @@ class Event(torch_npu._C._NPUEventBase, _EventBase):
     def record(self, stream=None):
         r"""Records the event in a given stream.
 
-        Uses ``torch_npu.npu.current_stream()`` if no stream is specified. The
+        Uses ``torch_backend.npu.current_stream()`` if no stream is specified. The
         stream's device must match the event's device.
         """
         if stream is None:
-            stream = torch_npu.npu.current_stream()
+            stream = torch_backend.npu.current_stream()
         super(Event, self).record(stream)
 
     def wait(self, stream=None):
         r"""Makes all future work submitted to the given stream wait for this
         event.
 
-        Use ``torch_npu.npu.current_stream()`` if no stream is specified.
+        Use ``torch_backend.npu.current_stream()`` if no stream is specified.
         """
         if stream is None:
-            stream = torch_npu.npu.current_stream()
+            stream = torch_backend.npu.current_stream()
         super(Event, self).wait(stream)
 
     def query(self):
@@ -185,6 +185,6 @@ class Event(torch_npu._C._NPUEventBase, _EventBase):
 
     def __repr__(self):
         if self.npu_event:
-            return '<torch_npu.npu.Event {0:#x}>'.format(self._as_parameter_.value)
+            return '<torch_backend.npu.Event {0:#x}>'.format(self._as_parameter_.value)
         else:
-            return '<torch_npu.npu.Event uninitialized>'
+            return '<torch_backend.npu.Event uninitialized>'

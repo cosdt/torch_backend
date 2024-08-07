@@ -259,7 +259,7 @@ at::native::ConvBackend select_conv_backend(
     TORCH_CHECK(false, "Only zero batch or zero channel inputs are supported, but got input shape: ", input.sizes(), OPS_ERROR(ErrCode::NOT_SUPPORT));
   }
 
-  if (torch_npu::utils::is_npu(input)) {
+  if (torch_backend::utils::is_npu(input)) {
     // backends without support for groups
     if (params.transposed) {
       if (input.ndimension() == 4) {

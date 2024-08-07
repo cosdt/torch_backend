@@ -32,9 +32,9 @@ int64_t NPUNativeFunctions::npu_change_data_ptr(
       PTA_ERROR(ErrCode::TYPE));
 
   auto dst_sizes =
-      torch_npu::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_.storage_sizes_;
+      torch_backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_.storage_sizes_;
   auto src_sizes =
-      torch_npu::NPUBridge::GetNpuStorageImpl(src)->npu_desc_.storage_sizes_;
+      torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_.storage_sizes_;
   int64_t dst_storage_size = c10::multiply_integers(dst_sizes);
   int64_t src_storage_size = c10::multiply_integers(src_sizes);
 

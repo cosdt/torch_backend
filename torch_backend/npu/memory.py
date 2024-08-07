@@ -8,7 +8,7 @@ import os
 import stat
 from typing import Any, Dict, Optional, Tuple, Union
 
-import torch_npu
+import torch_backend
 from . import is_initialized, _get_device_index, _lazy_init
 
 __all__ = [
@@ -35,11 +35,11 @@ __all__ = [
 
 @contextlib.contextmanager
 def _free_mutex():
-    torch_npu._C._npu_lock_mutex()
+    torch_backend._C._npu_lock_mutex()
     try:
         yield
     finally:
-        torch_npu._C._npu_unlock_mutex()
+        torch_backend._C._npu_unlock_mutex()
 
 
 def caching_allocator_alloc(size, device=None, stream=None):
@@ -48,13 +48,13 @@ def caching_allocator_alloc(size, device=None, stream=None):
     Memory is allocated for a given device and a stream, this
     function is intended to be used for interoperability with other
     frameworks. Allocated memory is released through
-    :func:`~torch_npu.npu.caching_allocator_delete`.
+    :func:`~torch_backend.npu.caching_allocator_delete`.
 
     Arguments:
         size (int): number of bytes to be allocated.
         device (torch.device or int, optional): selected device. If it is
             ``None`` the default NPU device is used.
-        stream (torch_npu.npu.Stream or int, optional): selected stream. If is ``None`` then
+        stream (torch_backend.npu.Stream or int, optional): selected stream. If is ``None`` then
             the default stream for the selected device is used.
 
     .. note::
@@ -62,24 +62,24 @@ def caching_allocator_alloc(size, device=None, stream=None):
         management.
     """
     if device is None:
-        device = torch_npu.npu.current_device()
+        device = torch_backend.npu.current_device()
     device = _get_device_index(device)
     if stream is None:
-        stream = torch_npu.npu.current_stream(device)
-    if isinstance(stream, torch_npu.npu.streams.Stream):
+        stream = torch_backend.npu.current_stream(device)
+    if isinstance(stream, torch_backend.npu.streams.Stream):
         stream = stream.npu_stream
     if not isinstance(stream, int):
         raise TypeError('Invalid type for stream argument, must be '
-                        '`torch_npu.npu.Stream` or `int` representing a pointer '
+                        '`torch_backend.npu.Stream` or `int` representing a pointer '
                         'to a exisiting stream')
-    with torch_npu.npu.device(device):
-        return torch_npu._C._npu_npuCachingAllocator_raw_alloc(size, stream)
+    with torch_backend.npu.device(device):
+        return torch_backend._C._npu_npuCachingAllocator_raw_alloc(size, stream)
 
 
 def caching_allocator_delete(mem_ptr):
     r"""Deletes memory allocated using the NPU memory allocator.
 
-    Memory allocated with :func:`~torch_npu.npu.caching_allocator_alloc`.
+    Memory allocated with :func:`~torch_backend.npu.caching_allocator_alloc`.
     is freed here. The associated device and stream are tracked inside
     the allocator.
 
@@ -90,7 +90,7 @@ def caching_allocator_delete(mem_ptr):
         See :ref:`npu-memory-management` for more details about NPU memory
         management.
     """
-    torch_npu._C._npu_npuCachingAllocator_raw_delete(mem_ptr)
+    torch_backend._C._npu_npuCachingAllocator_raw_delete(mem_ptr)
 
 
 def set_per_process_memory_fraction(fraction, device=None) -> None:
@@ -108,7 +108,7 @@ def set_per_process_memory_fraction(fraction, device=None) -> None:
     """
     _lazy_init()
     if device is None:
-        device = torch_npu.npu.current_device()
+        device = torch_backend.npu.current_device()
     device = _get_device_index(device)
     if not isinstance(fraction, float):
         raise TypeError('Invalid type for fraction argument, must be `float`')
@@ -116,7 +116,7 @@ def set_per_process_memory_fraction(fraction, device=None) -> None:
         raise ValueError('Invalid fraction value: {}. '
                          'Allowed range: 0~1'.format(fraction))
 
-    torch_npu._C._npu_setMemoryFraction(fraction, device)
+    torch_backend._C._npu_setMemoryFraction(fraction, device)
 
 
 def empty_cache():
@@ -125,13 +125,13 @@ def empty_cache():
     `nvidia-smi`.
 
     .. note::
-        :func:`~torch_npu.npu.empty_cache` doesn't increase the amount of NPU
+        :func:`~torch_backend.npu.empty_cache` doesn't increase the amount of NPU
         memory available for PyTorch. However, it may help reduce fragmentation
         of NPU memory in certain cases. See :ref:`npu-memory-management` for
         more details about NPU memory management.
     """
     if is_initialized():
-        torch_npu._C._npu_emptyCache()
+        torch_backend._C._npu_emptyCache()
 
 
 def memory_stats(device=None):
@@ -184,7 +184,7 @@ def memory_stats(device=None):
       number of over-size reserved segments from ``cudaMalloc()``.
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistics for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistics for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
     .. note::
         See :ref:`npu-memory-management` for more details about NPU memory
@@ -209,23 +209,23 @@ def memory_stats(device=None):
 
 
 def memory_stats_as_nested_dict(device=None):
-    r"""Returns the result of :func:`~torch_npu.npu.memory_stats` as a nested dictionary."""
+    r"""Returns the result of :func:`~torch_backend.npu.memory_stats` as a nested dictionary."""
     if not is_initialized():
         return {}
     device = _get_device_index(device, optional=True)
-    return torch_npu._C._npu_memoryStats(device)
+    return torch_backend._C._npu_memoryStats(device)
 
 
 def reset_accumulated_memory_stats(device=None):
     r"""Resets the "accumulated" (historical) stats tracked by the NPU memory allocator.
 
-    See :func:`~torch_npu.npu.memory_stats` for details. Accumulated stats correspond to
+    See :func:`~torch_backend.npu.memory_stats` for details. Accumulated stats correspond to
     the `"allocated"` and `"freed"` keys in each individual stat dict, as well as
     `"num_alloc_retries"` and `"num_ooms"`.
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistic for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistic for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
 
     .. note::
@@ -233,18 +233,18 @@ def reset_accumulated_memory_stats(device=None):
         management.
     """
     device = _get_device_index(device, optional=True)
-    return torch_npu._C._npu_resetAccumulatedMemoryStats(device)
+    return torch_backend._C._npu_resetAccumulatedMemoryStats(device)
 
 
 def reset_peak_memory_stats(device=None):
     r"""Resets the "peak" stats tracked by the NPU memory allocator.
 
-    See :func:`~torch_npu.npu.memory_stats` for details. Peak stats correspond to the
+    See :func:`~torch_backend.npu.memory_stats` for details. Peak stats correspond to the
     `"peak"` key in each individual stat dict.
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistic for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistic for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
 
     .. note::
@@ -252,22 +252,22 @@ def reset_peak_memory_stats(device=None):
         management.
     """
     device = _get_device_index(device, optional=True)
-    return torch_npu._C._npu_resetPeakMemoryStats(device)
+    return torch_backend._C._npu_resetPeakMemoryStats(device)
 
 
 def reset_max_memory_allocated(device=None):
     r"""Resets the starting point in tracking maximum NPU memory occupied by
     tensors for a given device.
 
-    See :func:`~torch_npu.npu.max_memory_allocated` for details.
+    See :func:`~torch_backend.npu.max_memory_allocated` for details.
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistic for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistic for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
 
     .. warning::
-        This function now calls :func:`~torch_npu.npu.reset_peak_memory_stats`, which resets
+        This function now calls :func:`~torch_backend.npu.reset_peak_memory_stats`, which resets
         /all/ peak memory stats.
 
     .. note::
@@ -275,7 +275,7 @@ def reset_max_memory_allocated(device=None):
         management.
     """
     warnings.warn(
-        "torch_npu.npu.reset_max_memory_allocated now calls torch_npu.npu.reset_peak_memory_stats, "
+        "torch_backend.npu.reset_max_memory_allocated now calls torch_backend.npu.reset_peak_memory_stats, "
         "which resets /all/ peak memory stats.",
         DeprecationWarning)
     return reset_peak_memory_stats(device=device)
@@ -285,15 +285,15 @@ def reset_max_memory_cached(device=None):
     r"""Resets the starting point in tracking maximum NPU memory managed by the
     caching allocator for a given device.
 
-    See :func:`~torch_npu.npu.max_memory_cached` for details.
+    See :func:`~torch_backend.npu.max_memory_cached` for details.
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistic for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistic for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
 
     .. warning::
-        This function now calls :func:`~torch_npu.npu.reset_peak_memory_stats`, which resets
+        This function now calls :func:`~torch_backend.npu.reset_peak_memory_stats`, which resets
         /all/ peak memory stats.
 
     .. note::
@@ -301,7 +301,7 @@ def reset_max_memory_cached(device=None):
         management.
     """
     warnings.warn(
-        "torch_npu.npu.reset_max_memory_cached now calls torch_npu.npu.reset_peak_memory_stats, "
+        "torch_backend.npu.reset_max_memory_cached now calls torch_backend.npu.reset_peak_memory_stats, "
         "which resets /all/ peak memory stats.",
         DeprecationWarning)
     return reset_peak_memory_stats(device=device)
@@ -313,7 +313,7 @@ def memory_allocated(device=None):
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistic for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistic for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
 
     .. note::
@@ -330,14 +330,14 @@ def max_memory_allocated(device=None):
     device.
 
     By default, this returns the peak allocated memory since the beginning of
-    this program. :func:`~torch_npu.npu.reset_peak_stats` can be used to
+    this program. :func:`~torch_backend.npu.reset_peak_stats` can be used to
     reset the starting point in tracking this metric. For example, these two
     functions can measure the peak allocated memory usage of each iteration in a
     training loop.
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistic for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistic for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
 
     .. note::
@@ -353,7 +353,7 @@ def memory_reserved(device=None):
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistic for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistic for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
 
     .. note::
@@ -368,14 +368,14 @@ def max_memory_reserved(device=None):
     for a given device.
 
     By default, this returns the peak cached memory since the beginning of this
-    program. :func:`~torch_npu.npu.reset_peak_stats` can be used to reset
+    program. :func:`~torch_backend.npu.reset_peak_stats` can be used to reset
     the starting point in tracking this metric. For example, these two functions
     can measure the peak cached memory amount of each iteration in a training
     loop.
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            statistic for the current device, given by :func:`~torch_npu.npu.current_device`,
+            statistic for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
 
     .. note::
@@ -386,17 +386,17 @@ def max_memory_reserved(device=None):
 
 
 def memory_cached(device=None):
-    r"""Deprecated; see :func:`~torch_npu.npu.memory_reserved`."""
+    r"""Deprecated; see :func:`~torch_backend.npu.memory_reserved`."""
     warnings.warn(
-        "torch_npu.npu.memory_cached has been renamed to torch_npu.npu.memory_reserved",
+        "torch_backend.npu.memory_cached has been renamed to torch_backend.npu.memory_reserved",
         DeprecationWarning)
     return memory_reserved(device=device)
 
 
 def max_memory_cached(device=None):
-    r"""Deprecated; see :func:`~torch_npu.npu.max_memory_reserved`."""
+    r"""Deprecated; see :func:`~torch_backend.npu.max_memory_reserved`."""
     warnings.warn(
-        "torch_npu.npu.max_memory_cached has been renamed to torch_npu.npu.max_memory_reserved",
+        "torch_backend.npu.max_memory_cached has been renamed to torch_backend.npu.max_memory_reserved",
         DeprecationWarning)
     return max_memory_reserved(device=device)
 
@@ -411,7 +411,7 @@ def memory_snapshot():
         See :ref:`npu-memory-management` for more details about NPU memory
         management.
     """
-    return torch_npu._C._npu_memorySnapshot()["segments"]
+    return torch_backend._C._npu_memorySnapshot()["segments"]
 
 
 def _format_size(sz, pref_sz):
@@ -469,7 +469,7 @@ def memory_summary(device=None, abbreviated=False):
 
     Arguments:
         device (torch.device or int, optional): selected device. Returns
-            printout for the current device, given by :func:`~torch_npu.npu.current_device`,
+            printout for the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
         abbreviated (bool, optional): whether to return an abbreviated summary
             (default: False).
@@ -550,7 +550,7 @@ def get_allocator_backend() -> str:
     .. note::
         See :ref:`npu-memory-management` for details on choosing the allocator backend.
     """
-    return torch_npu._C._npu_getAllocatorBackend()
+    return torch_backend._C._npu_getAllocatorBackend()
 
 def _snapshot(device=None):
     """Save a snapshot of NPU memory state at the time it was called.
@@ -626,7 +626,7 @@ def _snapshot(device=None):
     Returns:
         The Snapshot dictionary object
     """
-    return torch_npu._C._npu_memorySnapshot()
+    return torch_backend._C._npu_memorySnapshot()
 
 
 def _dump_snapshot(filename="dump_snapshot.pickle"):

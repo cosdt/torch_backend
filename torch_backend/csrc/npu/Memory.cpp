@@ -1,4 +1,4 @@
-#include "torch_npu/csrc/npu/Memory.h"
+#include "torch_backend/csrc/npu/Memory.h"
 #include <torch/csrc/Exceptions.h>
 #include <torch/csrc/THP.h>
 #include <torch/csrc/profiler/python/combined_traceback.h>

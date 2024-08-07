@@ -32,7 +32,7 @@ enum CheckOverflowMode {
 } // namespace
 
 at::Tensor npu_alloc_float_status(const at::Tensor& self) {
-  auto options = at::TensorOptions(torch_npu::utils::get_npu_device_type())
+  auto options = at::TensorOptions(torch_backend::utils::get_npu_device_type())
                      .dtype(at::kFloat);
   at::Tensor result = npu_preparation::apply_tensor_with_format(
       output_size, options, npu_preparation::get_tensor_npu_format(self));

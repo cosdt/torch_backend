@@ -1,4 +1,4 @@
-#include "torch_npu/csrc/npu/Init.h"
+#include "torch_backend/csrc/npu/Init.h"
 #include <ATen/Context.h>
 #include <torch/csrc/Exceptions.h>
 #include <torch/csrc/utils/object_ptr.h>

@@ -1,4 +1,4 @@
-#include "torch_npu/csrc/npu/Stream.h"
+#include "torch_backend/csrc/npu/Stream.h"
 #include <pybind11/pybind11.h>
 #include <structmember.h>
 #include <torch/csrc/Device.h>
@@ -159,7 +159,7 @@ static PyMethodDef THNPStream_methods[] = {
 PyTypeObject THNPStreamType = {
     PyVarObject_HEAD_INIT(
         nullptr,
-        0) "torch_npu._C._NPUStreamBase", /* tp_name */
+        0) "torch_backend._C._NPUStreamBase", /* tp_name */
     sizeof(THNPStream), /* tp_basicsize */
     0, /* tp_itemsize */
     (destructor)THNPStream_dealloc, /* tp_dealloc */
@@ -239,7 +239,7 @@ THNPUtils_PySequence_to_NPUStreamList(PyObject* obj) {
       streams.emplace_back();
     } else {
       std::runtime_error(
-          "Unknown data type found in stream list. Need torch_npu.npu.Stream or None");
+          "Unknown data type found in stream list. Need torch_backend.npu.Stream or None");
     }
   }
   return streams;

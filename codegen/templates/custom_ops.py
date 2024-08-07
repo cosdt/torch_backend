@@ -1,6 +1,6 @@
 import warnings
 import torch
-import torch_npu
+import torch_backend
 
 
 ${custom_ops}

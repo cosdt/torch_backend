@@ -5,9 +5,9 @@
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/framework/StorageDescHelper.h"
 
-namespace torch_npu {
+namespace torch_backend {
 
-REGISTER_TENSOR_BACKEND_META_REGISTRY(torch_npu::npu_info_serialization, torch_npu::npu_info_deserialization);
+REGISTER_TENSOR_BACKEND_META_REGISTRY(torch_backend::npu_info_serialization, torch_backend::npu_info_deserialization);
 
 std::unordered_map<std::string, aclFormat> FORMAT_INFO = {
     {"NC1HWC0", ACL_FORMAT_NC1HWC0},
@@ -61,4 +61,4 @@ void npu_info_deserialization(
   }
 }
 
-} // namespace torch_npu
+} // namespace torch_backend

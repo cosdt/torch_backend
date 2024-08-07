@@ -52,7 +52,7 @@ bool OptionsManager::CheckAclDumpDateEnable() {
   if (checkAclDumpDateEnable) {
     TORCH_NPU_WARN_ONCE(
         "The environment variable ACL_DUMP_DATA has been deprecated, "
-        "please use torch_npu.npu.init_dump() instead");
+        "please use torch_backend.npu.init_dump() instead");
   }
   return checkAclDumpDateEnable;
 }

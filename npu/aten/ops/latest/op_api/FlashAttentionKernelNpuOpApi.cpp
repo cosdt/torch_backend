@@ -57,7 +57,7 @@ DropOutStatus get_dropout_status(double keep_prob)
 at::Tensor format_trans(const at::Tensor &at_tensor)
 {
     if (at_tensor.defined()) {
-        TORCH_CHECK(torch_npu::utils::is_npu(at_tensor), "only npu tensor is supported" + OPS_ERROR(ErrCode::NOT_SUPPORT));
+        TORCH_CHECK(torch_backend::utils::is_npu(at_tensor), "only npu tensor is supported" + OPS_ERROR(ErrCode::NOT_SUPPORT));
         return custom_ops::npu_format_cast(at_tensor, ACL_FORMAT_ND);
     }
     return at_tensor;

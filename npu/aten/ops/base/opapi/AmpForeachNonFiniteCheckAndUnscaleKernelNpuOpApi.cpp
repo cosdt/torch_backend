@@ -131,7 +131,7 @@ void _amp_foreach_non_finite_check_and_unscale_(
     const at::Tensor& inv_scale) {
   TORCH_NPU_WARN_ONCE("Non finite check and unscale on NPU device!");
   TORCH_CHECK(
-      torch_npu::utils::is_npu(inv_scale),
+      torch_backend::utils::is_npu(inv_scale),
       "inv_scale must be NPU-Tensor" + OPS_ERROR(ErrCode::PARAM));
   TORCH_CHECK(
       inv_scale.numel() == 1,
@@ -169,7 +169,7 @@ void _amp_foreach_non_finite_check_and_unscale_(
   auto expected_dtype = scaled_grads[0].dtype();
   for (auto& t : scaled_grads) {
     TORCH_CHECK(
-        torch_npu::utils::is_npu(t),
+        torch_backend::utils::is_npu(t),
         "one of scaled_grads was not a NPU tensor." +
             OPS_ERROR(ErrCode::PARAM));
     TORCH_CHECK(

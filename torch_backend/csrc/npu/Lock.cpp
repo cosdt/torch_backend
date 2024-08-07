@@ -1,4 +1,4 @@
-#include "torch_npu/csrc/npu/Lock.h"
+#include "torch_backend/csrc/npu/Lock.h"
 #include <pybind11/pybind11.h>
 #include "csrc/npu/NPUFunctions.h"
 

@@ -5,8 +5,8 @@
 #include <torch/csrc/utils/python_arg_parser.h>
 #include "csrc/npu/NPUGuard.h"
 
-#include "torch_npu/csrc/npu/Event.h"
-#include "torch_npu/csrc/npu/Stream.h"
+#include "torch_backend/csrc/npu/Event.h"
+#include "torch_backend/csrc/npu/Stream.h"
 
 namespace torch::backend::event {
 
@@ -135,7 +135,7 @@ static PyMethodDef THNPEvent_methods[] = {
 PyTypeObject THNPEventType = {
     PyVarObject_HEAD_INIT(
         nullptr,
-        0) "torch_npu._C._NPUEventBase", /* tp_name */
+        0) "torch_backend._C._NPUEventBase", /* tp_name */
     sizeof(THNPEvent), /* tp_basicsize */
     0, /* tp_itemsize */
     (destructor)THNPEvent_dealloc, /* tp_dealloc */

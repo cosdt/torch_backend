@@ -55,7 +55,7 @@ class AclTensorDescMaker {
 
   AclTensorDescMaker& Create(
       aclDataType dataType,
-      torch_npu::NPUStorageDesc storageDesc) {
+      torch_backend::NPUStorageDesc storageDesc) {
     c10::SmallVector<int64_t, 5> dims;
     // if aclDataType is ACL_STRING, storageDims is empty.
     if (dataType != ACL_STRING) {

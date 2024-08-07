@@ -1,6 +1,6 @@
 #include <npu/core/NPUBridge.h>
 
-namespace torch_npu {
+namespace torch_backend {
 
 NPUStorageImpl* NPUBridge::GetNpuStorageImpl(c10::StorageImpl* storageImpl) {
   return static_cast<NPUStorageImpl*>(storageImpl);
@@ -23,4 +23,4 @@ NPUTensorImpl* NPUBridge::GetNpuTensorImpl(const at::Tensor& tensor) {
   return static_cast<NPUTensorImpl*>(tensor.unsafeGetTensorImpl());
 }
 
-} // namespace torch_npu
+} // namespace torch_backend

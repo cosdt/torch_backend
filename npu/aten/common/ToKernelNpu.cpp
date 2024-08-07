@@ -37,7 +37,7 @@ static inline at::Tensor to_impl_npu(
     return self;
   }
 
-  bool pin_out = non_blocking && torch_npu::utils::is_npu(self) &&
+  bool pin_out = non_blocking && torch_backend::utils::is_npu(self) &&
       options.device().is_cpu() && (options.layout() == c10::kStrided);
 
   if (memory_format == c10::MemoryFormat::Preserve) {

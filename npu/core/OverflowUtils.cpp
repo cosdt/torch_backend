@@ -4,7 +4,7 @@
 #include "npu/core/OverflowUtils.h"
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
-namespace torch_npu {
+namespace torch_backend {
 namespace utils {
 
 OverflowUtil::OverflowUtil() {}
@@ -37,4 +37,4 @@ void OverflowUtil::ClearOverflowNpu() {
 }
 
 } // namespace utils
-} // namespace torch_npu
+} // namespace torch_backend

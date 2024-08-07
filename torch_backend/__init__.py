@@ -6,14 +6,14 @@ os.environ['TORCH_DEVICE_BACKEND_AUTOLOAD'] = '0'
 
 import torch
 
-import torch_npu
-import torch_npu._C
-import torch_npu.npu
+import torch_backend
+import torch_backend._C
+import torch_backend.npu
 from .meta import _meta_registrations
 
 torch.utils.rename_privateuse1_backend("npu")
 # rename device name to 'npu' and register funcs
-torch._register_device_module("npu", torch_npu.npu)
+torch._register_device_module("npu", torch_backend.npu)
 unsupported_dtype = [
     torch.quint8,
     torch.quint4x2,
@@ -41,7 +41,7 @@ supported_dtypes = [
     torch.bool,
     torch.bfloat16,
 ]
-torch_npu._C.generate_tensor_types(supported_dtypes)
+torch_backend._C.generate_tensor_types(supported_dtypes)
 
 
 # This function is an entrypoint called by PyTorch

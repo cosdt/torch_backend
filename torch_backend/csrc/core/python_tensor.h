@@ -7,4 +7,4 @@ namespace torch::backend::tensor {
 
 TORCH_BACKEND_API PyMethodDef* python_functions();
 
-} // namespace torch_npu
+} // namespace torch_backend

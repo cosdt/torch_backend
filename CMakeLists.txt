@@ -30,7 +30,7 @@ if(DEFINED TORCH_VERSION)
   add_definitions(-DPYTORCH_NPU_VERSION="${TORCH_VERSION}")
 endif()
 
-set(PLUGIN_NAME torch_npu)
+set(PLUGIN_NAME torch_backend)
 
 set(RPATH_VALUE $ORIGIN)
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -57,7 +57,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(TORCHNPU_CSRC_ROOT "${PROJECT_SOURCE_DIR}/torch_npu/csrc")
+set(TORCHNPU_CSRC_ROOT "${PROJECT_SOURCE_DIR}/torch_backend/csrc")
 
 set(Torch_DIR ${PYTORCH_INSTALL_DIR}/share/cmake/Torch)
 find_package(Torch REQUIRED)
@@ -187,12 +187,12 @@ set(ACL_ADAPTER_SRCS)
 
 set(BACKEND_SRCS)
 
-# libtorch_npu_python
+# libtorch_backend_python
 set(NPU_SRCS)
 set(UTILS_SRCS)
 set(GENERATED_SRCS)
 
-# libtorch_npu
+# libtorch_backend
 add_subdirectory(${PROJECT_SOURCE_DIR}/npu/acl/libs)
 add_subdirectory(${PROJECT_SOURCE_DIR}/npu/core)
 add_subdirectory(${PROJECT_SOURCE_DIR}/npu/framework)
@@ -201,7 +201,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/npu/adapter)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/csrc)
 
-# libtorch_npu_python
+# libtorch_backend_python
 add_subdirectory(${TORCHNPU_CSRC_ROOT}/npu)
 add_subdirectory(${TORCHNPU_CSRC_ROOT}/core)
 
@@ -209,9 +209,9 @@ link_directories(${PYTORCH_INSTALL_DIR}/lib)
 link_directories(${PROJECT_SOURCE_DIR}/npu/acl/libs)
 
 set(NPULIB_SRCS ${NPU_SRCS} ${UTILS_SRCS} ${GENERATED_SRCS} ${TORCHNPU_CSRC_ROOT}/Module.cpp)
-add_library(torch_npu_python SHARED ${NPULIB_SRCS})
-target_link_libraries(torch_npu_python PRIVATE torch_npu torch_python)
-install(TARGETS torch_npu_python LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+add_library(torch_backend_python SHARED ${NPULIB_SRCS})
+target_link_libraries(torch_backend_python PRIVATE torch_backend torch_python)
+install(TARGETS torch_backend_python LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 set(CPP_SRCS ${BACKEND_SRCS} ${ATEN_SRCS} ${CORE_SRCS} ${OPS_PLUGIN_SRCS} ${FRAMEWORK_SRCS} ${ACL_ADAPTER_SRCS})
 add_library(${PLUGIN_NAME} SHARED ${CPP_SRCS})

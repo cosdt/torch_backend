@@ -2,7 +2,7 @@
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 
-namespace torch_npu {
+namespace torch_backend {
 namespace utils {
 
 class OverflowUtil {
@@ -24,4 +24,4 @@ class OverflowUtil {
 };
 
 } // namespace utils
-} // namespace torch_npu
+} // namespace torch_backend

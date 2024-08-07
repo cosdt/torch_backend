@@ -4,7 +4,7 @@
 #include <c10/core/TensorImpl.h>
 #include "csrc/npu/NPUStorageImpl.h"
 
-namespace torch_npu {
+namespace torch_backend {
 
 // NPUTensorImpl class is derived from c10::TensorImpl, and it is only used to
 // handle an NPU tensor. Its scope is just to handle an NPUTensor.
@@ -37,4 +37,4 @@ class NPUTensorImpl : public c10::TensorImpl {
   ~NPUTensorImpl();
 };
 
-} // namespace torch_npu
+} // namespace torch_backend

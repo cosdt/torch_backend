@@ -60,8 +60,8 @@ std::tuple<at::Tensor, at::Tensor> deformable_conv2d_nocheck(const at::Tensor &i
     at::Tensor nhwc_input = acl_op::npu_transpose(ori_input, in_perm, true);
     at::Tensor nhwc_offset = acl_op::npu_transpose(ori_offset, in_perm, true);
 
-    auto &nhwc_input_desc = torch_npu::NPUBridge::GetNpuStorageImpl(nhwc_input)->npu_desc_;
-    auto &nhwc_offset_desc = torch_npu::NPUBridge::GetNpuStorageImpl(nhwc_offset)->npu_desc_;
+    auto &nhwc_input_desc = torch_backend::NPUBridge::GetNpuStorageImpl(nhwc_input)->npu_desc_;
+    auto &nhwc_offset_desc = torch_backend::NPUBridge::GetNpuStorageImpl(nhwc_offset)->npu_desc_;
 
     nhwc_input_desc.npu_format_ = ACL_FORMAT_NHWC;
     nhwc_input_desc.origin_format_ = ACL_FORMAT_NHWC;
@@ -91,7 +91,7 @@ std::tuple<at::Tensor, at::Tensor> deformable_conv2d_nocheck(const at::Tensor &i
     nhwc_offset_desc.npu_format_ = ACL_FORMAT_NCHW;
     nhwc_offset_desc.origin_format_ = ACL_FORMAT_NCHW;
     auto &nhwc_deformable_offsets_output_desc =
-        torch_npu::NPUBridge::GetNpuStorageImpl(nhwc_deformable_offsets_output)->npu_desc_;
+        torch_backend::NPUBridge::GetNpuStorageImpl(nhwc_deformable_offsets_output)->npu_desc_;
     nhwc_deformable_offsets_output_desc.npu_format_ = ACL_FORMAT_NCHW;
     nhwc_deformable_offsets_output_desc.origin_format_ = ACL_FORMAT_NCHW;
     at::Tensor deformable_offsets_output = acl_op::npu_transpose(nhwc_deformable_offsets_output, out_perm, true);
@@ -167,9 +167,9 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor> npu_deformable_conv2d
     at::Tensor nhwc_offset = acl_op::npu_transpose(ori_offset, in_perm, true);
 
     auto &nhwc_deformable_offsets_backward_input_desc =
-        torch_npu::NPUBridge::GetNpuStorageImpl(nhwc_deformable_offsets_backward_input)->npu_desc_;
-    auto &nhwc_input_desc = torch_npu::NPUBridge::GetNpuStorageImpl(nhwc_input)->npu_desc_;
-    auto &nhwc_offset_desc = torch_npu::NPUBridge::GetNpuStorageImpl(nhwc_offset)->npu_desc_;
+        torch_backend::NPUBridge::GetNpuStorageImpl(nhwc_deformable_offsets_backward_input)->npu_desc_;
+    auto &nhwc_input_desc = torch_backend::NPUBridge::GetNpuStorageImpl(nhwc_input)->npu_desc_;
+    auto &nhwc_offset_desc = torch_backend::NPUBridge::GetNpuStorageImpl(nhwc_offset)->npu_desc_;
 
     nhwc_deformable_offsets_backward_input_desc.npu_format_ = ACL_FORMAT_NHWC;
     nhwc_deformable_offsets_backward_input_desc.origin_format_ = ACL_FORMAT_NHWC;
@@ -203,8 +203,8 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor> npu_deformable_conv2d
     nhwc_input_desc.origin_format_ = ACL_FORMAT_NCHW;
     nhwc_offset_desc.npu_format_ = ACL_FORMAT_NCHW;
     nhwc_offset_desc.origin_format_ = ACL_FORMAT_NCHW;
-    auto &nhwc_grad_input_desc = torch_npu::NPUBridge::GetNpuStorageImpl(nhwc_grad_input)->npu_desc_;
-    auto &nhwc_grad_offset_desc = torch_npu::NPUBridge::GetNpuStorageImpl(nhwc_grad_offset)->npu_desc_;
+    auto &nhwc_grad_input_desc = torch_backend::NPUBridge::GetNpuStorageImpl(nhwc_grad_input)->npu_desc_;
+    auto &nhwc_grad_offset_desc = torch_backend::NPUBridge::GetNpuStorageImpl(nhwc_grad_offset)->npu_desc_;
     nhwc_grad_input_desc.npu_format_ = ACL_FORMAT_NCHW;
     nhwc_grad_input_desc.origin_format_ = ACL_FORMAT_NCHW;
     nhwc_grad_offset_desc.npu_format_ = ACL_FORMAT_NCHW;

@@ -26,7 +26,7 @@ static at::Tensor self_tensor_to_device(const at::Tensor &tensor, const at::Scal
                                         const c10::Device device)
 {
     if (npu_preparation::is_scalar_wrapped_to_tensor(tensor) ||
-       (tensor.dim() == 0 && !torch_npu::utils::is_npu(tensor))) {
+       (tensor.dim() == 0 && !torch_backend::utils::is_npu(tensor))) {
         at::Scalar scalar = tensor.item();
         return npu_preparation::copy_scalar_to_device(scalar, result_type, device);
     }
@@ -36,7 +36,7 @@ static at::Tensor self_tensor_to_device(const at::Tensor &tensor, const at::Scal
 at::Tensor &inplace_mul_out_npu_no_check(at::Tensor &self, const at::Tensor &other)
 {
     // check if other scalar tensor
-    if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+    if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
         c10::Scalar other_scalar = other.item();
         EXEC_NPU_CMD(aclnnInplaceMuls, self, other_scalar);
     } else {
@@ -48,7 +48,7 @@ at::Tensor &inplace_mul_out_npu_no_check(at::Tensor &self, const at::Tensor &oth
 at::Tensor &mul_out_npu_no_check(const at::Tensor &self, const at::Tensor &other, at::Tensor &result)
 {
     // check if other scalar tensor
-    if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+    if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
         c10::Scalar other_scalar = other.item();
         EXEC_NPU_CMD(aclnnMuls, self, other_scalar, result);
     } else {
@@ -114,7 +114,7 @@ at::Tensor &mul_(at::Tensor &self, const at::Tensor &other)
 {
     DO_COMPATIBILITY(aclnnInplaceMul, acl_op::mul_(self, other));
     DO_COMPATIBILITY(aclnnInplaceMuls, acl_op::mul_(self, other));
-    TORCH_CHECK(torch_npu::utils::is_npu(self), "Inplace tensor self must be NPU-Tensor.", OPS_ERROR(ErrCode::PARAM));
+    TORCH_CHECK(torch_backend::utils::is_npu(self), "Inplace tensor self must be NPU-Tensor.", OPS_ERROR(ErrCode::PARAM));
     npu_preparation::check_memory({self, other}, {self});
     inplace_mul_out_npu_no_check(self, other);
     return self;
@@ -123,7 +123,7 @@ at::Tensor &mul_(at::Tensor &self, const at::Tensor &other)
 at::Tensor &mul_(at::Tensor &self, const at::Scalar &other)
 {
     DO_COMPATIBILITY(aclnnInplaceMuls, acl_op::mul_(self, other));
-    TORCH_CHECK(torch_npu::utils::is_npu(self), "Inplace tensor self must be NPU-Tensor.", OPS_ERROR(ErrCode::PARAM));
+    TORCH_CHECK(torch_backend::utils::is_npu(self), "Inplace tensor self must be NPU-Tensor.", OPS_ERROR(ErrCode::PARAM));
     EXEC_NPU_CMD(aclnnInplaceMuls, self, other);
     return self;
 }

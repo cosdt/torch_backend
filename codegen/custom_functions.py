@@ -206,7 +206,7 @@ def gen_custom_ops_patch(fm: FileManager, custom_trace_functions: Sequence[Nativ
 
     valid_native_functions = list(filter(should_generate_ops_patch, custom_trace_functions))
     fm.write_with_template(f'custom_ops.py', 'custom_ops.py', lambda: {
-        'custom_ops': [f'torch_npu.{ops} = torch.ops.npu.{ops}'
+        'custom_ops': [f'torch_backend.{ops} = torch.ops.npu.{ops}'
                        for ops in set([f.func.name.name for f in valid_native_functions])],
     })
 

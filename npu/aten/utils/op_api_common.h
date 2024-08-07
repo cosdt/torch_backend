@@ -193,7 +193,7 @@ inline aclTensor* ConvertType(const at::Tensor& at_tensor) {
     return nullptr;
   }
   TORCH_CHECK(
-      torch_npu::utils::is_npu(at_tensor),
+      torch_backend::utils::is_npu(at_tensor),
       "only npu tensor is supported",
       OPS_ERROR(ErrCode::PARAM));
   at::ScalarType scalar_data_type = at_tensor.scalar_type();

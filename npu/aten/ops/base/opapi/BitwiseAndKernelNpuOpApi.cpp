@@ -29,10 +29,10 @@ at::Tensor& bitwise_and_out(const at::Tensor& self, const at::Scalar& other, at:
 
 static at::Tensor& bitwise_and_op_api_out_npu_nocheck(at::Tensor& result, const at::Tensor& self,
                                                       const at::Tensor& other) {
-  if (!torch_npu::utils::is_npu(other)) {
+  if (!torch_backend::utils::is_npu(other)) {
     const at::Scalar other_value = other.item();
     EXEC_NPU_CMD(aclnnBitwiseAndScalar, self, other_value, result);
-  } else if (!torch_npu::utils::is_npu(self)) {
+  } else if (!torch_backend::utils::is_npu(self)) {
     const at::Scalar self_value = self.item();
     EXEC_NPU_CMD(aclnnBitwiseAndScalar, other, self_value, result);
   } else {
@@ -54,12 +54,12 @@ at::Tensor bitwise_and(const at::Tensor& self, const at::Tensor& other) {
   DO_COMPATIBILITY(aclnnBitwiseAndScalar, acl_op::bitwise_and(self, other));
   DO_COMPATIBILITY(aclnnBitwiseAndTensor, acl_op::bitwise_and(self, other));
 
-  if (!torch_npu::utils::is_npu(other)) {
+  if (!torch_backend::utils::is_npu(other)) {
     const at::Scalar other_value = other.item();
     return op_api::bitwise_and(self, other_value);
   }
 
-  if (!torch_npu::utils::is_npu(self)) {
+  if (!torch_backend::utils::is_npu(self)) {
     const at::Scalar self_value = self.item();
     return op_api::bitwise_and(other, self_value);
   }
@@ -104,7 +104,7 @@ at::Tensor bitwise_and(const at::Tensor& self, const at::Scalar& other) {
 }
 
 at::Tensor& bitwise_and_inplace_op_api_out_npu_nocheck(at::Tensor& self, const at::Tensor& other) {
-  if (!torch_npu::utils::is_npu(other)) {
+  if (!torch_backend::utils::is_npu(other)) {
     const at::Scalar other_value = other.item();
     EXEC_NPU_CMD(aclnnInplaceBitwiseAndScalar, self, other_value);
   } else {

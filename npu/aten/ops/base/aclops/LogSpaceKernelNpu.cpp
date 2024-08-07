@@ -40,11 +40,11 @@ at::Tensor& logspace_out_nocheck(
     auto result_type = result.scalar_type();
     if (result_type == at::ScalarType::Half) {
         inputs = at_npu::native::custom_ops::npu_dtype_cast(
-            at::arange(0, steps, at::device(torch_npu::utils::get_npu_device_type())),
+            at::arange(0, steps, at::device(torch_backend::utils::get_npu_device_type())),
             at::kHalf);
         dtype = 0;
     } else if (result_type == at::ScalarType::Float) {
-        inputs = at::arange(0, steps, at::device(torch_npu::utils::get_npu_device_type()).dtype(at::kFloat));
+        inputs = at::arange(0, steps, at::device(torch_backend::utils::get_npu_device_type()).dtype(at::kFloat));
         dtype = 1;
     } else {
         TORCH_CHECK(false, "logspace only support float32 and float16, given type is ", result_type,

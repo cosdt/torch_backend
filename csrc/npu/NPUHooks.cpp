@@ -26,7 +26,7 @@ void NPUHooks::resizePrivateUse1Bytes(
     const c10::Storage& storage,
     size_t new_bytes) const {
   auto storage_impl =
-      static_cast<torch_npu::NPUStorageImpl*>(storage.unsafeGetStorageImpl());
+      static_cast<torch_backend::NPUStorageImpl*>(storage.unsafeGetStorageImpl());
   auto format = storage_impl->npu_desc_.npu_format_;
   if (!at_npu::native::FormatHelper::IsBaseFormatType(format)) {
     AT_ERROR("Try to resize a storage without base format");

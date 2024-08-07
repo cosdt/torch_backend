@@ -5,7 +5,7 @@ if(BUILD_TEST)
     ${CMAKE_CURRENT_SOURCE_DIR}/npu_context_test.cpp)
 
   add_executable(test_npu ${TORCH_BACKEND_NPU_TEST_SOURCES})
-  target_link_libraries(test_npu PRIVATE torch_npu gtest_main gtest)
+  target_link_libraries(test_npu PRIVATE torch_backend gtest_main gtest)
   add_test(NAME test_npu COMMAND $<TARGET_FILE:test_npu>)
 endif()
 

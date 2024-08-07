@@ -16,7 +16,7 @@ std::tuple<aclTensorDesc*, aclDataBuffer*> OpCmdHelper::CovertTensorToAclInput(
   at::ScalarType scalarDataType = tensor.scalar_type();
   aclDataType aclDataType =
       CalcuOpUtil::ConvertToAclDataType(scalarDataType, forceDataType);
-  const auto& npuDesc = torch_npu::NPUBridge::GetNpuStorageImplDesc(tensor);
+  const auto& npuDesc = torch_backend::NPUBridge::GetNpuStorageImplDesc(tensor);
   c10::SmallVector<int64_t, 5> storageDims;
   // if aclDataType is ACL_STRING, storageDims is empty.
   if (aclDataType != ACL_STRING) {
@@ -114,7 +114,7 @@ std::tuple<aclTensorDesc*, aclDataBuffer*> OpCmdHelper::CovertToAclOutput(
     const string& forceDataType) {
   aclDataType aclDataType =
       CalcuOpUtil::ConvertToAclDataType(tensor.scalar_type(), forceDataType);
-  const auto& npuDesc = torch_npu::NPUBridge::GetNpuStorageImplDesc(tensor);
+  const auto& npuDesc = torch_backend::NPUBridge::GetNpuStorageImplDesc(tensor);
   const auto& dims = tensor.sizes();
   auto& storageDims = npuDesc.storage_sizes_;
   AclTensorDescMaker desc;

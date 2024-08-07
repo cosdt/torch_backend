@@ -731,12 +731,12 @@ def run(source_yaml: str, output_dir: str, dry_run: bool,
                              grouped_native_functions,
                              backend_indices[backend_dispatch_key])
 
-        custom_ops_patch_dir = os.path.join(output_dir, "../../../torch_npu/utils/")
+        custom_ops_patch_dir = os.path.join(output_dir, "../../../torch_backend/utils/")
         fm = FileManager(install_dir=custom_ops_patch_dir, template_dir=pta_template_dir, dry_run=dry_run)
         gen_custom_ops_patch(fm, custom_functions)
 
         filt_exposed_list = filt_exposed_api(source_yaml)
-        exposed_path = pathlib.Path(__file__).parents[1].joinpath('torch_npu/utils/exposed_api.py')
+        exposed_path = pathlib.Path(__file__).parents[1].joinpath('torch_backend/utils/exposed_api.py')
         PathManager.remove_path_safety(exposed_path)
         with os.fdopen(os.open(exposed_path, os.O_RDWR | os.O_CREAT, stat.S_IWUSR | stat.S_IRUSR), 'w') as f:
             f.write(f'public_npu_functions = {filt_exposed_list}')

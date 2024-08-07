@@ -51,7 +51,7 @@ at::Tensor& tril_out(const at::Tensor& self, int64_t diagonal, at::Tensor& resul
 
 at::Tensor tril(const at::Tensor& self, int64_t diagonal) {
     auto is_last_two_dims = [&self]() {
-        auto self_storage = torch_npu::NPUBridge::GetNpuStorageImpl(self)->get_npu_desc().storage_sizes_;
+        auto self_storage = torch_backend::NPUBridge::GetNpuStorageImpl(self)->get_npu_desc().storage_sizes_;
         if (self_storage.size() <= 1) {
           return false;
         }
