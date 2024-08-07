@@ -18,7 +18,6 @@
 #include <c10/util/irange.h>
 
 #include "csrc/core/allocator/CachingAllocator.h"
-#include "csrc/core/allocator/CachingAllocatorHelper.h"
 #include "csrc/core/allocator/EventPool.h"
 
 namespace c10::backend::CachingAllocator {

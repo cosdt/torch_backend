@@ -24,8 +24,7 @@ from .device import (
 __all__ = ["synchronize", "device_count", "can_device_access_peer", "set_device", "current_device", "get_device_name",
            "get_device_properties", "get_device_capability", "device", "device_of",
            "stream", "set_stream", "current_stream", "default_stream", "set_sync_debug_mode", "get_sync_debug_mode",
-           "get_soc_version", "is_support_inf_nan", "is_bf16_supported",
-           "get_npu_overflow_flag", "npu_check_overflow", "clear_npu_overflow_flag", "current_blas_handle"]
+           "is_support_inf_nan", "is_bf16_supported"]
 
 
 @contextlib.contextmanager
@@ -156,12 +155,6 @@ if not hasattr(torch_npu._C, '_NPUStreamBase'):
     torch_npu._C.__dict__['_NPUEventBase'] = _dummy_type('NPUEventBase')
 
 
-def get_soc_version():
-    torch_npu.npu._lazy_init()
-    soc_version = torch_npu._C._npu_get_soc_version()
-    return soc_version
-
-
 def is_support_inf_nan():
     torch_npu.npu._lazy_init()
     return torch_npu._C._npu_is_support_inf_nan()
@@ -170,48 +163,3 @@ def is_support_inf_nan():
 def is_bf16_supported():
     torch_npu.npu._lazy_init()
     return torch_npu._C._npu_is_bf16_supported()
-
-
-def get_npu_overflow_flag():
-    if is_support_inf_nan():
-        raise RuntimeError("Unsupported api when soc_version >= Ascend910B1, please use npu_check_overflow" +
-                           pta_error(ErrCode.NOT_SUPPORT))
-    float_status = torch.zeros(8).npu()
-    result = torch_npu.npu_get_float_status(float_status)
-    if result.cpu()[0] != 0:
-        return True
-    else:
-        return False
-
-
-def npu_check_overflow(grad):
-    if is_support_inf_nan():
-        if isinstance(grad, float):
-            cpu_sum = grad
-        elif isinstance(grad, torch.Tensor):
-            cpu_sum = float(grad.float().sum())
-        else:
-            raise RuntimeError("Unsupported type." + pta_error(ErrCode.TYPE))
-
-        if cpu_sum == float('inf') or cpu_sum == -float('inf') or cpu_sum != cpu_sum:
-            return True
-        else:
-            return False
-    else:
-        ret = get_npu_overflow_flag()
-        if ret:
-            clear_npu_overflow_flag()
-        return ret
-
-
-def clear_npu_overflow_flag():
-    if is_support_inf_nan():
-        warnings.warn("When soc_version >= Ascend910B1, clear_npu_overflow_flag is useless, please remove it.")
-        return
-    float_status = torch.zeros(8).npu()
-    torch_npu.npu_clear_float_status(float_status)
-
-
-def current_blas_handle():
-    warnings.warn("NPU does not use blas handle.")
-    return None
