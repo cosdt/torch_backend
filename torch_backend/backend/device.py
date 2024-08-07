@@ -21,8 +21,8 @@ def synchronize(device=None):
             It uses the current device, given by :func:`~torch_backend.npu.current_device`,
             if :attr:`device` is ``None`` (default).
     """
-    torch_backend.npu._lazy_init()
-    with torch_backend.npu.device(device):
+    torch_backend.backend._lazy_init()
+    with torch_backend.backend.device(device):
         return torch_backend._C._npu_synchronize()
 
 
@@ -50,7 +50,7 @@ def set_device(device):
 
 
 def current_device():
-    torch_backend.npu._lazy_init()
+    torch_backend.backend._lazy_init()
     return torch_backend._C._npu_getDevice()
 
 
@@ -63,7 +63,7 @@ def get_device_properties(device_name=None):
     device_id = _get_device_index(device_name, optional=True)
     if device_id < 0 or device_id >= device_count():
         raise AssertionError("Invalid device id")
-    torch_backend.npu._lazy_init()
+    torch_backend.backend._lazy_init()
     return torch_backend._C._npu_getDeviceProperties(device_id)
 
 
@@ -93,7 +93,7 @@ class device(object):
         self.prev_idx = torch_backend._C._npu_getDevice()
         if self.prev_idx != self.idx:
             torch_backend._C._npu_setDevice(self.idx)
-        torch_backend.npu._lazy_init()
+        torch_backend.backend._lazy_init()
 
     def __exit__(self, *args):
         if self.prev_idx != self.idx:

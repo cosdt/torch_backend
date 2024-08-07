@@ -9,7 +9,7 @@ import torch
 import torch_backend
 import torch_backend._C
 import torch_backend.backend
-import meta
+import torch_backend.meta
 
 torch.utils.rename_privateuse1_backend("npu")
 # rename device name to 'npu' and register funcs
