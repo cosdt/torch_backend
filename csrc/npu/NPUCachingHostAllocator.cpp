@@ -17,10 +17,12 @@
 #include "csrc/npu/NPUFunctions.h"
 
 namespace c10::npu {
+
 using Block = at::HostBlock<NPUStream>;
-struct HostAllocator : public at::CachingHostAllocatorImpl<
-                           NPUStream,
-                           c10::backend::EventPool<NPUEvent>::Event> {
+struct HostAllocator
+    : public at::CachingHostAllocatorImpl<
+          NPUStream,
+          c10::backend::CachingAllocator::EventPool<NPUEvent>::Event> {
  public:
   bool isPinndPtr(const void* ptr) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
@@ -45,25 +47,28 @@ struct HostAllocator : public at::CachingHostAllocatorImpl<
   }
 
   void record_stream(
-      std::optional<std::vector<c10::backend::EventPool<NPUEvent>::Event>>&
-          events,
+      std::optional<std::vector<
+          c10::backend::CachingAllocator::EventPool<NPUEvent>::Event>>& events,
       NPUStream stream) override {
     auto event = create_event_internal(stream.device_index());
     event->record(stream);
     events->push_back(std::move(event));
   }
 
-  bool query_event(c10::backend::EventPool<NPUEvent>::Event& event) override {
+  bool query_event(c10::backend::CachingAllocator::EventPool<NPUEvent>::Event&
+                       event) override {
     return event->query();
   }
 
-  c10::backend::EventPool<NPUEvent>::Event create_event_internal(
-      c10::DeviceIndex idx) {
+  c10::backend::CachingAllocator::EventPool<NPUEvent>::Event
+  create_event_internal(c10::DeviceIndex idx) {
     // Leak the event pool to avoid shutdown issue.
     static auto* event_pool =
-        new c10::backend::EventPool<NPUEvent>(device_count(), []() {
-          return std::make_unique<NPUEvent>(ACL_EVENT_CAPTURE_STREAM_PROGRESS);
-        });
+        new c10::backend::CachingAllocator::EventPool<NPUEvent>(
+            device_count(), []() {
+              return std::make_unique<NPUEvent>(
+                  ACL_EVENT_CAPTURE_STREAM_PROGRESS);
+            });
     return event_pool->get(idx);
   }
 

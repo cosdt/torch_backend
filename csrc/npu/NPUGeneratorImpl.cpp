@@ -83,7 +83,7 @@ at::Generator createNPUGenerator(c10::DeviceIndex device_index) {
  * NPUGeneratorImpl class implementation
  */
 NPUGeneratorImpl::NPUGeneratorImpl(c10::DeviceIndex device_index)
-    : BaseGeneratorImpl(device_index) {
+    : GeneratorImpl(device_index) {
   // at::npu::assertNotCapturing("Cannot construct a new NPUGeneratorImpl");
 }
 
