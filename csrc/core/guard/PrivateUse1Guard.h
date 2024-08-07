@@ -4,7 +4,7 @@
 #include <c10/core/impl/InlineDeviceGuard.h>
 #include <c10/core/impl/InlineStreamGuard.h>
 
-namespace c10::backend {
+namespace c10::backend::Guard {
 
 // This code is kind of boilerplatey.  See Note [Whither the DeviceGuard
 // boilerplate]
@@ -141,4 +141,4 @@ struct OptionalPrivateUse1Guard {
   c10::impl::InlineOptionalDeviceGuard<T> guard_;
 };
 
-} // namespace c10::backend
+} // namespace c10::backend::Guard

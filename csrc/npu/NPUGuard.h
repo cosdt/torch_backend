@@ -10,6 +10,8 @@
 
 namespace c10::npu {
 
+using namespace c10::backend::Guard;
+
 // This code is kind of boilerplatey.  See Note [Whither the DeviceGuard
 // boilerplate]
 
@@ -18,8 +20,8 @@ namespace c10::npu {
 /// more efficient than DeviceGuard (it compiles to straight line
 /// NPUSetDevice/NPUGetDevice calls); however, it can only be used
 /// from code that links against NPU directly.
-struct NPUGuard : public c10::backend::PrivateUse1Guard<impl::NPUGuardImpl> {
-  using PrivateUse1Guard = c10::backend::PrivateUse1Guard<impl::NPUGuardImpl>;
+struct NPUGuard : public PrivateUse1Guard<impl::NPUGuardImpl> {
+  using PrivateUse1Guard = PrivateUse1Guard<impl::NPUGuardImpl>;
   using PrivateUse1Guard::PrivateUse1Guard;
 
   // Copy is not allowed
@@ -33,10 +35,8 @@ struct NPUGuard : public c10::backend::PrivateUse1Guard<impl::NPUGuardImpl> {
 
 /// A variant of OptionalDeviceGuard that is specialized for NPU.  See
 /// NPUGuard for when you can use this.
-struct OptionalNPUGuard
-    : public c10::backend::OptionalPrivateUse1Guard<impl::NPUGuardImpl> {
-  using OptionalPrivateUse1Guard =
-      c10::backend::OptionalPrivateUse1Guard<impl::NPUGuardImpl>;
+struct OptionalNPUGuard : public OptionalPrivateUse1Guard<impl::NPUGuardImpl> {
+  using OptionalPrivateUse1Guard = OptionalPrivateUse1Guard<impl::NPUGuardImpl>;
   using OptionalPrivateUse1Guard::OptionalPrivateUse1Guard;
 
   // Copy is not allowed
