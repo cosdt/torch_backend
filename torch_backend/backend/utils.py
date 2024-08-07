@@ -82,13 +82,13 @@ def current_stream(device=None):
     Arguments:
         device (torch.device or int, optional): selected device. Returns
             the currently selected :class:`Stream` for the current device, given
-            by :func:`~torch_backend.npu.current_device`, if :attr:`device` is ``None``
+            by :func:`~torch_backend.backend.current_device`, if :attr:`device` is ``None``
             (default).
     """
-    torch_backend.npu._lazy_init()
+    torch_backend.backend._lazy_init()
     streamdata = torch_backend._C._npu_getCurrentStream(
         _get_device_index(device, optional=True))
-    return torch_backend.npu.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
+    return torch_backend.backend.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
 
 
 def default_stream(device=None):
@@ -97,13 +97,13 @@ def default_stream(device=None):
     Arguments:
         device (torch.device or int, optional): selected device. Returns
             the default :class:`Stream` for the current device, given by
-            :func:`~torch_backend.npu.current_device`, if :attr:`device` is ``None``
+            :func:`~torch_backend.backend.current_device`, if :attr:`device` is ``None``
             (default).
     """
-    torch_backend.npu._lazy_init()
+    torch_backend.backend._lazy_init()
     streamdata = torch_backend._C._npu_getDefaultStream(
         _get_device_index(device, optional=True))
-    return torch_backend.npu.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
+    return torch_backend.backend.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
 
 
 def set_sync_debug_mode(debug_mode):
@@ -153,10 +153,10 @@ if not hasattr(torch_backend._C, '_NPUStreamBase'):
 
 
 def is_support_inf_nan():
-    torch_backend.npu._lazy_init()
+    torch_backend.backend._lazy_init()
     return torch_backend._C._npu_is_support_inf_nan()
 
 
 def is_bf16_supported():
-    torch_backend.npu._lazy_init()
+    torch_backend.backend._lazy_init()
     return torch_backend._C._npu_is_bf16_supported()

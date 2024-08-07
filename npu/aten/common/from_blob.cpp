@@ -30,7 +30,7 @@ at::Tensor TensorMaker::make_tensor() {
   AT_ASSERT(
       (*device_).type() == c10::DeviceType::PrivateUse1,
       OPS_ERROR(ErrCode::PARAM));
-  torch_backend::utils::maybe_initialize_npu(*device_);
+  at::globalContext().lazyInitPrivateUse1();
 
   auto dtype = c10::scalarTypeToTypeMeta(
       dtype_or_default(c10::optTypeMetaToScalarType(opts_.dtype_opt())));

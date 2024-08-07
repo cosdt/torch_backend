@@ -109,7 +109,7 @@ at::Tensor NPUNativeFunctions::empty(
   AT_ASSERT(
       device_.type() == c10::DeviceType::PrivateUse1,
       OPS_ERROR(ErrCode::PARAM));
-  torch_backend::utils::maybe_initialize_npu(device_);
+  at::globalContext().lazyInitPrivateUse1();
   TORCH_CHECK(
       !c10::pinned_memory_or_default(pin_memory_opt),
       "Only dense CPU tensors can be pinned",
@@ -300,7 +300,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
   RECORD_FUNCTION("empty_tensor", std::vector<c10::IValue>({}));
   auto device_ = c10::device_or_default(device_opt);
   torch_backend::utils::torch_check_npu(device_);
-  torch_backend::utils::maybe_initialize_npu(device_);
+  at::globalContext().lazyInitPrivateUse1();
   TORCH_CHECK(
       !c10::pinned_memory_or_default(pin_memory_opt),
       "Only dense CPU tensors can be pinned",

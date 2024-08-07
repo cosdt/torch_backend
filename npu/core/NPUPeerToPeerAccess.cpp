@@ -28,7 +28,7 @@ NpuP2pCtrl::NpuP2pCtrl() {
   }
 }
 
-// Get NpuSysCtrl singleton instance
+// Get NPUDeviceRAII singleton instance
 NpuP2pCtrl& NpuP2pCtrl::get_instance() {
   static NpuP2pCtrl instance;
   return instance;
