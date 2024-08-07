@@ -9,10 +9,7 @@ import stat
 from typing import Any, Dict, Optional, Tuple, Union
 
 import torch_npu
-from torch_npu.utils.error_code import ErrCode, pta_error
 from . import is_initialized, _get_device_index, _lazy_init
-from .utils import _dummy_type
-from ._memory_viz import memory as _memory, segments as _segments
 
 __all__ = [
     "caching_allocator_alloc",
@@ -74,7 +71,7 @@ def caching_allocator_alloc(size, device=None, stream=None):
     if not isinstance(stream, int):
         raise TypeError('Invalid type for stream argument, must be '
                         '`torch_npu.npu.Stream` or `int` representing a pointer '
-                        'to a exisiting stream' + pta_error(ErrCode.TYPE))
+                        'to a exisiting stream')
     with torch_npu.npu.device(device):
         return torch_npu._C._npu_npuCachingAllocator_raw_alloc(size, stream)
 
@@ -114,10 +111,10 @@ def set_per_process_memory_fraction(fraction, device=None) -> None:
         device = torch_npu.npu.current_device()
     device = _get_device_index(device)
     if not isinstance(fraction, float):
-        raise TypeError('Invalid type for fraction argument, must be `float`' + pta_error(ErrCode.TYPE))
+        raise TypeError('Invalid type for fraction argument, must be `float`')
     if fraction < 0 or fraction > 1:
         raise ValueError('Invalid fraction value: {}. '
-                         'Allowed range: 0~1'.format(fraction) + pta_error(ErrCode.VALUE))
+                         'Allowed range: 0~1'.format(fraction))
 
     torch_npu._C._npu_setMemoryFraction(fraction, device)
 
@@ -644,17 +641,3 @@ def _dump_snapshot(filename="dump_snapshot.pickle"):
     s = _snapshot()
     with os.fdopen(os.open(filename, os.O_WRONLY | os.O_CREAT, stat.S_IWUSR), "wb") as f:
         pickle.dump(s, f)
-
-
-def _save_segment_usage(filename="output.svg", snapshot=None):
-    if snapshot is None:
-        snapshot = _snapshot()
-    with os.fdopen(os.open(filename, os.O_WRONLY | os.O_CREAT, stat.S_IWUSR), "w") as f:
-        f.write(_segments(snapshot))
-
-
-def _save_memory_usage(filename="output.svg", snapshot=None):
-    if snapshot is None:
-        snapshot = _snapshot()
-    with os.fdopen(os.open(filename, os.O_WRONLY | os.O_CREAT, stat.S_IWUSR), "w") as f:
-        f.write(_memory(snapshot))

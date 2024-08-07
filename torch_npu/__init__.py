@@ -1,45 +1,15 @@
 import os
 import atexit
 
-from functools import wraps
-
 # Disable autoloading before running 'import torch'
 os.environ['TORCH_DEVICE_BACKEND_AUTOLOAD'] = '0'
 
 import torch
-import torch.utils
 
 import torch_npu
 import torch_npu._C
 import torch_npu.npu
-from torch_npu.utils.error_code import _except_handler, ErrCode, pta_error
-
-from torch_npu.utils.exposed_api import public_npu_functions
-from . import _op_plugin_docs
 from .meta import _meta_registrations
-
-del _op_plugin_docs
-
-
-def _wrap_torch_error_func(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        raise RuntimeError(
-            f"torch.{func.__name__} is deprecated and will be removed in future version. "
-            f"Use torch_npu.{func.__name__} instead." + pta_error(ErrCode.NOT_SUPPORT)
-        )
-
-    return wrapper
-
-
-for name in dir(torch.ops.npu):
-    if name.startswith("__") or name in ["_dir", "name"]:
-        continue
-    globals()[name] = getattr(torch.ops.npu, name)
-    if name in public_npu_functions:
-        __all__.append(name)
-    setattr(torch, name, _wrap_torch_error_func(getattr(torch.ops.npu, name)))
-
 
 torch.utils.rename_privateuse1_backend("npu")
 # rename device name to 'npu' and register funcs
@@ -58,8 +28,6 @@ torch.utils.generate_methods_for_privateuse1_backend(
     unsupported_dtype=unsupported_dtype,
 )
 
-# Apply monkey-patches.
-_except_handler.patch_excepthook()
 # this must be placed at the end
 supported_dtypes = [
     torch.uint8,

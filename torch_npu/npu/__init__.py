@@ -44,8 +44,6 @@ __all__ = [  # noqa 405
     "get_allocator_backend",
     "Stream",
     "Event",
-    "get_npu_overflow_flag",
-    "clear_npu_overflow_flag",
     "get_rng_state",
     "set_rng_state",
     "get_rng_state_all",
@@ -83,7 +81,6 @@ from torch.storage import _LegacyStorage, _warn_typed_storage_removal
 from torch._utils import classproperty
 
 import torch_npu
-from torch_npu.utils.error_code import ErrCode, pta_error
 from .utils import (  # noqa 401
     synchronize,
     device_count,
@@ -103,8 +100,6 @@ from .utils import (  # noqa 401
     set_sync_debug_mode,
     get_sync_debug_mode,
     is_bf16_supported,
-    get_npu_overflow_flag,
-    clear_npu_overflow_flag,
 )
 from .streams import Stream, Event
 from .autocast_mode import *  # noqa 403
@@ -163,7 +158,7 @@ def _lazy_init():
                     f"NPU call failed lazily at initialization with error: {str(e)}\n\n"
                     f"NPU call was originally invoked at:\n\n{orig_traceback}"
                 )
-                raise _DeferredNpuCallError(msg + pta_error(ErrCode.INTERNAL)) from e
+                raise _DeferredNpuCallError(msg) from e
 
     global _initialized, _original_pid, _queued_calls
     if _initialized or hasattr(_tls, "is_initializing"):
@@ -286,21 +281,19 @@ class _NPULegacyStorage(_LegacyStorage):
     def from_buffer(cls, *args, **kwargs):
         _warn_typed_storage_removal()
         raise RuntimeError(
-            "from_buffer: Not available for NPU storage" + pta_error(ErrCode.UNAVAIL)
+            "from_buffer: Not available for NPU storage"
         )
 
     @classmethod
     def _new_with_weak_ptr(cls, *args, **kwargs):
         raise RuntimeError(
             "_new_with_weak_ptr: Not available for NPU storage"
-            + pta_error(ErrCode.UNAVAIL)
         )
 
     @classmethod
     def _new_shared_filename(cls, manager, obj, size, *, device=None, dtype=None):
         raise RuntimeError(
             "_new_shared_filename: Not available for NPU storage"
-            + pta_error(ErrCode.UNAVAIL)
         )
 
 
