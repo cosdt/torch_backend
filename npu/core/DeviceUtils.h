@@ -4,7 +4,7 @@
 #include <c10/core/TensorOptions.h>
 #include "npu/core/sys_ctrl/npu_sys_ctrl.h"
 
-namespace torch_npu {
+namespace torch_backend {
 namespace utils {
 
 inline bool is_npu(const at::Tensor& tensor) {
@@ -45,13 +45,13 @@ inline c10::DeviceType get_npu_device_type() {
 }
 
 inline void maybe_initialize_npu(const at::TensorOptions& options) {
-  if (torch_npu::utils::is_npu(options)) {
+  if (torch_backend::utils::is_npu(options)) {
     c10::npu::TryInitDevice(options.device().index());
   }
 }
 
 inline void maybe_initialize_npu(const at::Device& device) {
-  if (torch_npu::utils::is_npu(device)) {
+  if (torch_backend::utils::is_npu(device)) {
     c10::npu::TryInitDevice(device.index());
   }
 }
@@ -63,4 +63,4 @@ inline void maybe_initialize_npu(const c10::optional<at::Device>& device) {
 }
 
 } // namespace utils
-} // namespace torch_npu
+} // namespace torch_backend

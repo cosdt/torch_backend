@@ -197,17 +197,17 @@ TAGS
 bazel-*
 
 # Generated files
-torch_npu/version.py
+torch_backend/version.py
 csrc/aten/generated
 csrc/aten/npu_native_functions_by_codegen.yaml
-torch_npu/testing/_npu_testing_utils.py
-torch_npu/utils/custom_ops.py
-torch_npu/utils/exposed_api.py
+torch_backend/testing/_npu_testing_utils.py
+torch_backend/utils/custom_ops.py
+torch_backend/utils/exposed_api.py
 
-torch_npu/_op_plugin_docs.py
+torch_backend/_op_plugin_docs.py
 
-torch_npu/bin
-torch_npu/lib
-torch_npu/include
+torch_backend/bin
+torch_backend/lib
+torch_backend/include
 
 kernel_meta

@@ -25,7 +25,7 @@ static const int64_t SIZE_INT64 = 8;
 // get the shape result after broadcast
 static at::Tensor remainder_dest_output(const at::Tensor& self, const at::Tensor& other)
 {
-  bool isSelfWrapped = !torch_npu::utils::is_npu(self);
+  bool isSelfWrapped = !torch_backend::utils::is_npu(self);
   return isSelfWrapped ? other : self;
 }
 

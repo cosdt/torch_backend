@@ -100,7 +100,7 @@ Project Structure
     |-- third_party
     |   |-- googletest
     |   `-- op-plugin         // Device-specific
-    `-- torch_npu             // Python interface implementation for PyTorch
+    `-- torch_backend             // Python interface implementation for PyTorch
         |-- csrc              // Python & C++ binding
         |   |-- core          // General capabilities, only provided for Python
         |   `-- npu           // Python bindings for all low-level capabilities needed to be exposed to Python for NPU

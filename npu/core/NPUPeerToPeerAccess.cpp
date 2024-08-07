@@ -3,7 +3,7 @@
 #include <c10/util/Exception.h>
 #include <c10/util/irange.h>
 #include <npu/acl/include/acl/acl_rt.h>
-#include "csrc/npu/NPUFunctions.h"
+#include "csrc/backend/NPUFunctions.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/NPUPeerToPeerAccess.h"
 

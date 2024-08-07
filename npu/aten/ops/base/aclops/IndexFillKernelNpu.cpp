@@ -93,7 +93,7 @@ at::Tensor index_fill_d_assist_help(const at::Tensor &self, const at::Tensor &in
     float value_float = op_plugin::utils::get_scalar_float_value(value);
     assist = index_fill_d_assist_help_init(dim, size, index_vector, flag, value_float);
     at::Tensor assist_help = at::from_blob(assist.data(), size, dtype(at::ScalarType::Float));
-    return assist_help.to(at::device(torch_npu::utils::get_npu_device_type()));
+    return assist_help.to(at::device(torch_backend::utils::get_npu_device_type()));
 }
 
 at::Tensor &index_fill_d_nocheck(at::Tensor &result, const at::Tensor &self, int64_t dim, const at::Tensor &index,

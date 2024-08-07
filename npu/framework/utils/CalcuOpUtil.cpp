@@ -1,8 +1,8 @@
 #include <ATen/record_function.h>
 
-#include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUFunctions.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/aten/mirror/NPUMemoryOverlap.h"
@@ -277,8 +277,8 @@ int64_t CalcuOpUtil::GetTensorNpuFormat(const at::Tensor& tensor) {
       "device is correct.",
       OPS_ERROR(ErrCode::TYPE));
   if (NpuUtils::check_match(&tensor) || NpuUtils::check_5d_5d_match(tensor)) {
-    const torch_npu::NPUStorageDesc& tensor_desc =
-        torch_npu::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+    const torch_backend::NPUStorageDesc& tensor_desc =
+        torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
     return tensor_desc.npu_format_;
   } else if (tensor.data_ptr() == nullptr) {
     // transforming faketensor into realtensor and assigning format ND
@@ -305,7 +305,7 @@ void CalcuOpUtil::CheckMemoryOverLaps(
 
 bool CalcuOpUtil::IsScalarWrappedToTensor(const at::Tensor& tensor) {
   return tensor.unsafeGetTensorImpl()->is_wrapped_number() &&
-      (!torch_npu::utils::is_npu(tensor));
+      (!torch_backend::utils::is_npu(tensor));
 }
 
 float CalcuOpUtil::GetScalarFloatValue(const c10::Scalar& scalar) {

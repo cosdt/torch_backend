@@ -73,7 +73,7 @@ at::Tensor &le_(at::Tensor &self, const at::Scalar &other)
 at::Tensor &le_(at::Tensor &self, const at::Tensor &other)
 {
     DO_COMPATIBILITY(aclnnInplaceLeTensor, acl_op::le_(self, other));
-    if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+    if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
         return op_api::le_(self, other.item());
     } else {
         TORCH_CHECK(self.device() == other.device(),

@@ -1,9 +1,9 @@
 #include "npu/aten/common/from_blob.h"
 #include <ATen/Utils.h>
 #include <c10/core/Allocator.h>
-#include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUFunctions.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/aten/common/TensorFactories.h"
 #include "npu/core/NPUException.h"
 #include "npu/framework/StorageDescHelper.h"
@@ -30,7 +30,7 @@ at::Tensor TensorMaker::make_tensor() {
   AT_ASSERT(
       (*device_).type() == c10::DeviceType::PrivateUse1,
       OPS_ERROR(ErrCode::PARAM));
-  torch_npu::utils::maybe_initialize_npu(*device_);
+  torch_backend::utils::maybe_initialize_npu(*device_);
 
   auto dtype = c10::scalarTypeToTypeMeta(
       dtype_or_default(c10::optTypeMetaToScalarType(opts_.dtype_opt())));
@@ -43,7 +43,7 @@ at::Tensor TensorMaker::make_tensor() {
   c10::DataPtr data_ptr{data_, *device_};
 
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<torch_npu::NPUStorageImpl>(
+      c10::make_intrusive<torch_backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           std::move(data_ptr),
@@ -51,7 +51,7 @@ at::Tensor TensorMaker::make_tensor() {
           true);
 
   auto tensor =
-      at::detail::make_tensor<torch_npu::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<torch_backend::NPUTensorImpl>(storage_impl, dtype);
 
   at_npu::native::StorageDescHelper::SetDesc(tensor, sizes_, tensor.strides());
 

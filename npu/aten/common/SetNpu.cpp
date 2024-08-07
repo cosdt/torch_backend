@@ -62,7 +62,7 @@ at::Tensor& NPUNativeFunctions::set_(
 at::Tensor& NPUNativeFunctions::set_(at::Tensor& self) {
   caffe2::TypeMeta dtype = self.dtype();
   c10::intrusive_ptr<c10::StorageImpl> npu_storage_impl =
-      c10::make_intrusive<torch_npu::NPUStorageImpl>(
+      c10::make_intrusive<torch_backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           0,
           c10::npu::NPUCachingAllocator::get()->allocate(0),
@@ -113,7 +113,7 @@ at::Tensor set_tensor_with_storage_format(c10::Storage src) {
     // The storage object src has complete description information,
     // and the tensor object self needs to be brushed to be the same
     auto desc =
-        torch_npu::NPUBridge::GetNpuStorageImpl(src.unsafeGetStorageImpl())
+        torch_backend::NPUBridge::GetNpuStorageImpl(src.unsafeGetStorageImpl())
             ->npu_desc_;
     auto dist_tensor = NPUNativeFunctions::empty(
         {0},

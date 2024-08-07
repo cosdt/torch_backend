@@ -2,7 +2,7 @@
 #include <ATen/NativeFunctions.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/acl/include/acl/acl_rt.h"
 #include "npu/framework/utils/CalcuOpUtil.h"

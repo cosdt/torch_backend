@@ -25,7 +25,7 @@
 #include <type_traits>
 #include <vector>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/aten/utils/KernelNpuOutputSize.h"
 #include "npu/aten/utils/OpConstants.h"
 #include "npu/aten/utils/OpUtils.h"
@@ -193,7 +193,7 @@ inline aclTensor* ConvertType(const at::Tensor& at_tensor) {
     return nullptr;
   }
   TORCH_CHECK(
-      torch_npu::utils::is_npu(at_tensor),
+      torch_backend::utils::is_npu(at_tensor),
       "only npu tensor is supported",
       OPS_ERROR(ErrCode::PARAM));
   at::ScalarType scalar_data_type = at_tensor.scalar_type();

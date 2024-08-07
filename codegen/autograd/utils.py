@@ -15,9 +15,9 @@ from codegen.gen_backend_stubs import parse_native_and_custom_yaml
 
 AUTOGRAD_BLACK_LIST = {'npu_format_cast.Tensor', 'npu_format_cast_', 'npu_format_cast_.acl_format'}
 
-torch_npu_root = Path(__file__).parent.parent.parent
-PathManager.check_directory_path_readable(torch_npu_root / "version.txt")
-with open(torch_npu_root / "version.txt") as version_f:
+torch_backend_root = Path(__file__).parent.parent.parent
+PathManager.check_directory_path_readable(torch_backend_root / "version.txt")
+with open(torch_backend_root / "version.txt") as version_f:
     version = version_f.read().strip()
 VERSION_PART = version.split('.')
 

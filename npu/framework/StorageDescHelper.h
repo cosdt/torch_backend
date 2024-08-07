@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/framework/utils/NPUDefinition.h"
 
 namespace at_npu {
@@ -23,8 +23,8 @@ class StorageDescHelper {
 
   // helper function of transdata op.
   static bool IsSameDesc(
-      const torch_npu::NPUStorageDesc& a,
-      const torch_npu::NPUStorageDesc& b);
+      const torch_backend::NPUStorageDesc& a,
+      const torch_backend::NPUStorageDesc& b);
   static bool IsSameDesc(const at::Tensor& a, const at::Tensor& b);
 
   // calculate storage size need by npu memory
@@ -63,10 +63,10 @@ class StorageDescHelper {
   static void CopyDesc(at::Tensor& dst, const c10::Storage& src);
   static void CopyDesc(
       const at::Tensor& dst,
-      const torch_npu::NPUStorageDesc& src_desc);
+      const torch_backend::NPUStorageDesc& src_desc);
 
   static void UpdateDesc(
-      torch_npu::NPUStorageDesc& npuDesc,
+      torch_backend::NPUStorageDesc& npuDesc,
       const c10::IntArrayRef& new_data_sizes,
       const c10::IntArrayRef& new_shape_sizes);
 
@@ -80,14 +80,14 @@ class StorageDescHelper {
   static bool IsSameSize(
       const c10::SmallVector<int64_t, 5>& a,
       const c10::IntArrayRef& b);
-  static int64_t GetMemorySize(const torch_npu::NPUStorageDesc& dst);
+  static int64_t GetMemorySize(const torch_backend::NPUStorageDesc& dst);
   // Set Part
-  static torch_npu::NPUStorageDesc SetDesc(const caffe2::TypeMeta& dtype);
-  static torch_npu::NPUStorageDesc SetDesc(
+  static torch_backend::NPUStorageDesc SetDesc(const caffe2::TypeMeta& dtype);
+  static torch_backend::NPUStorageDesc SetDesc(
       const caffe2::TypeMeta& dtype,
       const c10::IntArrayRef& size,
       const c10::IntArrayRef& strides);
-  static torch_npu::NPUStorageDesc SetDesc(
+  static torch_backend::NPUStorageDesc SetDesc(
       const caffe2::TypeMeta& dtype,
       const c10::IntArrayRef& size,
       const c10::IntArrayRef& strides,

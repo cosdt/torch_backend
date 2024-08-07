@@ -1,5 +1,5 @@
 #include "npu/core/NPUBridge.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
 #include "npu/framework/utils/OpAdapter.h"
 #include "npu/aten/OpInterface.h"
@@ -74,8 +74,8 @@ class PermuteContiguousOpt : public ContiguousOpt {
       const c10::SmallVector<int64_t, MAX_DIM>& sizes) {
     // Refresh src Tensor to match output self Tensor
     auto src_desc_stored =
-        torch_npu::NPUBridge::GetNpuStorageImpl(src)->get_npu_desc();
-    auto& src_desc = torch_npu::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+        torch_backend::NPUBridge::GetNpuStorageImpl(src)->get_npu_desc();
+    auto& src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
     src_desc.base_sizes_ = sizes;
     src_desc.base_strides_ = StorageDescHelper::ComputeStrideFromShape(
         static_cast<FormatShape>(sizes));

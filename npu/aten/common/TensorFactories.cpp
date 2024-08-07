@@ -16,9 +16,9 @@
 #include <c10/util/irange.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUStorageImpl.h"
-#include "csrc/npu/NPUTensorImpl.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/NPUTensorImpl.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/aten/common/ResizeNpu.h"
@@ -109,7 +109,7 @@ at::Tensor NPUNativeFunctions::empty(
   AT_ASSERT(
       device_.type() == c10::DeviceType::PrivateUse1,
       OPS_ERROR(ErrCode::PARAM));
-  torch_npu::utils::maybe_initialize_npu(device_);
+  torch_backend::utils::maybe_initialize_npu(device_);
   TORCH_CHECK(
       !c10::pinned_memory_or_default(pin_memory_opt),
       "Only dense CPU tensors can be pinned",
@@ -126,7 +126,7 @@ at::Tensor NPUNativeFunctions::empty(
   auto dtype = c10::scalarTypeToTypeMeta(dtype_or_default(dtype_opt));
   int64_t size_bytes = nelements * dtype.itemsize();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<torch_npu::NPUStorageImpl>(
+      c10::make_intrusive<torch_backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           allocator->allocate(size_bytes),
@@ -134,7 +134,7 @@ at::Tensor NPUNativeFunctions::empty(
           true);
 
   auto tensor =
-      at::detail::make_tensor<torch_npu::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<torch_backend::NPUTensorImpl>(storage_impl, dtype);
 
   // Default at::TensorImpl has size [0]
   if (size.size() != 1 || size[0] != 0) {
@@ -243,7 +243,7 @@ at::Tensor empty_like_npu(
   at::Tensor result;
 
   if (memory_format == c10::MemoryFormat::Preserve &&
-      !(torch_npu::utils::is_npu(options))) {
+      !(torch_backend::utils::is_npu(options))) {
     if (self.is_non_overlapping_and_dense()) {
       result = at::empty_strided(
           self.sizes(), self.strides(), options.memory_format(c10::nullopt));
@@ -256,12 +256,12 @@ at::Tensor empty_like_npu(
     }
   } else {
     // See Note [Explicit nullopt c10::MemoryFormat argument]
-    if (!(torch_npu::utils::is_npu(options))) {
+    if (!(torch_backend::utils::is_npu(options))) {
       result = at::empty(
           self.sizes(), options.memory_format(memory_format), c10::nullopt);
     } else {
       auto npu_format =
-          torch_npu::NPUBridge::GetNpuStorageImpl(self)->npu_desc_.npu_format_;
+          torch_backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_.npu_format_;
       result = OpPreparation::ApplyTensorWithFormat(
           self.sizes(), options, npu_format);
     }
@@ -299,8 +299,8 @@ at::Tensor NPUNativeFunctions::empty_with_format(
     int64_t dst_format) {
   RECORD_FUNCTION("empty_tensor", std::vector<c10::IValue>({}));
   auto device_ = c10::device_or_default(device_opt);
-  torch_npu::utils::torch_check_npu(device_);
-  torch_npu::utils::maybe_initialize_npu(device_);
+  torch_backend::utils::torch_check_npu(device_);
+  torch_backend::utils::maybe_initialize_npu(device_);
   TORCH_CHECK(
       !c10::pinned_memory_or_default(pin_memory_opt),
       "Only dense CPU tensors can be pinned",
@@ -320,7 +320,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
   int64_t nelements = StorageDescHelper::GetMemorySize(size, format, dtype);
   int64_t size_bytes = nelements * dtype.itemsize();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<torch_npu::NPUStorageImpl>(
+      c10::make_intrusive<torch_backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           allocator->allocate(size_bytes),
@@ -328,7 +328,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
           true);
 
   auto tensor =
-      at::detail::make_tensor<torch_npu::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<torch_backend::NPUTensorImpl>(storage_impl, dtype);
 
   // Default NPUTensorImpl has size [0]
   if (size.size() != 1 || size[0] != 0) {
@@ -371,7 +371,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
     c10::optional<c10::Device> device_opt,
     c10::optional<bool> pin_memory_opt,
     int64_t dst_format) {
-  torch_npu::utils::torch_check_npu(c10::device_or_default(device_opt));
+  torch_backend::utils::torch_check_npu(c10::device_or_default(device_opt));
   caffe2::TypeMeta dtype =
       c10::scalarTypeToTypeMeta(dtype_or_default(dtype_opt));
   c10::TensorOptions options = c10::TensorOptions()

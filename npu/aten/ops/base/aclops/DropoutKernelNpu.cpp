@@ -61,7 +61,7 @@ std::tuple<at::Tensor, at::Tensor> dropout_do_mask_npu(
 
 at::Tensor dropout_gen_mask(const at::Tensor& self, at::Scalar prob) {
   bool is_not_jit_compile = at_npu::native::env::CheckJitDisable();
-  auto desc_ = torch_npu::NPUBridge::GetNpuStorageImpl(self)->get_npu_desc();
+  auto desc_ = torch_backend::NPUBridge::GetNpuStorageImpl(self)->get_npu_desc();
   int64_t numels = is_not_jit_compile ? c10::multiply_integers(desc_.storage_sizes_) : self.numel();
 
   uint64_t length = (static_cast<uint64_t>(numels) + LENGTH_DATA_ALIGN - 1) / LENGTH_DATA_ALIGN * LENGTH_DATA_ALIGN;

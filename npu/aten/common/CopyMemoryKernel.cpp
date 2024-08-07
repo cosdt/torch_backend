@@ -1,7 +1,7 @@
 #include <ATen/ATen.h>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/acl/include/acl/acl.h"
 #include "npu/core/NPUBridge.h"
 #include "npu/core/NPUException.h"
@@ -18,7 +18,7 @@ at::Tensor& NPUNativeFunctions::copy_memory_(
     bool non_blocking) {
   c10::DeviceGuard guard(src.device());
   AT_ASSERT(
-      torch_npu::utils::is_npu(src),
+      torch_backend::utils::is_npu(src),
       "copy_memory_ only support npu tensor",
       OPS_ERROR(ErrCode::PARAM));
   AT_ASSERT(
@@ -32,8 +32,8 @@ at::Tensor& NPUNativeFunctions::copy_memory_(
       src.device().index() == self.device().index(),
       "input tensors of copy_memory_ should have same device index",
       OPS_ERROR(ErrCode::PARAM));
-  auto dst_desc = torch_npu::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
-  auto src_desc = torch_npu::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto dst_desc = torch_backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
+  auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
 
   int dst_size = 0;
   int src_size = 0;

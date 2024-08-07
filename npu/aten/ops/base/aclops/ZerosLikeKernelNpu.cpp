@@ -40,7 +40,7 @@ at::Tensor zeros_like(
     c10::optional<bool> pin_memory_opt,
     c10::optional<c10::MemoryFormat> optional_memory_format) {
   auto device = device_opt.has_value() ? device_opt.value() : self.device();
-  if (!torch_npu::utils::is_npu(device)) {
+  if (!torch_backend::utils::is_npu(device)) {
     auto result = at::empty_like(
         self, dtype_opt, layout_opt, device_opt, pin_memory_opt, optional_memory_format);
     return result.fill_(0);

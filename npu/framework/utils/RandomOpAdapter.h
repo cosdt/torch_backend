@@ -1,5 +1,5 @@
 #pragma once
 
-#include "csrc/npu/NPUGeneratorImpl.h"
-#include "csrc/npu/NPUCachingAllocator.h"
-#include "csrc/npu/NPUEvent.h"
+#include "csrc/backend/NPUGeneratorImpl.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUEvent.h"

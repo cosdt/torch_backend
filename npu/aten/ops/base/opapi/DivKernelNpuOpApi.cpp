@@ -32,7 +32,7 @@ static void check_rounding_mode_npu(c10::optional<c10::string_view> rounding_mod
 
 static at::Tensor& div_out_npu_opapi_nocheck(const at::Tensor& self, const at::Tensor& other, at::Tensor& result) {
   // executing the NPU operator
-  if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+  if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
     c10::Scalar others = other.item();
     EXEC_NPU_CMD(aclnnDivs, self, others, result);
   } else {
@@ -96,7 +96,7 @@ at::Tensor& div_out(const at::Tensor& self, const at::Tensor& other, c10::option
     }
 
     // calculate the output result of the NPU
-    if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+    if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
         c10::Scalar others = other.item();
         EXEC_NPU_CMD(aclnnDivMods, self_cp, others, mode, result);
     } else {
@@ -159,7 +159,7 @@ at::Tensor div(const at::Tensor& self, const at::Tensor& other, c10::optional<c1
     at::Tensor result = npu_preparation::apply_tensor_without_format(outputSize, outputTensor.options().dtype(high_type));
 
     // executing the NPU operator
-    if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+    if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
         c10::Scalar others = other.item();
         EXEC_NPU_CMD(aclnnDivMods, self_cp, others, mode, result);
     } else {
@@ -170,7 +170,7 @@ at::Tensor div(const at::Tensor& self, const at::Tensor& other, c10::optional<c1
 
 static at::Tensor& inplace_div_out_npu_no_check(at::Tensor& self, const at::Tensor& other) {
   // check if other scalar tensor
-  if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+  if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
     c10::Scalar others = other.item();
     EXEC_NPU_CMD(aclnnInplaceDivs, self, others);
   } else {
@@ -181,7 +181,7 @@ static at::Tensor& inplace_div_out_npu_no_check(at::Tensor& self, const at::Tens
 
 static at::Tensor& inplace_div_out_mode_npu_no_check(at::Tensor& self, const at::Tensor& other, int mode) {
   // check if other scalar tensor
-  if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+  if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
     c10::Scalar others = other.item();
     EXEC_NPU_CMD(aclnnInplaceDivMods, self, others, mode);
   } else {

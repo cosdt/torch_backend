@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "npu/core/NPUQueue.h"
 
-#include "csrc/npu/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/OpParamMaker.h"
 #include "npu/framework/utils/CalcuOpUtil.h"

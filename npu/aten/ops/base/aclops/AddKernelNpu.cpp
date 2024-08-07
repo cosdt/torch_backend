@@ -132,7 +132,7 @@ at::Tensor stride_add_tensor_get(const at::Tensor& src) {
   if (src.is_contiguous()) {
     return src;
   } else {
-    auto src_desc = torch_npu::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+    auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
     at::Tensor src_new = npu_preparation::apply_tensor_with_format(
         src_desc.base_sizes_, src.options(), ACL_FORMAT_NC1HWC0);
     src_new.set_(

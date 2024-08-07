@@ -123,7 +123,7 @@ std::tuple<at::Tensor, at::Tensor> _dropout_with_byte_mask(
 
 at::Tensor dropout_with_byte_mask(const at::Tensor& self, double p, bool train) {
   TORCH_CHECK(
-      torch_npu::utils::is_npu(self),
+      torch_backend::utils::is_npu(self),
       "dropout_with_byte_mask only supports device for NPU!" + OPS_ERROR(ErrCode::NOT_SUPPORT));
   if (p == 0 || !train || self.numel() == 0) {
     return self;

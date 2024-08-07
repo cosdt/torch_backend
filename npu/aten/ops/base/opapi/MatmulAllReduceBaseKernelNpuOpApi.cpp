@@ -43,9 +43,9 @@ void check_params(const at::Tensor &x1, const at::Tensor &x2,
                 x1.size(x1.dim() - 1), ", x2_k: ", x2.size(0), OPS_ERROR(ErrCode::VALUE));
 
     // check parameters.
-    // aclnn apis for MC2 share one torch_npu api, therefore, each aclnn api only accepts parameters
+    // aclnn apis for MC2 share one torch_backend api, therefore, each aclnn api only accepts parameters
     // that will be used. Any unused parameter will be seen as illegal. The job must be done here in
-    // torch_npu api.
+    // torch_backend api.
     // A8W8: antiquantScale and antiquantOffset should be None.
     // A16W8: dequantScale should be None.
     // MC2 without quantization. antiquantScale and antiquantOffset and dequantScale should be None.

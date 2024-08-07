@@ -2,7 +2,7 @@
 #include <ATen/record_function.h>
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUStorageImpl.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/core/NPUBridge.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/InferFormat.h"
@@ -133,7 +133,7 @@ bool OpPreparation::is_scalar_wrapped_to_tensor(const at::Tensor& tensor) {
 
 c10::SmallVector<int64_t, 5> OpPreparation::get_tensor_desc_base_sizes(
     const at::Tensor& tensor) {
-  return torch_npu::NPUBridge::GetNpuStorageImpl(tensor)
+  return torch_backend::NPUBridge::GetNpuStorageImpl(tensor)
       ->get_npu_desc()
       .base_sizes_;
 }
@@ -182,7 +182,7 @@ void OpPreparation::check_tensor(
     c10::IntArrayRef expect_size) {
   check_memory(src_list, {dst});
   TORCH_CHECK(
-      torch_npu::utils::is_npu(dst),
+      torch_backend::utils::is_npu(dst),
       "output with device ",
       dst.device(),
       " doesn't match the desired device NPU",
@@ -203,7 +203,7 @@ void OpPreparation::check_tensor(
     c10::IntArrayRef expect_size) {
   check_memory(src_list, {dst});
   TORCH_CHECK(
-      torch_npu::utils::is_npu(dst),
+      torch_backend::utils::is_npu(dst),
       "output with device ",
       dst.device(),
       " doesn't match the desired device NPU",
@@ -237,14 +237,14 @@ void OpPreparation::check_memory(
 
 at::Tensor OpPreparation::cast_to_ori_format(const at::Tensor& tensor) {
   auto& tensor_desc =
-      torch_npu::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
   auto ret = custom_ops::npu_format_cast(tensor, tensor_desc.origin_format_);
   return ret;
 }
 
 at::Tensor& OpPreparation::cast_to_ori_format(at::Tensor& tensor) {
   auto& tensor_desc =
-      torch_npu::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
   NPUNativeFunctions::npu_format_cast_(tensor, tensor_desc.origin_format_);
   return tensor;
 }
@@ -361,7 +361,7 @@ void OpPreparation::CheckOut(
   c10::SmallVector<at::Tensor, N> outputs = {output};
   CalcuOpUtil::CheckMemoryOverLaps(inputs, outputs);
   TORCH_CHECK(
-      torch_npu::utils::is_npu(output),
+      torch_backend::utils::is_npu(output),
       "output with device ",
       output.device(),
       " doesn't match the desired device NPU",
@@ -406,14 +406,14 @@ void OpPreparation::CheckOut(
 
 at::Tensor OpPreparation::CastBackToOriFormat(const at::Tensor& tensor) {
   auto& tensor_desc =
-      torch_npu::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
   auto ret = custom_ops::npu_format_cast(tensor, tensor_desc.origin_format_);
   return ret;
 }
 
 at::Tensor& OpPreparation::CastBackToOriFormat(at::Tensor& tensor) {
   auto& tensor_desc =
-      torch_npu::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
   NPUNativeFunctions::npu_format_cast_(tensor, tensor_desc.origin_format_);
   return tensor;
 }
@@ -459,7 +459,7 @@ at::Tensor OpPreparation::unsafe_empty_workspace(uint64_t workspace_size) {
   ASCEND_LOGD("Alloc workspace %zu bytes unsafely.", workspace_size);
   c10::Allocator* allocator = c10::npu::NPUCachingAllocator::get();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<torch_npu::NPUStorageImpl>(
+      c10::make_intrusive<torch_backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           workspace_size,
           allocator->allocate(workspace_size),
@@ -467,7 +467,7 @@ at::Tensor OpPreparation::unsafe_empty_workspace(uint64_t workspace_size) {
           true);
   static auto dtype = c10::scalarTypeToTypeMeta(dtype_or_default(at::kByte));
   auto tensor =
-      at::detail::make_tensor<torch_npu::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<torch_backend::NPUTensorImpl>(storage_impl, dtype);
   tensor.unsafeGetTensorImpl()->empty_tensor_restride(
       c10::MemoryFormat::Contiguous);
   return tensor;
@@ -557,7 +557,7 @@ void OpPreparation::CheckMemory(
 }
 
 bool OpPreparation::IsCPUScalar(const at::Tensor& tensor) {
-  if (tensor.dim() == 0 && !torch_npu::utils::is_npu(tensor)) {
+  if (tensor.dim() == 0 && !torch_backend::utils::is_npu(tensor)) {
     return true;
   }
   return false;

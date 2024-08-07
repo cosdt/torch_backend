@@ -2,7 +2,7 @@
 
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/npu/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "npu/aten/OpInterface.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
@@ -131,7 +131,7 @@ void copy_between_host_and_device(
         dst, nbytes, src, nbytes, kind);
     NPU_CHECK_ERROR(ret);
     ASCEND_LOGD("non_blocking copy without StreamSynchronize.");
-    const auto& host_tensor = torch_npu::utils::is_npu(dst) ? src : dst;
+    const auto& host_tensor = torch_backend::utils::is_npu(dst) ? src : dst;
     void* ptr = host_tensor.data_ptr();
     void* ctx = host_tensor.storage().data_ptr().get_context();
     NPUCachingHostAllocator_recordEvent(ptr, ctx, stream);
@@ -315,12 +315,12 @@ void copy_d2d_dtype(
     const at::Tensor& src,
     bool non_blocking) {
   if (!is_same_format(self, src)) {
-    auto src_desc = torch_npu::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+    auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
     if (src.is_contiguous() && FormatHelper::IsBaseFormatType(src) &&
         src_desc.base_sizes_.size() == 1) {
       StorageDescHelper::ReflushDescBySelf(src);
       copy_d2d_format_cast(self, src);
-      torch_npu::NPUBridge::GetNpuStorageImpl(src)->npu_desc_ =
+      torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_ =
           std::move(src_desc);
       return;
     }
@@ -398,14 +398,14 @@ at::Tensor& NPUNativeFunctions::copy_(
     internal_set_names_inplace(self, names);
   }
 
-  if (torch_npu::utils::is_npu(self)) {
-    if (torch_npu::utils::is_npu(src)) {
+  if (torch_backend::utils::is_npu(self)) {
+    if (torch_backend::utils::is_npu(src)) {
       copy_d2d(self, src, non_blocking);
     } else {
       copy_h2d(self, src, non_blocking);
     }
   } else {
-    if (torch_npu::utils::is_npu(src)) {
+    if (torch_backend::utils::is_npu(src)) {
       copy_d2h(self, src, non_blocking);
     }
   }

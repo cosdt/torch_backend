@@ -56,9 +56,9 @@ at::Tensor& bmm_out(
   TORCH_CHECK(
       self.device() == mat2.device(),
       "Expected all tensors to be on the same device, but found at least two devices, ",
-      (torch_npu::utils::is_npu(self) ? "npu" : "cpu"),
+      (torch_backend::utils::is_npu(self) ? "npu" : "cpu"),
       " and ",
-      (torch_npu::utils::is_npu(mat2) ? "npu! " : "cpu! "),
+      (torch_backend::utils::is_npu(mat2) ? "npu! " : "cpu! "),
       OPS_ERROR(ErrCode::PARAM));
   TORCH_CHECK(
       self.scalar_type() != at::ScalarType::Char &&
@@ -81,9 +81,9 @@ at::Tensor bmm(const at::Tensor& self, const at::Tensor& mat2) {
   TORCH_CHECK(
       self.device() == mat2.device(),
       "Expected all tensors to be on the same device, but found at least two devices, ",
-      (torch_npu::utils::is_npu(self) ? "npu" : "cpu"),
+      (torch_backend::utils::is_npu(self) ? "npu" : "cpu"),
       " and ",
-      (torch_npu::utils::is_npu(mat2) ? "npu! " : "cpu! "),
+      (torch_backend::utils::is_npu(mat2) ? "npu! " : "cpu! "),
       OPS_ERROR(ErrCode::PARAM));
   TORCH_CHECK(
       self.dim() == 3 && mat2.dim() == 3,

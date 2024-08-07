@@ -1,5 +1,5 @@
 #include "npu/core/NPUException.h"
-#include "csrc/npu/NPUFunctions.h"
+#include "csrc/backend/NPUFunctions.h"
 #include "npu/core/register/OptionsManager.h"
 
 std::unordered_map<SubModule, std::string> submoduleMap = {

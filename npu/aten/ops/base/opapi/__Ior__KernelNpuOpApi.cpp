@@ -24,7 +24,7 @@ at::Tensor& __ior__(at::Tensor& self, const at::Tensor& other) {
   DO_COMPATIBILITY(aclnnInplaceBitwiseOrScalar, acl_op::__ior__(self, other));
   DO_COMPATIBILITY(aclnnInplaceBitwiseOrTensor, acl_op::__ior__(self, other));
 
-  if (!torch_npu::utils::is_npu(other)) {
+  if (!torch_backend::utils::is_npu(other)) {
     const at::Scalar other_value = other.item();
     EXEC_NPU_CMD(aclnnInplaceBitwiseOrScalar, self, other_value);
   } else {

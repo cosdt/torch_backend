@@ -16,7 +16,7 @@
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
-#include "csrc/npu/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "npu/aten/common/InnerNpuNativeFunction.h"
 #include "npu/aten/utils/op_api_common.h"
 #include "npu/core/NPUPeerToPeerAccess.h"
@@ -42,7 +42,7 @@ void copy_between_host_and_device_opapi(
         dst, nbytes, src, nbytes, kind);
     NPU_CHECK_ERROR(ret);
     ASCEND_LOGD("non_blocking copy without StreamSynchronize.");
-    const auto& host_tensor = torch_npu::utils::is_npu(dst) ? src : dst;
+    const auto& host_tensor = torch_backend::utils::is_npu(dst) ? src : dst;
     void* ptr = host_tensor.data_ptr();
     void* ctx = host_tensor.storage().data_ptr().get_context();
     NPUCachingHostAllocator_recordEvent(ptr, ctx, stream);
@@ -213,14 +213,14 @@ at::Tensor& NPUNativeOpApiFunctions::copy_(
   auto maybe_outnames =
       at::namedinference::compute_broadcast_outnames(self, src);
 
-  if (torch_npu::utils::is_npu(self)) {
-    if (torch_npu::utils::is_npu(src)) {
+  if (torch_backend::utils::is_npu(self)) {
+    if (torch_backend::utils::is_npu(src)) {
       copy_d2d_baseformat_opapi(self, src, non_blocking);
     } else {
       copy_h2d_baseformat_opapi(self, src, non_blocking);
     }
   } else {
-    if (torch_npu::utils::is_npu(src)) {
+    if (torch_backend::utils::is_npu(src)) {
       copy_d2h_baseformat_opapi(self, src, non_blocking);
     }
   }

@@ -7,5 +7,5 @@ if(BUILD_TEST)
 
   # test/cpp/core
   add_subdirectory(${PROJECT_SOURCE_DIR}/test/cpp/core ${CMAKE_BINARY_DIR}/test_core)
-  add_subdirectory(${PROJECT_SOURCE_DIR}/test/cpp/npu ${CMAKE_BINARY_DIR}/test_npu)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/test/cpp/backend ${CMAKE_BINARY_DIR}/test_backend)
 endif()

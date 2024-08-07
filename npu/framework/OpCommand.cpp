@@ -2,8 +2,8 @@
 #include <string>
 
 #include "csrc/aten/generated/CustomFunctions.h"
-#include "csrc/npu/NPUCachingHostAllocator.h"
-#include "csrc/npu/NPUFunctions.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUFunctions.h"
 #include "npu/core/NPUException.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/core/register/OptionsManager.h"
@@ -185,9 +185,9 @@ OpCommand& OpCommand::AddTensorInput(
     tensor = custom_ops::npu_dtype_cast(tensor, commonType.value());
   }
   // as for dim=0, the dtype of tensor can not be `uint16` because of `TBE`
-  if (torch_npu::NPUBridge::GetNpuStorageImplDesc(tensor)
+  if (torch_backend::NPUBridge::GetNpuStorageImplDesc(tensor)
           .storage_sizes_.empty()) {
-    if (torch_npu::utils::is_npu(tensor)) {
+    if (torch_backend::utils::is_npu(tensor)) {
       res = OpCmdHelper::CovertNPUTensorWithZeroDimToAclInput(tensor, descName);
     } else {
       res = OpCmdHelper::CovertTensorWithZeroDimToAclInput(

@@ -78,7 +78,7 @@ GPU integration and accelerating the development of high-performance machine lea
     |   |   |-- mirror
     |   |   |-- ops
     |   |   `-- utils
-    |   |-- core 
+    |   |-- core
     |   |   |-- interface
     |   |   |-- register
     |   |   `-- sys_ctrl
@@ -90,7 +90,7 @@ GPU integration and accelerating the development of high-performance machine lea
     |       `-- utils
     |-- third_party
     |   `-- googletest        // Device-specific
-    `-- torch_npu             // Python interface implementation for PyTorch
+    `-- torch_backend         // Python interface implementation for PyTorch
         |-- csrc              // Python & C++ binding
         |   |-- core          // General capabilities, only provided for Python
         |   `-- npu           // Python bindings for all low-level capabilities needed to be exposed to Python for NPU
@@ -107,7 +107,7 @@ Following modules you may want to switch to your deivce specific implementation 
 
 ### API Documents
 
-[C++ API](https://cosdt.github.io/torch_npu/cpp_html/index.html)
+[C++ API](https://cosdt.github.io/torch_backend/cpp_html/index.html)
 
 ## License
 

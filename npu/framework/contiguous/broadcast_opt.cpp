@@ -1,5 +1,5 @@
 #include "csrc/aten/generated/CustomFunctions.h"
-#include "csrc/npu/NPUStream.h"
+#include "csrc/backend/NPUStream.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/contiguous/ContiguousOpt.h"
 #include "npu/framework/utils/OpAdapter.h"

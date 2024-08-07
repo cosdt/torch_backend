@@ -1,6 +1,6 @@
 
 import torch
-import torch_npu
+import torch_backend
 import pytest
 
 @pytest.mark.npu

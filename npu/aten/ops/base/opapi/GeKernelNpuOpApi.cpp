@@ -53,13 +53,13 @@ at::Tensor& ge_out(const at::Tensor& self, const at::Tensor& other, at::Tensor& 
 
 at::Tensor ge(const at::Tensor& self, const at::Tensor& other) {
   DO_COMPATIBILITY(aclnnGeTensor, acl_op::ge(self, other));
-  if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+  if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
     DO_COMPATIBILITY(aclnnGeScalar, acl_op::ge(self, other));
     at::Tensor result = npu_preparation::apply_tensor_without_format(self.sizes(), self.options().dtype(at::kBool));
     const at::Scalar tmpItem = other.item();
     EXEC_NPU_CMD(aclnnGeScalar, self, tmpItem, result);
     return result;
-  } else if (self.dim() == 0 && !torch_npu::utils::is_npu(self)) {
+  } else if (self.dim() == 0 && !torch_backend::utils::is_npu(self)) {
     DO_COMPATIBILITY(aclnnLessScalar, acl_op::ge(self, other));
     at::Tensor result = npu_preparation::apply_tensor_without_format(other.sizes(), other.options().dtype(at::kBool));
     const at::Scalar tmpItem = self.item();
@@ -76,7 +76,7 @@ at::Tensor ge(const at::Tensor& self, const at::Tensor& other) {
 at::Tensor& ge_(at::Tensor &self, const at::Tensor &other)
 {
     DO_COMPATIBILITY(aclnnInplaceGeTensor, acl_op::ge_(self, other));
-    if (other.dim() == 0 && !torch_npu::utils::is_npu(other)) {
+    if (other.dim() == 0 && !torch_backend::utils::is_npu(other)) {
         return op_api::ge_(self, other.item());
     } else {
         TORCH_CHECK(self.device() == other.device(),
