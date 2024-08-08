@@ -55,7 +55,7 @@
  * a kernel on the same stream from two different threads.
  */
 
-namespace c10::npu {
+namespace c10::backend {
 
 static constexpr int max_compile_time_stream_priorities = 2;
 
@@ -230,12 +230,12 @@ C10_BACKEND_API void setCurrentNPUStream(NPUStream stream);
 std::ostream& operator<<(std::ostream& stream, const NPUStream& s);
 
 aclError DestroyUsedStreams();
-} // namespace c10::npu
+} // namespace c10::backend
 
 namespace std {
 template <>
-struct hash<c10::npu::NPUStream> {
-  size_t operator()(c10::npu::NPUStream s) const noexcept {
+struct hash<c10::backend::NPUStream> {
+  size_t operator()(c10::backend::NPUStream s) const noexcept {
     return std::hash<c10::Stream>{}(s.unwrap());
   }
 };

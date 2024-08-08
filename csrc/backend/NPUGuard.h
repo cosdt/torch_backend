@@ -3,14 +3,12 @@
 #include <c10/core/DeviceType.h>
 #include <c10/core/impl/InlineDeviceGuard.h>
 #include <c10/core/impl/InlineStreamGuard.h>
-#include "csrc/core/guard/PrivateUse1Guard.h"
 #include "csrc/backend/NPUGuardImpl.h"
+#include "csrc/core/guard/PrivateUse1Guard.h"
 
 #include <cstddef>
 
-namespace c10::npu {
-
-using namespace c10::backend::Guard;
+namespace c10::backend {
 
 // This code is kind of boilerplatey.  See Note [Whither the DeviceGuard
 // boilerplate]
@@ -20,10 +18,9 @@ using namespace c10::backend::Guard;
 /// more efficient than DeviceGuard (it compiles to straight line
 /// NPUSetDevice/NPUGetDevice calls); however, it can only be used
 /// from code that links against NPU directly.
-struct NPUGuard : public PrivateUse1Guard<impl::NPUGuardImpl> {
-  using PrivateUse1Guard = PrivateUse1Guard<impl::NPUGuardImpl>;
+struct NPUGuard : public Guard::PrivateUse1Guard<impl::NPUGuardImpl> {
+  using PrivateUse1Guard = Guard::PrivateUse1Guard<impl::NPUGuardImpl>;
   using PrivateUse1Guard::PrivateUse1Guard;
-
   // Copy is not allowed
   NPUGuard(const NPUGuard&) = delete;
   NPUGuard& operator=(const NPUGuard&) = delete;
@@ -35,8 +32,10 @@ struct NPUGuard : public PrivateUse1Guard<impl::NPUGuardImpl> {
 
 /// A variant of OptionalDeviceGuard that is specialized for NPU.  See
 /// NPUGuard for when you can use this.
-struct OptionalNPUGuard : public OptionalPrivateUse1Guard<impl::NPUGuardImpl> {
-  using OptionalPrivateUse1Guard = OptionalPrivateUse1Guard<impl::NPUGuardImpl>;
+struct OptionalNPUGuard
+    : public Guard::OptionalPrivateUse1Guard<impl::NPUGuardImpl> {
+  using OptionalPrivateUse1Guard =
+      Guard::OptionalPrivateUse1Guard<impl::NPUGuardImpl>;
   using OptionalPrivateUse1Guard::OptionalPrivateUse1Guard;
 
   // Copy is not allowed
@@ -109,7 +108,7 @@ struct NPUStreamGuard {
   }
 
  private:
-  c10::impl::InlineStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineStreamGuard<c10::backend::impl::NPUGuardImpl> guard_;
 };
 
 /// A variant of OptionalStreamGuard that is specialized for NPU.  See NPUGuard
@@ -178,7 +177,7 @@ struct OptionalNPUStreamGuard {
   }
 
  private:
-  c10::impl::InlineOptionalStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineOptionalStreamGuard<c10::backend::impl::NPUGuardImpl> guard_;
 };
 
 /// A variant of MultiStreamGuard that is specialized for NPU.
@@ -197,7 +196,7 @@ struct NPUMultiStreamGuard {
   NPUMultiStreamGuard& operator=(NPUMultiStreamGuard&& other) = delete;
 
  private:
-  c10::impl::InlineMultiStreamGuard<c10::npu::impl::NPUGuardImpl> guard_;
+  c10::impl::InlineMultiStreamGuard<c10::backend::impl::NPUGuardImpl> guard_;
 
   static std::vector<c10::Stream> unwrapStreams(
       at::ArrayRef<NPUStream> NPUStreams) {
@@ -210,4 +209,4 @@ struct NPUMultiStreamGuard {
   }
 };
 
-} // namespace c10::npu
+} // namespace c10::backend

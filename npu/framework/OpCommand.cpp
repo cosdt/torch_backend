@@ -170,7 +170,7 @@ OpCommand& OpCommand::Sync(c10::SmallVector<int64_t, N>& index) {
 }
 
 OpCommand& OpCommand::Sync() {
-  c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
+  c10::backend::NPUStream stream = c10::backend::getCurrentNPUStream();
   NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(stream, -1));
   return *this;
 }
@@ -185,7 +185,7 @@ OpCommand& OpCommand::AddTensorInput(
     tensor = custom_ops::npu_dtype_cast(tensor, commonType.value());
   }
   // as for dim=0, the dtype of tensor can not be `uint16` because of `TBE`
-  if (torch_backend::NPUBridge::GetNpuStorageImplDesc(tensor)
+  if (c10::backend::NPUBridge::GetNpuStorageImplDesc(tensor)
           .storage_sizes_.empty()) {
     if (torch_backend::utils::is_npu(tensor)) {
       res = OpCmdHelper::CovertNPUTensorWithZeroDimToAclInput(tensor, descName);
@@ -261,7 +261,7 @@ at::Tensor OpCommand::CopyHostToDevice(
 at::Tensor OpCommand::CopyHostToDevice(const at::Tensor& cpuTensor) {
   at::Tensor cpuPinMemTensor = cpuTensor.pin_memory();
   c10::DeviceIndex deviceIndex = 0;
-  NPU_CHECK_ERROR(c10::npu::GetDevice(&deviceIndex));
+  NPU_CHECK_ERROR(c10::backend::GetDevice(&deviceIndex));
   auto tensor = cpuPinMemTensor.to(
       c10::Device(c10::DeviceType::PrivateUse1, deviceIndex),
       cpuPinMemTensor.scalar_type(),

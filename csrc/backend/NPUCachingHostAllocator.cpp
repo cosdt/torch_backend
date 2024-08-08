@@ -11,12 +11,14 @@
 #include <unordered_set>
 #include <utility>
 
-#include "csrc/core/allocator/EventPool.h"
 #include "csrc/backend/NPUCachingHostAllocator.h"
 #include "csrc/backend/NPUEvent.h"
 #include "csrc/backend/NPUFunctions.h"
+#include "csrc/core/allocator/EventPool.h"
 
 namespace c10::npu {
+
+using namespace c10::backend;
 
 using Block = at::HostBlock<NPUStream>;
 struct HostAllocator
@@ -35,7 +37,7 @@ struct HostAllocator
 
     // TODO(FFFrog): implement aclrtMallocHost which don`t need explicitly
     // to create context
-    c10::npu::current_device();
+    c10::backend::current_device();
     NPU_CHECK_ERROR(aclrtMallocHost(ptr, size));
     pinned_ptrs.insert(*ptr);
   }
@@ -108,7 +110,7 @@ void raw_local_deleter(void* ptr) {
 bool NPUCachingHostAllocator_recordEvent(
     void* ptr,
     void* ctx,
-    c10::npu::NPUStream stream) {
+    c10::backend::NPUStream stream) {
   return npu_caching_host_allocator.record_event(ptr, ctx, stream);
 }
 

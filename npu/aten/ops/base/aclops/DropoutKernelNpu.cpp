@@ -37,7 +37,10 @@ at::Tensor& dropout_do_mask(
   cmd.Name("DropOutDoMask")
       .Input(self)
       .Input(mask)
-      .Input(prob, self.scalar_type(), npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
+      .Input(
+          prob,
+          self.scalar_type(),
+          npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
       .Output(result)
       .Run();
   return result;
@@ -53,7 +56,10 @@ std::tuple<at::Tensor, at::Tensor> dropout_do_mask_npu(
   cmd.Name("DropOutDoMask")
       .Input(self)
       .Input(mask)
-      .Input(prob, self.scalar_type(), npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
+      .Input(
+          prob,
+          self.scalar_type(),
+          npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
       .Output(result)
       .Run();
   return std::tie(result, mask);
@@ -61,16 +67,20 @@ std::tuple<at::Tensor, at::Tensor> dropout_do_mask_npu(
 
 at::Tensor dropout_gen_mask(const at::Tensor& self, at::Scalar prob) {
   bool is_not_jit_compile = at_npu::native::env::CheckJitDisable();
-  auto desc_ = torch_backend::NPUBridge::GetNpuStorageImpl(self)->get_npu_desc();
-  int64_t numels = is_not_jit_compile ? c10::multiply_integers(desc_.storage_sizes_) : self.numel();
+  auto desc_ = c10::backend::NPUBridge::GetNpuStorageImpl(self)->get_npu_desc();
+  int64_t numels = is_not_jit_compile
+      ? c10::multiply_integers(desc_.storage_sizes_)
+      : self.numel();
 
-  uint64_t length = (static_cast<uint64_t>(numels) + LENGTH_DATA_ALIGN - 1) / LENGTH_DATA_ALIGN * LENGTH_DATA_ALIGN;
+  uint64_t length = (static_cast<uint64_t>(numels) + LENGTH_DATA_ALIGN - 1) /
+      LENGTH_DATA_ALIGN * LENGTH_DATA_ALIGN;
   at::Tensor mask = npu_preparation::apply_tensor_with_format(
       {length / LENGTH_BOLCK_ALIGN},
       self.options().dtype(at::kByte),
       ACL_FORMAT_ND);
 
-  at::IntArrayRef self_shape = is_not_jit_compile ? desc_.storage_sizes_ : self.sizes();
+  at::IntArrayRef self_shape =
+      is_not_jit_compile ? desc_.storage_sizes_ : self.sizes();
 
   at_npu::native::OpCommand cmd;
   // DropOutGenMask use seed and seed1 to generator a seed, like this:
@@ -78,8 +88,9 @@ at::Tensor dropout_gen_mask(const at::Tensor& self, at::Scalar prob) {
   // 127~64   63~0
   // so, we set seed1 = 0 to ensure the seed which user set is equal to the seed
   // used by the operator DropOutGenMask
-  const auto gen = at_npu::detail::getDefaultNPUGenerator();
-  auto pair = at::check_generator<at_npu::NPUGeneratorImpl>(gen)->philox_engine_inputs(INCREMENT);
+  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  auto pair = at::check_generator<c10::backend::NPUGeneratorImpl>(gen)
+                  ->philox_engine_inputs(INCREMENT);
   // At present, the default value of random number may be very large,
   // which will cause overflow in graph mode, so we set seed = 0 to avoid it.
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -89,10 +100,16 @@ at::Tensor dropout_gen_mask(const at::Tensor& self, at::Scalar prob) {
   const int64_t seed1 = 0;
   cmd.Name("StatelessDropOutGenMask")
       .Input(self_shape)
-      .Input(prob, self.scalar_type(), npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
+      .Input(
+          prob,
+          self.scalar_type(),
+          npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
       .Input(at::Scalar(seed), at::ScalarType::Int)
       .Input(at::Scalar(seed1), at::ScalarType::Int)
-      .Input(offset_list, at::kLong, npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT)
+      .Input(
+          offset_list,
+          at::kLong,
+          npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT)
       .Output(mask)
       .Run();
   return mask;
@@ -106,7 +123,8 @@ std::tuple<at::Tensor, at::Tensor> dropout_v1_out_nocheck(
   TORCH_CHECK(
       p >= 0 && p <= 1,
       "dropout probability has to be between 0 and 1, but got ",
-      p, OPS_ERROR(ErrCode::VALUE));
+      p,
+      OPS_ERROR(ErrCode::VALUE));
   TORCH_CHECK(
       at::isFloatingType(self_cp.scalar_type()),
       "dropout only supports floating-point dtypes" + OPS_ERROR(ErrCode::TYPE));
@@ -129,30 +147,31 @@ std::tuple<at::Tensor, at::Tensor> _npu_dropout(
 }
 
 at::Tensor npu_dropout_gen_mask(
-    at::IntArrayRef size, double p,
+    at::IntArrayRef size,
+    double p,
     c10::optional<at::ScalarType> dtype_opt,
     c10::optional<c10::Layout> layout_opt,
     c10::optional<c10::Device> device_opt,
     c10::optional<bool> pin_memory_opt) {
-  c10::TensorOptions options = c10::TensorOptions().dtype(dtype_opt)
-      .device(device_opt)
-      .layout(layout_opt)
-      .pinned_memory(pin_memory_opt);
+  c10::TensorOptions options = c10::TensorOptions()
+                                   .dtype(dtype_opt)
+                                   .device(device_opt)
+                                   .layout(layout_opt)
+                                   .pinned_memory(pin_memory_opt);
 
   at::Scalar prob = at::Scalar(1. - p);
   int64_t numels = c10::multiply_integers(size);
 
   uint64_t length = (static_cast<uint64_t>(numels) + 128 - 1) / 128 * 128;
   at::Tensor mask = npu_preparation::apply_tensor_with_format(
-      at::IntArrayRef{length / 8},
-      options.dtype(at::kByte),
-      ACL_FORMAT_ND);
+      at::IntArrayRef{length / 8}, options.dtype(at::kByte), ACL_FORMAT_ND);
 
   at_npu::native::OpCommand cmd;
   // If either seed or seed1 are set to be non-zero, the random number generator
   // is seeded by the given seed. Otherwise, it is seeded by a random seed.
-  const auto gen = at_npu::detail::getDefaultNPUGenerator();
-  auto pair = at::check_generator<at_npu::NPUGeneratorImpl>(gen)->philox_engine_inputs(10);
+  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  auto pair = at::check_generator<c10::backend::NPUGeneratorImpl>(gen)
+                  ->philox_engine_inputs(10);
   // At present, the default value of random number may be very large,
   // which will cause overflow in graph mode, so we set seed = 0 to avoid it.
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -162,10 +181,16 @@ at::Tensor npu_dropout_gen_mask(
   const int64_t seed1 = 0;
   cmd.Name("StatelessDropOutGenMask")
       .Input(size)
-      .Input(prob, c10::typeMetaToScalarType(options.dtype()), npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
+      .Input(
+          prob,
+          c10::typeMetaToScalarType(options.dtype()),
+          npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
       .Input(at::Scalar(seed), at::ScalarType::Int)
       .Input(at::Scalar(seed1), at::ScalarType::Int)
-      .Input(offset_list, at::kLong, npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT)
+      .Input(
+          offset_list,
+          at::kLong,
+          npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT)
       .Output(mask)
       .Run();
   return mask;
@@ -177,7 +202,8 @@ at::Tensor npu_dropout_backward(
     double scale) {
   TORCH_CHECK(
       at::isFloatingType(grad_output.scalar_type()),
-      "dropoutbackward only supports floating-point dtypes" + OPS_ERROR(ErrCode::TYPE));
+      "dropoutbackward only supports floating-point dtypes" +
+          OPS_ERROR(ErrCode::TYPE));
   TORCH_CHECK(
       mask.scalar_type() == at::ScalarType::Byte,
       "mask should be torch.uint8 dtype" + OPS_ERROR(ErrCode::TYPE));
@@ -188,7 +214,10 @@ at::Tensor npu_dropout_backward(
   cmd.Name("DropOutDoMask")
       .Input(grad_output)
       .Input(mask)
-      .Input(at::Scalar(retain), grad_output.scalar_type(), npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
+      .Input(
+          at::Scalar(retain),
+          grad_output.scalar_type(),
+          npu_compile_type::MEMORY_HOST_COMPILE_DEPENDENT)
       .Output(result)
       .Run();
 

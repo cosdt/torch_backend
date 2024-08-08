@@ -61,7 +61,7 @@ AsyncCopyTask::AsyncCopyTask(
 void AsyncCopyTask::LaunchCopyTask() {
   RECORD_FUNCTION(
       CopyParas::COPY_PARAS_MAP[copyParam_.kind], std::vector<c10::IValue>({}));
-  c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
+  c10::backend::NPUStream stream = c10::backend::getCurrentNPUStream();
   NPU_CHECK_ERROR(aclrtMemcpyAsync(
       copyParam_.dst,
       copyParam_.dstLen,

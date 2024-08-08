@@ -13,7 +13,7 @@ namespace torch::backend::lock {
 static PyGILState_STATE npuMutexGILState;
 
 PyObject* THNPModule_npuLockMutex(PyObject* module, PyObject* noargs) {
-  auto mutex = c10::npu::getFreeMutex();
+  auto mutex = c10::backend::getFreeMutex();
   // This has to be a busy loop because we **absolutely need to** hold the GIL
   // or it's a recipe for a deadlock otherwise (if we let other Python threads
   // run while we have the cudaMutex, but not the GIL, they might try to e.g.
@@ -34,7 +34,7 @@ PyObject* THNPModule_npuLockMutex(PyObject* module, PyObject* noargs) {
 }
 
 PyObject* THNPModule_npuUnlockMutex(PyObject* module, PyObject* noargs) {
-  auto mutex = c10::npu::getFreeMutex();
+  auto mutex = c10::backend::getFreeMutex();
   PyGILState_Release(npuMutexGILState);
   mutex->unlock();
   Py_RETURN_NONE;

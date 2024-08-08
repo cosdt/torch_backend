@@ -2,10 +2,10 @@
 #include "csrc/backend/NPUContext.h"
 
 TEST(NPUContextTest, TestGetDeviceProperties) {
-  if (!c10::npu::is_available()) {
+  if (!c10::backend::is_available()) {
     GTEST_SKIP() << "NPU is not available";
   }
 
-  auto prop = c10::npu::getDeviceProperties(0);
+  auto prop = c10::backend::getDeviceProperties(0);
   EXPECT_NE(prop->name, " ");
 }

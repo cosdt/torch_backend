@@ -2,9 +2,9 @@
 
 #include <ATen/ATen.h>
 
-#include "npu/core/NPUBridge.h"
 #include "csrc/backend/NPUStorageImpl.h"
 #include "csrc/backend/NPUStream.h"
+#include "npu/core/NPUBridge.h"
 #include "npu/core/interface/AsyncTaskQueueInterface.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/StorageDescHelper.h"
@@ -15,7 +15,7 @@ namespace at_npu {
 namespace native {
 
 static void storage_resize_npu(
-    torch_backend::NPUStorageImpl& storage,
+    c10::backend::NPUStorageImpl& storage,
     ptrdiff_t size,
     c10::IntArrayRef new_size) {
   if (!storage.resizable()) {
@@ -25,7 +25,7 @@ static void storage_resize_npu(
 
   at::DataPtr new_data = storage.allocator()->allocate(size);
   auto storage_desc =
-      torch_backend::NPUBridge::GetNpuStorageImpl(&storage)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(&storage)->npu_desc_;
   size_t itemsize = storage_desc.data_type_.itemsize();
   at::DataPtr old_data = storage.set_data_ptr(std::move(new_data));
   ptrdiff_t old_size = static_cast<ptrdiff_t>(storage.nbytes());
@@ -45,7 +45,7 @@ static void storage_resize_npu(
   // It is necessary to properly refresh the storage according to sizes and
   // strides, not just new sizes.
   StorageDescHelper::UpdateDesc(
-      torch_backend::NPUBridge::GetNpuStorageImpl(&storage)->npu_desc_,
+      c10::backend::NPUBridge::GetNpuStorageImpl(&storage)->npu_desc_,
       resize_shape,
       new_size);
 
@@ -81,7 +81,7 @@ static inline void maybe_resize_storage_npu(
         static_cast<int64_t>(self->dtype().itemsize());
     if (new_size_bytes > static_cast<int64_t>(self->storage().nbytes())) {
       storage_resize_npu(
-          *torch_backend::NPUBridge::GetNpuStorageImpl(
+          *c10::backend::NPUBridge::GetNpuStorageImpl(
               self->storage().unsafeGetStorageImpl()),
           new_size_bytes,
           size);

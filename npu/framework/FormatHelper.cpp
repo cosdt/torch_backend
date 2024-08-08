@@ -1,7 +1,7 @@
 #include "npu/core/npu_log.h"
 
-#include "npu/core/NPUBridge.h"
 #include "npu/core/DeviceUtils.h"
+#include "npu/core/NPUBridge.h"
 #include "npu/core/NPUException.h"
 #include "npu/framework/FormatHelper.h"
 
@@ -119,7 +119,7 @@ std::unordered_map<aclFormat, FormatHelper::FormatInfo> FormatHelper::info = {
 
 bool FormatHelper::IsPadded(const at::Tensor* tensor) {
   auto format =
-      torch_backend::NPUBridge::GetNpuStorageImplDesc(*tensor).npu_format_;
+      c10::backend::NPUBridge::GetNpuStorageImplDesc(*tensor).npu_format_;
   return IsPadded(format);
 }
 
@@ -142,7 +142,8 @@ char* FormatHelper::GetFormatName(aclFormat format) {
 }
 
 char* FormatHelper::GetFormatName(const at::Tensor& tensor) {
-  auto format = torch_backend::NPUBridge::GetNpuStorageImplDesc(tensor).npu_format_;
+  auto format =
+      c10::backend::NPUBridge::GetNpuStorageImplDesc(tensor).npu_format_;
   return GetFormatName(format);
 }
 
@@ -161,7 +162,7 @@ aclFormat FormatHelper::GetBaseFormat(aclFormat format) {
 }
 
 aclFormat FormatHelper::GetFormat(const at::Tensor& tensor) {
-  return torch_backend::NPUBridge::GetNpuStorageImplDesc(tensor).npu_format_;
+  return c10::backend::NPUBridge::GetNpuStorageImplDesc(tensor).npu_format_;
 }
 
 bool FormatHelper::IsBaseFormatType(aclFormat format) {
@@ -169,12 +170,13 @@ bool FormatHelper::IsBaseFormatType(aclFormat format) {
 }
 
 bool FormatHelper::IsBaseFormatType(const at::Tensor& tensor) {
-  auto format = torch_backend::NPUBridge::GetNpuStorageImplDesc(tensor).npu_format_;
+  auto format =
+      c10::backend::NPUBridge::GetNpuStorageImplDesc(tensor).npu_format_;
   return IsBaseFormatType(format);
 }
 
 FormatShape FormatHelper::GetStorageSizes(
-    const torch_backend::NPUStorageDesc& desc) {
+    const c10::backend::NPUStorageDesc& desc) {
   auto ori_size = desc.base_sizes_;
   auto format = desc.npu_format_;
   auto dtype = desc.data_type_;
@@ -186,7 +188,7 @@ bool FormatHelper::IsOpInputBaseFormat(const at::Tensor& tensor) {
     return true;
   }
   const auto format =
-      torch_backend::NPUBridge::GetNpuStorageImplDesc(tensor).npu_format_;
+      c10::backend::NPUBridge::GetNpuStorageImplDesc(tensor).npu_format_;
   return (format == ACL_FORMAT_ND) || (format == ACL_FORMAT_NCHW) ||
       (format == ACL_FORMAT_NHWC) || (format == ACL_FORMAT_NCDHW);
 }
@@ -566,8 +568,8 @@ at::Tensor& FormatHelper::unsafe_format_cast(
     at::Tensor& self,
     int64_t self_format,
     int64_t result_format) {
-  torch_backend::NPUStorageDesc& self_desc =
-      torch_backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
+  c10::backend::NPUStorageDesc& self_desc =
+      c10::backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
   if (self_format == ACL_FORMAT_ND && result_format == ACL_FORMAT_NC1HWC0) {
     auto itemsize = self_desc.data_type_.itemsize();
     self_desc.storage_sizes_ = InferShape4To5(self.sizes(), itemsize);

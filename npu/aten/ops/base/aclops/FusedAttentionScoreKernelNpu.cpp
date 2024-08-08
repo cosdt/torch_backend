@@ -46,7 +46,7 @@ at::Tensor dropout_gen_mask_nocheck(
     const at::Scalar& prob) {
   at::Tensor mask = npu_preparation::apply_tensor_with_format(
       {self.numel()}, self.options().dtype(at::kByte), ACL_FORMAT_ND);
-  const auto gen = at_npu::detail::getDefaultNPUGenerator();
+  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
   const int64_t seed = static_cast<int64_t>(gen.current_seed());
   const int64_t seed2 = 0;
   at_npu::native::OpCommand cmd;
@@ -219,7 +219,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> npu_fused_attention_score_fwd(
   at::Tensor softmax_output =
       npu_preparation::apply_tensor(query_layer, std::get<1>(output_sizes));
   at::Tensor drop_mask;
-  auto original_stream = c10::npu::getCurrentNPUStream();
+  auto original_stream = c10::backend::getCurrentNPUStream();
   drop_mask = dropout_gen_mask_nocheck(softmax_output, at::Scalar(keep_prob));
   npu_fused_attention_score_nocheck(
       attention_score,

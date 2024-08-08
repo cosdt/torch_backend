@@ -8,7 +8,7 @@
 #include "csrc/core/Macros.h"
 #include "csrc/core/generator/GeneratorImpl.h"
 
-namespace at_npu {
+namespace c10::backend {
 /**
  * Note [NPU Graph-safe RNG states]
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -155,4 +155,4 @@ TORCH_BACKEND_API at::Generator createNPUGenerator(
     c10::DeviceIndex device_index = -1);
 
 } // namespace detail
-} // namespace at_npu
+} // namespace c10::backend

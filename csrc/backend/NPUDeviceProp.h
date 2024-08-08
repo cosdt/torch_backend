@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace c10::npu {
+namespace c10::backend {
 
 struct NPUDeviceProp {
   std::string name{};

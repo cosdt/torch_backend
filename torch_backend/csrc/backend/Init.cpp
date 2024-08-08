@@ -24,10 +24,10 @@ static PyObject* THNPModule_initExtension(PyObject* self, PyObject* noargs) {
       throw python_error();
     }
   };
-  c10::DeviceIndex num_npus = c10::npu::device_count();
+  c10::DeviceIndex num_npus = c10::backend::device_count();
   auto default_npu_generators = PyTuple_New(static_cast<Py_ssize_t>(num_npus));
   for (c10::DeviceIndex i = 0; i < num_npus; i++) {
-    auto gen = at_npu::detail::getDefaultNPUGenerator(i);
+    auto gen = c10::backend::detail::getDefaultNPUGenerator(i);
     auto cast_gen = (THPGenerator*)THPGenerator_initDefaultGenerator(gen);
     // This reference is meant to be given away, so no need to incref here.
     PyTuple_SetItem(default_npu_generators, i, (PyObject*)cast_gen);

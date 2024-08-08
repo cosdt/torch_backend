@@ -1,6 +1,6 @@
 #include "npu/framework/InferFormat.h"
-#include "npu/core/NPUBridge.h"
 #include "csrc/backend/NPUStorageImpl.h"
+#include "npu/core/NPUBridge.h"
 #include "npu/core/register/OptionsManager.h"
 #include "npu/framework/FormatHelper.h"
 
@@ -9,7 +9,7 @@ namespace native {
 
 aclFormat InferFormat::GuessFormatWhenContiguous(const at::Tensor& tensor) {
   // fix: when input tensor is a FakeTensor without desc.
-  auto tensor_storage_impl = torch_backend::NPUBridge::GetNpuStorageImpl(tensor);
+  auto tensor_storage_impl = c10::backend::NPUBridge::GetNpuStorageImpl(tensor);
   if (tensor_storage_impl->data_ptr() == nullptr) {
     return ACL_FORMAT_ND;
   }
@@ -95,9 +95,9 @@ FormatShape InferFormat::GuessStorageSizeWhenConvertFormat(
     const at::Tensor& tensor) {
   auto format = FormatHelper::GetFormat(tensor);
   auto size =
-      torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_.base_sizes_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_.base_sizes_;
   auto dtype =
-      torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_.data_type_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_.data_type_;
   // TransData: ND->NZ, ND size < 2, we can expand dimension to 2, the storage
   // have no effect. now, only ND->NZ and NZ->ND will call transdata， so we no
   // need to check other format.

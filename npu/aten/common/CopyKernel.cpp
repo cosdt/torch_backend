@@ -97,8 +97,8 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
           self.device().index());
     }
     guard.reset_device(self.device());
-    c10::npu::NPUStream dst_stream =
-        c10::npu::getCurrentNPUStream(self.device().index());
+    c10::backend::NPUStream dst_stream =
+        c10::backend::getCurrentNPUStream(self.device().index());
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(dst_stream, -1));
     guard.reset_device(src.device());
   }
@@ -110,7 +110,7 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
   copy_d2d_dtype(self, src, non_blocking);
   // synchronize src stream for different devices copy
   if (self.device().index() != src.device().index()) {
-    c10::npu::NPUStream copy_stream = c10::npu::getCurrentNPUStream();
+    c10::backend::NPUStream copy_stream = c10::backend::getCurrentNPUStream();
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(copy_stream, -1));
   }
 }
@@ -124,7 +124,7 @@ void copy_between_host_and_device(
     aclrtMemcpyKind kind,
     bool non_blocking) {
   int64_t nbytes = dst.numel() * dst.element_size();
-  c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
+  c10::backend::NPUStream stream = c10::backend::getCurrentNPUStream();
 
   if (non_blocking) {
     auto ret = CalcuOpUtil::LaunchAsyncCopyTaskWithModeSwitch(
@@ -315,12 +315,12 @@ void copy_d2d_dtype(
     const at::Tensor& src,
     bool non_blocking) {
   if (!is_same_format(self, src)) {
-    auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+    auto src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
     if (src.is_contiguous() && FormatHelper::IsBaseFormatType(src) &&
         src_desc.base_sizes_.size() == 1) {
       StorageDescHelper::ReflushDescBySelf(src);
       copy_d2d_format_cast(self, src);
-      torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_ =
+      c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_ =
           std::move(src_desc);
       return;
     }

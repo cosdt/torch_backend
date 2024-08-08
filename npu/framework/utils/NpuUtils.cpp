@@ -70,8 +70,8 @@ bool NpuUtils::check_5d_5d_match(const at::Tensor& tensor) {
     return false;
   }
 
-  if (torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_.npu_format_ !=
-      ACL_FORMAT_NC1HWC0) {
+  if (c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
+          ->npu_desc_.npu_format_ != ACL_FORMAT_NC1HWC0) {
     return false;
   }
 
@@ -99,9 +99,9 @@ bool NpuUtils::check_5d_5d_match(const at::Tensor& tensor) {
   int64_t c0_len = 16;
   for (const auto i : c10::irange(
            2,
-           torch_backend::NPUBridge::GetNpuStorageImpl(tensor)
+           c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
                ->npu_desc_.base_sizes_.size())) {
-    contiguous_len *= torch_backend::NPUBridge::GetNpuStorageImpl(tensor)
+    contiguous_len *= c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
                           ->npu_desc_.base_sizes_[i];
   }
   bool is_offset_match = (tensor.storage_offset() % contiguous_len == 0);
@@ -112,7 +112,7 @@ bool NpuUtils::check_5d_5d_match(const at::Tensor& tensor) {
 
 void NpuUtils::RefreshFormat(const at::Tensor& tensor) {
   auto& tensor_desc =
-      torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
   if (tensor_desc.storage_sizes_.size() == 4 &&
       tensor_desc.npu_format_ == ACL_FORMAT_ND) {
     tensor_desc.npu_format_ = ACL_FORMAT_NCHW;
@@ -151,7 +151,7 @@ at::Tensor metadata_convert_match_without_copy_optimize(const at::Tensor& src) {
       "Expected all tensors to be on the same device. "
       "Expected NPU tensor, please check whether the input tensor device is correct.",
       OPS_ERROR(ErrCode::TYPE));
-  auto& src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto& src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
   bool numelEq = (src.numel() == c10::multiply_integers(src_desc.base_sizes_));
   return metadata_convert_match(src, numelEq);
 }
@@ -162,7 +162,7 @@ at::Tensor metadata_convert_match_with_copy_optimize(const at::Tensor& src) {
       "Expected all tensors to be on the same device. "
       "Expected NPU tensor, please check whether the input tensor device is correct.",
       OPS_ERROR(ErrCode::TYPE));
-  auto& src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto& src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
   bool numelEq = (src.numel() == c10::multiply_integers(src_desc.base_sizes_));
 
   // For unmatched Tensors with base format, we can:
@@ -260,7 +260,7 @@ bool NpuUtils::IsOomError(aclError ret, int index) {
     // free devcie cached memory when return value of the first op execution is
     // oom
     if (index == 1) {
-      NPU_CHECK_ERROR(c10::npu::GetDevice(&deviceId));
+      NPU_CHECK_ERROR(c10::backend::GetDevice(&deviceId));
       c10::npu::NPUCachingAllocator::emptyDeviceCache(deviceId);
       return true;
     }

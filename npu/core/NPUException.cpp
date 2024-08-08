@@ -30,7 +30,7 @@ std::unordered_map<ErrCode, std::string> errCodeMap = {
 std::string formatErrorCode(SubModule submodule, ErrCode errorCode) {
   std::ostringstream oss;
   c10::DeviceIndex deviceIndex = -1;
-  c10::npu::GetDevice(&deviceIndex);
+  c10::backend::GetDevice(&deviceIndex);
   auto rank_id = c10::npu::option::OptionsManager::GetRankId();
   oss << "\n[ERROR] " << getCurrentTimestamp() << " (PID:" << getpid()
       << ", Device:" << deviceIndex << ", RankID:" << rank_id << ") ";
@@ -60,7 +60,7 @@ static std::string getCurrentTimestamp() {
   return oss.str();
 }
 
-namespace c10::npu {
+namespace c10::backend {
 
 const char* getDeviceErrorMessage() {
   return aclGetRecentErrMsg();
@@ -75,4 +75,4 @@ const std::string getErrorMessage(int error_code) {
   return "\n[Error]: " + itr->second;
 }
 
-} // namespace c10::npu
+} // namespace c10::backend

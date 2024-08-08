@@ -186,7 +186,7 @@ at::Tensor CalcuOpUtil::CopyScalarToDevice(
 at::Tensor CalcuOpUtil::CopyTensorHostToDevice(const at::Tensor& cpu_tensor) {
   at::Tensor cpuPinMemTensor = cpu_tensor.pin_memory();
   c10::DeviceIndex deviceIndex = 0;
-  NPU_CHECK_ERROR(c10::npu::GetDevice(&deviceIndex));
+  NPU_CHECK_ERROR(c10::backend::GetDevice(&deviceIndex));
   return cpuPinMemTensor.to(
       c10::Device(c10::DeviceType::PrivateUse1, deviceIndex),
       cpuPinMemTensor.scalar_type(),
@@ -277,8 +277,8 @@ int64_t CalcuOpUtil::GetTensorNpuFormat(const at::Tensor& tensor) {
       "device is correct.",
       OPS_ERROR(ErrCode::TYPE));
   if (NpuUtils::check_match(&tensor) || NpuUtils::check_5d_5d_match(tensor)) {
-    const torch_backend::NPUStorageDesc& tensor_desc =
-        torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+    const c10::backend::NPUStorageDesc& tensor_desc =
+        c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
     return tensor_desc.npu_format_;
   } else if (tensor.data_ptr() == nullptr) {
     // transforming faketensor into realtensor and assigning format ND

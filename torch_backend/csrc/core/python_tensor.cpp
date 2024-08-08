@@ -51,7 +51,7 @@ static PyObject* Tensor_new(
   }();
 
   TORCH_CHECK_TYPE(
-      c10::npu::device_count() != 0,
+      c10::backend::device_count() != 0,
       "type ",
       tensor_type.name,
       " not available.")
@@ -186,9 +186,7 @@ static THPObjectPtr get_tensor_dict() {
   }
 
   auto tensor_type = (PyTypeObject*)tensor_class.get();
-  TORCH_CHECK(
-      tensor_type->tp_base,
-      "missing base type for Tensor");
+  TORCH_CHECK(tensor_type->tp_base, "missing base type for Tensor");
 
   auto res = THPObjectPtr(PyDict_New());
   if (!res) {
@@ -299,4 +297,3 @@ PyMethodDef* python_functions() {
 }
 
 } // namespace torch::backend::tensor
-

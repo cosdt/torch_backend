@@ -14,7 +14,7 @@ namespace at_npu {
 namespace native {
 
 NpuP2pCtrl::NpuP2pCtrl() {
-  num_devices_ = c10::npu::device_count();
+  num_devices_ = c10::backend::device_count();
 
   device_enabled_count_.clear();
   device_enabled_count_.resize(num_devices_, 1);

@@ -36,7 +36,7 @@ std::tuple<at::Tensor, at::Tensor> _npu_dropout(
       at_npu::native::OpPreparation::apply_tensor_without_format(self);
   at::Tensor mask;
 
-  auto original_stream = c10::npu::getCurrentNPUStream();
+  auto original_stream = c10::backend::getCurrentNPUStream();
   mask = at_npu::native::OpPreparation::apply_tensor_without_format(
       {length}, self.options().dtype(at::kByte));
   at::IntArrayRef shapeArray(self.sizes());
@@ -46,10 +46,9 @@ std::tuple<at::Tensor, at::Tensor> _npu_dropout(
   // 127~64   63~0
   // so, we set seed1 = 0 to ensure the seed which user set is equal to the seed
   // used by the operator DropOutGenMask
-  const auto gen = at_npu::detail::getDefaultNPUGenerator();
-  auto pair =
-      at::check_generator<at_npu::NPUGeneratorImpl>(gen)->philox_engine_inputs(
-          10);
+  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  auto pair = at::check_generator<c10::backend::NPUGeneratorImpl>(gen)
+                  ->philox_engine_inputs(10);
   // At present, the default value of random number may be very large,
   // which will cause overflow in graph mode, so we set seed = 0 to avoid it.
   const uint64_t seed = pair.first;
