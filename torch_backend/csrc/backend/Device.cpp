@@ -20,7 +20,8 @@ void registerDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   py::class_<c10::backend::NPUDeviceProp>(m, "_NPUDeviceProperties")
       .def_readonly("name", &c10::backend::NPUDeviceProp::name)
-      .def_readonly("total_memory", &c10::backend::NPUDeviceProp::totalGlobalMem)
+      .def_readonly(
+          "total_memory", &c10::backend::NPUDeviceProp::totalGlobalMem)
       .def("__repr__", [](const c10::backend::NPUDeviceProp& prop) {
         std::ostringstream stream;
         stream << "_NPUDeviceProperties(name='" << prop.name
@@ -53,7 +54,7 @@ void init(PyObject* module) {
 PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
   pybind11::gil_scoped_release no_gil;
-  c10::npu::device_synchronize();
+  c10::backend::device_synchronize();
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }
@@ -67,7 +68,7 @@ PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
   }
 
   auto device = THPUtils_unpackLong(arg);
-  c10::npu::set_device(static_cast<c10::DeviceIndex>(device));
+  c10::backend::set_device(static_cast<c10::DeviceIndex>(device));
 
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
@@ -77,14 +78,14 @@ PyObject* THNPModule_getDevice_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
   torch::utils::device_lazy_init(at::kPrivateUse1);
   // NOLINTNEXTLINE(bugprone-signed-char-misuse)
-  auto device = static_cast<int32_t>(c10::npu::current_device());
+  auto device = static_cast<int32_t>(c10::backend::current_device());
   return THPUtils_packInt32(device);
   END_HANDLE_TH_ERRORS
 }
 
 PyObject* THNPModule_getDeviceCount_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
-  return THPUtils_packUInt64(c10::npu::device_count());
+  return THPUtils_packUInt64(c10::backend::device_count());
   END_HANDLE_TH_ERRORS
 }
 

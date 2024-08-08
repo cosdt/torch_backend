@@ -3,14 +3,14 @@
 #include <c10/core/Storage.h>
 #include "csrc/backend/NPUGeneratorImpl.h"
 
-namespace c10::npu {
+namespace c10::backend {
 
 struct TORCH_API NPUHooks : public at::PrivateUse1HooksInterface {
   virtual ~NPUHooks() = default;
   const at::Generator& getDefaultGenerator(
       c10::DeviceIndex device_index) override {
     static auto device_gen =
-        at_npu::detail::getDefaultNPUGenerator(device_index);
+        c10::backend::detail::getDefaultNPUGenerator(device_index);
     return device_gen;
   }
   void initPrivateUse1() const override;

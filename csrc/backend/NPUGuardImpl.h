@@ -31,13 +31,13 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
         PTA_ERROR(ErrCode::PARAM));
     c10::Device old_device = getDevice();
     if (old_device.index() != d.index()) {
-      NPU_CHECK_ERROR(c10::npu::SetDevice(d.index()));
+      NPU_CHECK_ERROR(c10::backend::SetDevice(d.index()));
     }
     return old_device;
   }
   c10::Device getDevice() const override {
     c10::DeviceIndex device = 0;
-    NPU_CHECK_ERROR(c10::npu::GetDevice(&device));
+    NPU_CHECK_ERROR(c10::backend::GetDevice(&device));
     return c10::Device(c10::DeviceType::PrivateUse1, device);
   }
   void setDevice(c10::Device d) const override {
@@ -46,10 +46,10 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
         "DeviceType must be 'c10::DeviceType::PrivateUse1'. Actual DeviceType is: ",
         d.type(),
         PTA_ERROR(ErrCode::PARAM));
-    NPU_CHECK_ERROR(c10::npu::SetDevice(d.index()));
+    NPU_CHECK_ERROR(c10::backend::SetDevice(d.index()));
   }
   void uncheckedSetDevice(c10::Device d) const noexcept override {
-    NPU_CHECK_WARN(c10::npu::SetDevice(d.index()));
+    NPU_CHECK_WARN(c10::backend::SetDevice(d.index()));
   }
   c10::Stream getStream(c10::Device d) const noexcept override {
     return c10::backend::getCurrentNPUStream(d.index()).unwrap();
@@ -70,7 +70,7 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
     return old_stream.unwrap();
   }
   c10::DeviceIndex deviceCount() const noexcept override {
-    static c10::DeviceIndex count = c10::npu::device_count();
+    static c10::DeviceIndex count = c10::backend::device_count();
     return count;
   }
 
@@ -86,10 +86,10 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
       return;
     auto acl_event = static_cast<aclrtEvent>(event);
     c10::DeviceIndex orig_device{-1};
-    NPU_CHECK_WARN(c10::npu::GetDevice(&orig_device));
-    NPU_CHECK_WARN(c10::npu::SetDevice(device_index));
+    NPU_CHECK_WARN(c10::backend::GetDevice(&orig_device));
+    NPU_CHECK_WARN(c10::backend::SetDevice(device_index));
     NPU_CHECK_WARN(aclrtDestroyEvent(acl_event));
-    NPU_CHECK_WARN(c10::npu::SetDevice(orig_device));
+    NPU_CHECK_WARN(c10::backend::SetDevice(orig_device));
   }
 
   void record(

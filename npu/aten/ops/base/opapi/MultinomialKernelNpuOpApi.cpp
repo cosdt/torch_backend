@@ -16,8 +16,8 @@
 
 #include "npu/aten/AclOpsInterface.h"
 #include "npu/aten/OpApiInterface.h"
-#include "npu/framework/utils/RandomOpAdapter.h"
 #include "npu/aten/utils/op_api_common.h"
+#include "npu/framework/utils/RandomOpAdapter.h"
 
 namespace op_api {
 
@@ -27,12 +27,14 @@ at::Tensor& multinomial_op_api(
     int64_t num_samples,
     bool replacement,
     c10::optional<at::Generator> gen) {
-  auto gen_ = at::get_generator_or_default<at_npu::NPUGeneratorImpl>(gen, at_npu::detail::getDefaultNPUGenerator());
+  auto gen_ = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+      gen, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen_->philox_engine_inputs(10);
   const uint64_t seed = pair.first;
   const uint64_t offset = pair.second;
 
-  EXEC_NPU_CMD(aclnnMultinomial, self, num_samples, replacement, seed, offset, result);
+  EXEC_NPU_CMD(
+      aclnnMultinomial, self, num_samples, replacement, seed, offset, result);
   return result;
 }
 
@@ -42,15 +44,14 @@ at::Tensor& multinomial_out(
     bool replacement,
     c10::optional<at::Generator> gen,
     at::Tensor& result) {
-  DO_COMPATIBILITY(aclnnMultinomial, acl_op::multinomial_out(self, num_samples, replacement, gen, result));
+  DO_COMPATIBILITY(
+      aclnnMultinomial,
+      acl_op::multinomial_out(self, num_samples, replacement, gen, result));
   auto input_dim = self.dim();
   auto output_size = op_infer::array_to_small_vector(self.sizes());
   output_size[input_dim - 1] = num_samples;
   at_npu::native::OpPreparation::check_tensor(
-      {self},
-      result,
-      at::ScalarType::Long,
-      output_size);
+      {self}, result, at::ScalarType::Long, output_size);
   multinomial_op_api(result, self, num_samples, replacement, gen);
   return result;
 }
@@ -60,14 +61,17 @@ at::Tensor multinomial(
     int64_t num_samples,
     bool replacement,
     c10::optional<at::Generator> gen) {
-  DO_COMPATIBILITY(aclnnMultinomial, acl_op::multinomial(self, num_samples, replacement, gen));
+  DO_COMPATIBILITY(
+      aclnnMultinomial,
+      acl_op::multinomial(self, num_samples, replacement, gen));
   auto dim = self.dim();
   auto shape = op_infer::array_to_small_vector(self.sizes());
-  shape[dim-1] = num_samples;
-  at::Tensor result = at_npu::native::OpPreparation::apply_tensor_without_format(
-                      shape, self.options().dtype(at::kLong));
+  shape[dim - 1] = num_samples;
+  at::Tensor result =
+      at_npu::native::OpPreparation::apply_tensor_without_format(
+          shape, self.options().dtype(at::kLong));
   multinomial_op_api(result, self, num_samples, replacement, gen);
   return result;
 }
 
-}  // namespace op_api
+} // namespace op_api

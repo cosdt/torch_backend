@@ -88,10 +88,9 @@ at::Tensor dropout_gen_mask(const at::Tensor& self, at::Scalar prob) {
   // 127~64   63~0
   // so, we set seed1 = 0 to ensure the seed which user set is equal to the seed
   // used by the operator DropOutGenMask
-  const auto gen = at_npu::detail::getDefaultNPUGenerator();
-  auto pair =
-      at::check_generator<at_npu::NPUGeneratorImpl>(gen)->philox_engine_inputs(
-          INCREMENT);
+  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  auto pair = at::check_generator<c10::backend::NPUGeneratorImpl>(gen)
+                  ->philox_engine_inputs(INCREMENT);
   // At present, the default value of random number may be very large,
   // which will cause overflow in graph mode, so we set seed = 0 to avoid it.
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -170,10 +169,9 @@ at::Tensor npu_dropout_gen_mask(
   at_npu::native::OpCommand cmd;
   // If either seed or seed1 are set to be non-zero, the random number generator
   // is seeded by the given seed. Otherwise, it is seeded by a random seed.
-  const auto gen = at_npu::detail::getDefaultNPUGenerator();
-  auto pair =
-      at::check_generator<at_npu::NPUGeneratorImpl>(gen)->philox_engine_inputs(
-          10);
+  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  auto pair = at::check_generator<c10::backend::NPUGeneratorImpl>(gen)
+                  ->philox_engine_inputs(10);
   // At present, the default value of random number may be very large,
   // which will cause overflow in graph mode, so we set seed = 0 to avoid it.
   const int64_t seed = static_cast<int64_t>(pair.first);

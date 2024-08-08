@@ -186,7 +186,7 @@ at::Tensor CalcuOpUtil::CopyScalarToDevice(
 at::Tensor CalcuOpUtil::CopyTensorHostToDevice(const at::Tensor& cpu_tensor) {
   at::Tensor cpuPinMemTensor = cpu_tensor.pin_memory();
   c10::DeviceIndex deviceIndex = 0;
-  NPU_CHECK_ERROR(c10::npu::GetDevice(&deviceIndex));
+  NPU_CHECK_ERROR(c10::backend::GetDevice(&deviceIndex));
   return cpuPinMemTensor.to(
       c10::Device(c10::DeviceType::PrivateUse1, deviceIndex),
       cpuPinMemTensor.scalar_type(),

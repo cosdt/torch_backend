@@ -15,8 +15,8 @@ namespace native {
 
 at::Tensor TensorMaker::make_tensor() {
   if (device_ == c10::nullopt) {
-    device_ =
-        c10::Device(at::DeviceType::PrivateUse1, c10::npu::current_device());
+    device_ = c10::Device(
+        at::DeviceType::PrivateUse1, c10::backend::current_device());
   }
 
   if (opts_.device().has_index()) {

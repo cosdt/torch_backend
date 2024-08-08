@@ -25,8 +25,12 @@ using npu_compile_type = at_npu::native::CompileType;
 using npu_utils = at_npu::native::NpuUtils;
 
 namespace {
-at::Tensor& normal_out_npu_nocheck(at::Tensor& result, c10::optional<at::Generator> gen) {
-  auto gen_default = at::get_generator_or_default<at_npu::NPUGeneratorImpl>(gen, at_npu::detail::getDefaultNPUGenerator());
+at::Tensor& normal_out_npu_nocheck(
+    at::Tensor& result,
+    c10::optional<at::Generator> gen) {
+  auto gen_default =
+      at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+          gen, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen_default->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
   const int64_t offset = static_cast<int64_t>(pair.second);
@@ -37,9 +41,20 @@ at::Tensor& normal_out_npu_nocheck(at::Tensor& result, c10::optional<at::Generat
 
   at_npu::native::OpCommand cmd;
   cmd.Name("StatelessRandomNormalV2")
-      .Input(result.sizes(), at::kLong, npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT)
-      .Input(key, at::kLong, npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT, (string) "uint64")
-      .Input(counter, at::kLong, npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT, (string) "uint64")
+      .Input(
+          result.sizes(),
+          at::kLong,
+          npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT)
+      .Input(
+          key,
+          at::kLong,
+          npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT,
+          (string) "uint64")
+      .Input(
+          counter,
+          at::kLong,
+          npu_compile_type::MEMORY_HOST_COMPILE_INDEPENDENT,
+          (string) "uint64")
       .Input(at::Scalar(alg), at::ScalarType::Int)
       .Output(result)
       .Attr("dtype", result.scalar_type())
@@ -53,19 +68,22 @@ at::Tensor& normal_out(
     double std,
     c10::optional<at::Generator> generator,
     at::Tensor& result) {
-    TORCH_CHECK(std >= 0.0, "normal_ expects std >= 0.0, but found std=", std,
-        OPS_ERROR(ErrCode::VALUE));
+  TORCH_CHECK(
+      std >= 0.0,
+      "normal_ expects std >= 0.0, but found std=",
+      std,
+      OPS_ERROR(ErrCode::VALUE));
 
-    npu_preparation::CheckOut({mean}, result, mean);
-    if (!npu_utils::check_match(&result)) {
-        at::Tensor contiguous_result = npu_utils::format_contiguous(result);
-        normal_out_npu_nocheck(contiguous_result, generator);
-        npu_utils::format_fresh_view(result, contiguous_result);
-    } else {
-        normal_out_npu_nocheck(result, generator);
-    }
-    result.mul_(std).add_(mean);
-    return result;
+  npu_preparation::CheckOut({mean}, result, mean);
+  if (!npu_utils::check_match(&result)) {
+    at::Tensor contiguous_result = npu_utils::format_contiguous(result);
+    normal_out_npu_nocheck(contiguous_result, generator);
+    npu_utils::format_fresh_view(result, contiguous_result);
+  } else {
+    normal_out_npu_nocheck(result, generator);
+  }
+  result.mul_(std).add_(mean);
+  return result;
 }
 
 at::Tensor& normal_out(
@@ -92,7 +110,8 @@ at::Tensor& normal_out(
     const at::Tensor& std,
     c10::optional<at::Generator> generator,
     at::Tensor& result) {
-  at::SmallVector<int64_t, SIZE> output_size = op_infer::broadcast_ops_npu_output_size(mean, std);
+  at::SmallVector<int64_t, SIZE> output_size =
+      op_infer::broadcast_ops_npu_output_size(mean, std);
   npu_preparation::CheckOut({mean, std}, result, mean, output_size);
 
   if (!npu_utils::check_match(&result)) {
@@ -113,20 +132,23 @@ at::Tensor& normal_out(
     at::IntArrayRef size,
     c10::optional<at::Generator> generator,
     at::Tensor& result) {
-    TORCH_CHECK(std >= 0.0, "normal_ expects std >= 0.0, but found std=", std,
-        OPS_ERROR(ErrCode::VALUE));
-    npu_preparation::CheckOut({}, result, result, size);
+  TORCH_CHECK(
+      std >= 0.0,
+      "normal_ expects std >= 0.0, but found std=",
+      std,
+      OPS_ERROR(ErrCode::VALUE));
+  npu_preparation::CheckOut({}, result, result, size);
 
-    if (!npu_utils::check_match(&result)) {
-        at::Tensor contiguous_result = npu_utils::format_contiguous(result);
-        normal_out_npu_nocheck(contiguous_result, generator);
-        npu_utils::format_fresh_view(result, contiguous_result);
-    } else {
-        normal_out_npu_nocheck(result, generator);
-    }
+  if (!npu_utils::check_match(&result)) {
+    at::Tensor contiguous_result = npu_utils::format_contiguous(result);
+    normal_out_npu_nocheck(contiguous_result, generator);
+    npu_utils::format_fresh_view(result, contiguous_result);
+  } else {
+    normal_out_npu_nocheck(result, generator);
+  }
 
-    result.mul_(std).add_(mean);
-    return result;
+  result.mul_(std).add_(mean);
+  return result;
 }
 
 at::Tensor normal(
@@ -153,7 +175,8 @@ at::Tensor normal(
     const at::Tensor& mean,
     const at::Tensor& std,
     c10::optional<at::Generator> generator) {
-  at::SmallVector<int64_t, SIZE> output_size = op_infer::broadcast_ops_npu_output_size(mean, std);
+  at::SmallVector<int64_t, SIZE> output_size =
+      op_infer::broadcast_ops_npu_output_size(mean, std);
   at::Tensor result = npu_preparation::apply_tensor(mean, output_size);
   normal_out_npu_nocheck(result, generator);
   result.mul_(std).add_(mean);
@@ -161,18 +184,21 @@ at::Tensor normal(
 }
 
 at::Tensor normal(
-    double mean, double std,
+    double mean,
+    double std,
     at::IntArrayRef size,
     c10::optional<at::Generator> generator,
     c10::optional<at::ScalarType> dtype_opt,
     c10::optional<c10::Layout> layout_opt,
     c10::optional<c10::Device> device_opt,
     c10::optional<bool> pin_memory_opt) {
-  c10::TensorOptions option = c10::TensorOptions().dtype(dtype_opt)
-                                                  .device(device_opt)
-                                                  .layout(layout_opt)
-                                                  .pinned_memory(pin_memory_opt);
-  at::Tensor result = npu_preparation::apply_tensor_with_format(size, option, ACL_FORMAT_ND);
+  c10::TensorOptions option = c10::TensorOptions()
+                                  .dtype(dtype_opt)
+                                  .device(device_opt)
+                                  .layout(layout_opt)
+                                  .pinned_memory(pin_memory_opt);
+  at::Tensor result =
+      npu_preparation::apply_tensor_with_format(size, option, ACL_FORMAT_ND);
   normal_out_npu_nocheck(result, generator);
   result.mul_(std).add_(mean);
   return result;

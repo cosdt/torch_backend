@@ -46,7 +46,7 @@ at::Tensor dropout_gen_mask_nocheck(
     const at::Scalar& prob) {
   at::Tensor mask = npu_preparation::apply_tensor_with_format(
       {self.numel()}, self.options().dtype(at::kByte), ACL_FORMAT_ND);
-  const auto gen = at_npu::detail::getDefaultNPUGenerator();
+  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
   const int64_t seed = static_cast<int64_t>(gen.current_seed());
   const int64_t seed2 = 0;
   at_npu::native::OpCommand cmd;

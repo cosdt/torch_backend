@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <climits>
 #include <ATen/NamedTensorUtils.h>
+#include <climits>
 #include "npu/aten/AclOpsInterface.h"
 #include "npu/aten/OpApiInterface.h"
 #include "npu/aten/utils/op_api_common.h"
@@ -25,9 +25,13 @@ static const uint64_t PHILOX_DEFAULT_NUM = 10;
 
 using npu_preparation = at_npu::native::OpPreparation;
 
-at::Tensor& bernoulli_(at::Tensor& self, double p, c10::optional<at::Generator> gen) {
+at::Tensor& bernoulli_(
+    at::Tensor& self,
+    double p,
+    c10::optional<at::Generator> gen) {
   DO_COMPATIBILITY(aclnnInplaceBernoulli, acl_op::bernoulli_(self, p, gen));
-  auto gen_ = at::get_generator_or_default<at_npu::NPUGeneratorImpl>(gen, at_npu::detail::getDefaultNPUGenerator());
+  auto gen_ = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+      gen, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen_->philox_engine_inputs(PHILOX_DEFAULT_NUM);
   const uint64_t seed = pair.first;
   const uint64_t offset = pair.second;
@@ -37,9 +41,14 @@ at::Tensor& bernoulli_(at::Tensor& self, double p, c10::optional<at::Generator> 
   return self;
 }
 
-at::Tensor& bernoulli_(at::Tensor& self, const at::Tensor& p, c10::optional<at::Generator> gen) {
-  DO_COMPATIBILITY(aclnnInplaceBernoulliTensor, acl_op::bernoulli_(self, p, gen));
-  auto gen_ = at::get_generator_or_default<at_npu::NPUGeneratorImpl>(gen, at_npu::detail::getDefaultNPUGenerator());
+at::Tensor& bernoulli_(
+    at::Tensor& self,
+    const at::Tensor& p,
+    c10::optional<at::Generator> gen) {
+  DO_COMPATIBILITY(
+      aclnnInplaceBernoulliTensor, acl_op::bernoulli_(self, p, gen));
+  auto gen_ = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+      gen, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen_->philox_engine_inputs(PHILOX_DEFAULT_NUM);
   const uint64_t seed = pair.first;
   const uint64_t offset = pair.second;
@@ -53,15 +62,23 @@ at::Tensor bernoulli(const at::Tensor& self, c10::optional<at::Generator> gen) {
   return op_api::bernoulli_(self_copy, self, gen);
 }
 
-at::Tensor bernoulli(const at::Tensor& self, double p, c10::optional<at::Generator> gen) {
+at::Tensor bernoulli(
+    const at::Tensor& self,
+    double p,
+    c10::optional<at::Generator> gen) {
   DO_COMPATIBILITY(aclnnInplaceBernoulli, acl_op::bernoulli(self, p, gen));
-  return at::empty_like(self, LEGACY_CONTIGUOUS_MEMORY_FORMAT).bernoulli_(p, gen);
+  return at::empty_like(self, LEGACY_CONTIGUOUS_MEMORY_FORMAT)
+      .bernoulli_(p, gen);
 }
 
-at::Tensor& bernoulli_out(const at::Tensor& self, c10::optional<at::Generator> gen, at::Tensor& result) {
-  DO_COMPATIBILITY(aclnnInplaceBernoulliTensor, acl_op::bernoulli_out(self, gen, result));
+at::Tensor& bernoulli_out(
+    const at::Tensor& self,
+    c10::optional<at::Generator> gen,
+    at::Tensor& result) {
+  DO_COMPATIBILITY(
+      aclnnInplaceBernoulliTensor, acl_op::bernoulli_out(self, gen, result));
   result.resize_(self.sizes()).bernoulli_(self, gen);
   at::namedinference::propagate_names(result, self);
   return result;
 }
-}  // namespace op_api
+} // namespace op_api

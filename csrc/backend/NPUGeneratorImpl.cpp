@@ -5,7 +5,7 @@
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUFunctions.h"
 
-namespace at_npu {
+namespace c10::backend {
 namespace detail {
 
 namespace {
@@ -27,7 +27,7 @@ static std::vector<at::Generator> default_gens_npu;
  * Warning: this function must only be called once!
  */
 static void initNPUGenVector() {
-  num_npus = c10::npu::device_count();
+  num_npus = c10::backend::device_count();
   npu_gens_init_flag.resize(num_npus);
   default_gens_npu.resize(num_npus);
 }
@@ -46,7 +46,7 @@ const at::Generator& getDefaultNPUGenerator(c10::DeviceIndex device_index) {
   std::call_once(num_npu_init_flag, initNPUGenVector);
   c10::DeviceIndex idx = device_index;
   if (idx == -1) {
-    idx = c10::npu::current_device();
+    idx = c10::backend::current_device();
   } else {
     TORCH_CHECK(idx >= 0 && idx < num_npus, PTA_ERROR(ErrCode::VALUE));
   }
@@ -64,7 +64,7 @@ at::Generator createNPUGenerator(c10::DeviceIndex device_index) {
   std::call_once(num_npu_init_flag, initNPUGenVector);
   c10::DeviceIndex idx = device_index;
   if (idx == -1) {
-    idx = c10::npu::current_device();
+    idx = c10::backend::current_device();
   }
   TORCH_CHECK(
       idx >= 0 && idx < num_npus,
@@ -309,4 +309,4 @@ at::Generator make_npu_generator(c10::DeviceIndex device_index) {
 
 REGISTER_GENERATOR_PRIVATEUSE1(make_npu_generator)
 
-} // namespace at_npu
+} // namespace c10::backend

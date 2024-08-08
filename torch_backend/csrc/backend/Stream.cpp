@@ -16,7 +16,7 @@ static PyObject* THNPStream_pynew(
   HANDLE_TH_ERRORS
 
   c10::DeviceIndex current_device;
-  NPU_CHECK_ERROR(c10::npu::GetDevice(&current_device));
+  NPU_CHECK_ERROR(c10::backend::GetDevice(&current_device));
 
   int priority = 0;
   int64_t stream_id = 0;
@@ -320,9 +320,9 @@ PyObject* THNPModule_setStream_wrap(
       static_cast<c10::DeviceIndex>(device_index),
       static_cast<c10::DeviceType>(device_type));
 
-  auto device = c10::npu::current_device();
+  auto device = c10::backend::current_device();
   if (device != stream.device_index()) {
-    c10::npu::set_device(stream.device_index());
+    c10::backend::set_device(stream.device_index());
   }
   c10::backend::setCurrentNPUStream(stream);
   Py_RETURN_NONE;

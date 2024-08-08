@@ -261,7 +261,7 @@ at::Tensor OpCommand::CopyHostToDevice(
 at::Tensor OpCommand::CopyHostToDevice(const at::Tensor& cpuTensor) {
   at::Tensor cpuPinMemTensor = cpuTensor.pin_memory();
   c10::DeviceIndex deviceIndex = 0;
-  NPU_CHECK_ERROR(c10::npu::GetDevice(&deviceIndex));
+  NPU_CHECK_ERROR(c10::backend::GetDevice(&deviceIndex));
   auto tensor = cpuPinMemTensor.to(
       c10::Device(c10::DeviceType::PrivateUse1, deviceIndex),
       cpuPinMemTensor.scalar_type(),

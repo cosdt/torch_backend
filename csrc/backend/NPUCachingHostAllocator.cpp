@@ -37,7 +37,7 @@ struct HostAllocator
 
     // TODO(FFFrog): implement aclrtMallocHost which don`t need explicitly
     // to create context
-    c10::npu::current_device();
+    c10::backend::current_device();
     NPU_CHECK_ERROR(aclrtMallocHost(ptr, size));
     pinned_ptrs.insert(*ptr);
   }

@@ -17,7 +17,7 @@
 #include "csrc/core/Macros.h"
 #include "npu/core/NPUException.h"
 
-namespace c10::npu {
+namespace c10::backend {
 
 C10_BACKEND_API c10::DeviceIndex device_count() noexcept;
 
@@ -88,4 +88,4 @@ C10_BACKEND_API void get_device_properties(
     c10::backend::NPUDeviceProp* device_prop,
     c10::DeviceIndex device);
 
-} // namespace c10::npu
+} // namespace c10::backend

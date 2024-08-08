@@ -501,7 +501,7 @@ void StartConsume(Repository* repo, c10::DeviceIndex device_id) {
     ASCEND_LOGE("set thread name failed!");
   }
 
-  aclError ret = c10::npu::SetDevice(device_id);
+  aclError ret = c10::backend::SetDevice(device_id);
   if (ret != 0) {
     C10_NPU_SHOW_ERR_MSG();
     ASCEND_LOGE(

@@ -2,9 +2,9 @@
 #include <c10/util/Optional.h>
 #include <c10/util/irange.h>
 #include <iostream>
-#include "csrc/core/allocator/CachingAllocator.h"
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUStream.h"
+#include "csrc/core/allocator/CachingAllocator.h"
 #include "npu/acl/include/acl/acl_base.h"
 #include "npu/acl/include/acl/acl_rt.h"
 
@@ -82,7 +82,7 @@ class CachingAllocatorHelper
       override {
     aclrtContext compiler_ctx = aclrtContext();
     aclError ret_ctx = aclrtGetCurrentContext(&compiler_ctx);
-    aclrtSetCurrentContext(c10::npu::GetDeviceContext(device));
+    aclrtSetCurrentContext(c10::backend::GetDeviceContext(device));
     fn();
     if (ret_ctx == ACL_ERROR_NONE) {
       aclrtSetCurrentContext(compiler_ctx);
@@ -98,7 +98,7 @@ class CachingAllocatorHelper
   }
 
   virtual void deviceSynchronize() override {
-    c10::npu::device_synchronize();
+    c10::backend::device_synchronize();
   }
 
   int memFree(void* devPtr) override {
@@ -176,7 +176,8 @@ REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &defaultNPUAllocator);
 void init(CachingAllocator* delegate) {
   static c10::npu::NPUCachingAllocator::CachingAllocatorHelper helper;
   c10::backend::CachingAllocator::registerHelper(&helper);
-  c10::backend::CachingAllocator::init(c10::npu::device_count_ensure_non_zero());
+  c10::backend::CachingAllocator::init(
+      c10::backend::device_count_ensure_non_zero());
 
   defaultNPUAllocator.init(delegate);
 }
