@@ -2,7 +2,7 @@
 
 #include "npu/aten/OpInterface.h"
 #include "npu/core/OverflowUtils.h"
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
+#include "npu/core/NpuDeviceRAII.h"
 
 namespace torch_backend {
 namespace utils {

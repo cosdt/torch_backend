@@ -1,4 +1,4 @@
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
+#include "npu/core/NpuDeviceRAII.h"
 #include "csrc/backend/NPUCachingAllocator.h"
 #include "csrc/backend/NPUCachingHostAllocator.h"
 #include "csrc/backend/NPUFunctions.h"
@@ -11,18 +11,29 @@
 
 namespace c10::npu {
 
-void TryInitDevice(c10::DeviceIndex device_id) {
-  static NpuSysCtrl device(device_id);
+class NPUDeviceRAII {
+ public:
+  virtual ~NPUDeviceRAII();
+
+  friend void TryInitDevice();
+ private:
+  NPUDeviceRAII();
+  bool need_finalize_;
+};
+
+void TryInitDevice() {
+  static NPUDeviceRAII device;
 }
 
-NpuSysCtrl::NpuSysCtrl(c10::DeviceIndex device_id) : need_finalize_(true) {
+NPUDeviceRAII::NPUDeviceRAII() : need_finalize_(true){
   aclError ret = c10::npu::InitDevice();
-  if (ret == ACL_ERROR_REPEAT_INITIALIZE) {
+  if(ret == ACL_ERROR_REPEAT_INITIALIZE) {
     need_finalize_ = false;
   }
   // Init allocator
   c10::npu::NPUCachingAllocator::init(c10::backend::CachingAllocator::get());
 
+  c10::DeviceIndex device_id;
   ret = c10::npu::GetDevice(&device_id);
   if (ret != ACL_ERROR_NONE) {
     device_id = (device_id == -1) ? 0 : device_id;
@@ -33,7 +44,8 @@ NpuSysCtrl::NpuSysCtrl(c10::DeviceIndex device_id) : need_finalize_(true) {
   c10::npu::option::SetOption("jitCompile", "disable");
 }
 
-NpuSysCtrl::~NpuSysCtrl() {
+NPUDeviceRAII::~NPUDeviceRAII() {
+
   NPUCachingHostAllocator_emptyCache();
   c10::npu::NPUCachingAllocator::emptyCache();
 

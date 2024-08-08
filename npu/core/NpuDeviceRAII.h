@@ -12,16 +12,6 @@
 
 namespace c10::npu {
 
-void TryInitDevice(c10::DeviceIndex device_id = -1);
-class NpuSysCtrl {
- public:
-  virtual ~NpuSysCtrl();
-
-  friend void TryInitDevice(c10::DeviceIndex device_id);
-
- private:
-  NpuSysCtrl(c10::DeviceIndex device_id);
-  bool need_finalize_;
-};
+void TryInitDevice();
 
 } // namespace c10::npu

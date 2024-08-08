@@ -2,7 +2,7 @@
 #include <ATen/ATen.h>
 #include <ATen/Tensor.h>
 #include <c10/core/TensorOptions.h>
-#include "npu/core/sys_ctrl/npu_sys_ctrl.h"
+#include "npu/core/NpuDeviceRAII.h"
 
 namespace torch_backend {
 namespace utils {
@@ -42,24 +42,6 @@ inline void torch_check_npu(const at::Device& device) {
 
 inline c10::DeviceType get_npu_device_type() {
   return c10::DeviceType::PrivateUse1;
-}
-
-inline void maybe_initialize_npu(const at::TensorOptions& options) {
-  if (torch_backend::utils::is_npu(options)) {
-    c10::npu::TryInitDevice(options.device().index());
-  }
-}
-
-inline void maybe_initialize_npu(const at::Device& device) {
-  if (torch_backend::utils::is_npu(device)) {
-    c10::npu::TryInitDevice(device.index());
-  }
-}
-
-inline void maybe_initialize_npu(const c10::optional<at::Device>& device) {
-  if (device) {
-    maybe_initialize_npu(*device);
-  }
 }
 
 } // namespace utils
