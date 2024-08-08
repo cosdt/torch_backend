@@ -89,7 +89,7 @@ void OpAttrMaker::Set(
 }
 
 void OpCommandImpl::SetEnginePriority() {
-  auto stream = c10::npu::getCurrentNPUStream();
+  auto stream = c10::backend::getCurrentNPUStream();
   AddAttr("_performance_prior", true);
   AddAttr<std::string>("_exclude_engines", "AiCore");
 }
@@ -126,7 +126,7 @@ aclError OpCommandImpl::InnerRun(
     c10::SmallVector<int64_t, N>& sync_index,
     c10::SmallVector<at::Tensor, N>& outputTensor) {
   aclError ret;
-  auto stream = c10::npu::getCurrentNPUStream();
+  auto stream = c10::backend::getCurrentNPUStream();
   auto inputSize = params.inBuffer.size();
   auto outputSize = params.outBuffer.size();
   // open the deterministicAlgorithms config

@@ -67,7 +67,7 @@ at::Tensor& NPUNativeFunctions::copy_memory_(
   NPU_CHECK_ERROR(ret);
 
   if (!non_blocking) {
-    c10::npu::NPUStream stream = c10::npu::getCurrentNPUStream();
+    c10::backend::NPUStream stream = c10::backend::getCurrentNPUStream();
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(stream, -1));
   }
   return self;

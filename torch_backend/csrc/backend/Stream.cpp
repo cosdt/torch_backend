@@ -50,16 +50,16 @@ static PyObject* THNPStream_pynew(
     return nullptr;
   }
 
-  c10::npu::NPUStream stream = (stream_id || device_index || device_type)
-      ? c10::npu::NPUStream::unpack3(
+  c10::backend::NPUStream stream = (stream_id || device_index || device_type)
+      ? c10::backend::NPUStream::unpack3(
             stream_id, device_index, static_cast<c10::DeviceType>(device_type))
-      : c10::npu::getStreamFromPool(false);
+      : c10::backend::getStreamFromPool(false);
 
   THNPStream* self = (THNPStream*)ptr.get();
   self->stream_id = static_cast<int64_t>(stream.id());
   self->device_index = static_cast<int64_t>(stream.device_index());
   self->device_type = static_cast<int64_t>(stream.device_type());
-  new (&self->npu_stream) c10::npu::NPUStream(stream);
+  new (&self->npu_stream) c10::backend::NPUStream(stream);
 
   return (PyObject*)ptr.release();
   END_HANDLE_TH_ERRORS
@@ -212,7 +212,7 @@ void init(PyObject* module) {
   }
 }
 
-std::vector<c10::optional<c10::npu::NPUStream>>
+std::vector<c10::optional<c10::backend::NPUStream>>
 THNPUtils_PySequence_to_NPUStreamList(PyObject* obj) {
   if (!PySequence_Check(obj)) {
     throw std::runtime_error(
@@ -224,13 +224,13 @@ THNPUtils_PySequence_to_NPUStreamList(PyObject* obj) {
         "expected PySequence, but got " + std::string(THPUtils_typename(obj)));
   }
 
-  std::vector<c10::optional<c10::npu::NPUStream>> streams;
+  std::vector<c10::optional<c10::backend::NPUStream>> streams;
   Py_ssize_t length = PySequence_Fast_GET_SIZE(seq.get());
   for (Py_ssize_t i = 0; i < length; i++) {
     PyObject* stream = PySequence_Fast_GET_ITEM(seq.get(), i);
 
     if (PyObject_IsInstance(stream, THNPStreamClass)) {
-      streams.emplace_back(c10::npu::NPUStream::unpack3(
+      streams.emplace_back(c10::backend::NPUStream::unpack3(
           (reinterpret_cast<THNPStream*>(stream))->stream_id,
           (reinterpret_cast<THNPStream*>(stream))->device_index,
           static_cast<c10::DeviceType>(
@@ -253,7 +253,7 @@ PyObject* THNPModule_getCurrentStream_wrap(
       THPUtils_checkLong(device_index), "invalid argument to getCurrentStream");
 
   c10::DeviceIndex device = THPUtils_unpackDeviceIndex(device_index);
-  auto stream = c10::npu::getCurrentNPUStream(device);
+  auto stream = c10::backend::getCurrentNPUStream(device);
   PyObject* output_tuple = PyTuple_New(3);
   PyTuple_SetItem(
       output_tuple, 0, THPUtils_packInt64(static_cast<int64_t>(stream.id())));
@@ -277,7 +277,7 @@ PyObject* THNPModule_getDefaultStream_wrap(
       THPUtils_checkLong(device_index), "invalid argument to getDefaultStream");
 
   c10::DeviceIndex device = THPUtils_unpackDeviceIndex(device_index);
-  auto stream = c10::npu::getDefaultNPUStream(device);
+  auto stream = c10::backend::getDefaultNPUStream(device);
   PyObject* output_tuple = PyTuple_New(3);
   PyTuple_SetItem(
       output_tuple, 0, THPUtils_packInt64(static_cast<int64_t>(stream.id())));
@@ -315,7 +315,7 @@ PyObject* THNPModule_setStream_wrap(
           &device_type)) {
   }
 
-  auto stream = c10::npu::NPUStream::unpack3(
+  auto stream = c10::backend::NPUStream::unpack3(
       stream_id,
       static_cast<c10::DeviceIndex>(device_index),
       static_cast<c10::DeviceType>(device_type));
@@ -324,7 +324,7 @@ PyObject* THNPModule_setStream_wrap(
   if (device != stream.device_index()) {
     c10::npu::set_device(stream.device_index());
   }
-  c10::npu::setCurrentNPUStream(stream);
+  c10::backend::setCurrentNPUStream(stream);
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }

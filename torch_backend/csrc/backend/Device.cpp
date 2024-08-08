@@ -18,10 +18,10 @@ namespace torch::backend::device {
 
 void registerDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
-  py::class_<c10::npu::NPUDeviceProp>(m, "_NPUDeviceProperties")
-      .def_readonly("name", &c10::npu::NPUDeviceProp::name)
-      .def_readonly("total_memory", &c10::npu::NPUDeviceProp::totalGlobalMem)
-      .def("__repr__", [](const c10::npu::NPUDeviceProp& prop) {
+  py::class_<c10::backend::NPUDeviceProp>(m, "_NPUDeviceProperties")
+      .def_readonly("name", &c10::backend::NPUDeviceProp::name)
+      .def_readonly("total_memory", &c10::backend::NPUDeviceProp::totalGlobalMem)
+      .def("__repr__", [](const c10::backend::NPUDeviceProp& prop) {
         std::ostringstream stream;
         stream << "_NPUDeviceProperties(name='" << prop.name
                << "', total_memory="
@@ -39,8 +39,8 @@ void bindGetDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   m.def(
       "_npu_getDeviceProperties",
-      [](c10::DeviceIndex deviceid) -> c10::npu::NPUDeviceProp* {
-        return c10::npu::getDeviceProperties(deviceid);
+      [](c10::DeviceIndex deviceid) -> c10::backend::NPUDeviceProp* {
+        return c10::backend::getDeviceProperties(deviceid);
       },
       py::return_value_policy::reference);
 }

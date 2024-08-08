@@ -6,14 +6,14 @@
 
 #include <npu/acl/include/acl/acl.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/core/guard/PrivateUse1GuardImpl.h"
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUStream.h"
+#include "csrc/core/guard/PrivateUse1GuardImpl.h"
 #include "npu/core/NPUException.h"
 
-namespace c10::npu {
+namespace c10::backend {
 namespace impl {
-struct NPUGuardImpl final : public c10::backend::impl::PrivateUse1GuardImpl {
+struct NPUGuardImpl final : public PrivateUse1GuardImpl {
   NPUGuardImpl() = default;
 
   explicit NPUGuardImpl(c10::DeviceType t) {
@@ -52,21 +52,21 @@ struct NPUGuardImpl final : public c10::backend::impl::PrivateUse1GuardImpl {
     NPU_CHECK_WARN(c10::npu::SetDevice(d.index()));
   }
   c10::Stream getStream(c10::Device d) const noexcept override {
-    return c10::npu::getCurrentNPUStream(d.index()).unwrap();
+    return c10::backend::getCurrentNPUStream(d.index()).unwrap();
   }
   c10::Stream getDefaultStream(c10::Device d) const override {
-    return c10::npu::getDefaultNPUStream(d.index());
+    return c10::backend::getDefaultNPUStream(d.index());
   }
   c10::Stream getStreamFromGlobalPool(
       c10::Device d,
       bool isHighPriority = false) const override {
-    return c10::npu::getStreamFromPool(isHighPriority, d.index());
+    return c10::backend::getStreamFromPool(isHighPriority, d.index());
   }
   // NB: These do NOT set the current device
   c10::Stream exchangeStream(c10::Stream s) const noexcept override {
     NPUStream cs(s);
-    auto old_stream = c10::npu::getCurrentNPUStream(s.device().index());
-    c10::npu::setCurrentNPUStream(cs);
+    auto old_stream = c10::backend::getCurrentNPUStream(s.device().index());
+    c10::backend::setCurrentNPUStream(cs);
     return old_stream.unwrap();
   }
   c10::DeviceIndex deviceCount() const noexcept override {
@@ -156,4 +156,4 @@ struct NPUGuardImpl final : public c10::backend::impl::PrivateUse1GuardImpl {
 };
 
 } // namespace impl
-} // namespace c10::npu
+} // namespace c10::backend

@@ -4,10 +4,10 @@
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUStream.h"
 #include "npu/acl/include/acl/acl_op_compiler.h"
-#include "npu/core/NpuVariables.h"
-#include "npu/framework/interface/AclOpCompileInterface.h"
 #include "npu/adapter/acl_device_adapter.h"
+#include "npu/core/NpuVariables.h"
 #include "npu/core/register/OptionRegister.h"
+#include "npu/framework/interface/AclOpCompileInterface.h"
 
 namespace c10::npu {
 
@@ -49,7 +49,7 @@ NPUDeviceRAII::~NPUDeviceRAII() {
   NPUCachingHostAllocator_emptyCache();
   c10::npu::NPUCachingAllocator::emptyCache();
 
-  NPU_CHECK_WARN(c10::npu::DestroyUsedStreams());
+  NPU_CHECK_WARN(c10::backend::DestroyUsedStreams());
   NPU_CHECK_WARN(acl_adapter::ResetUsedDevices());
   // Maintain a basic point of view, who applies for the resource, the
   // resource is released by whom. If aclInit is not a PTA call, then

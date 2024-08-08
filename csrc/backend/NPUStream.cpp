@@ -13,7 +13,7 @@
 
 #define C10_COMPILE_TIME_MAX_NPUS 16
 
-namespace c10::npu {
+namespace c10::backend {
 namespace {
 
 // Global stream state and constants
@@ -164,9 +164,7 @@ static void initSingleStream(int p, c10::DeviceIndex device_index, int i) {
   auto pri = -p; // lower number is higher priority
 
   NPU_CHECK_SUPPORTED_OR_ERROR(aclrtCreateStreamWithConfig(
-        &stream,
-        0,
-        (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC)));
+      &stream, 0, (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC)));
   priority_counters[p][device_index] = 0;
 }
 
@@ -268,7 +266,7 @@ aclrtStream NPUStream::stream() const {
 NPUStream getStreamFromPool(const int priority, c10::DeviceIndex device_index) {
   initNPUStreamsOnce();
   if (device_index == -1) {
-    device_index = current_device();
+    device_index = c10::npu::current_device();
   }
 
   check_npu(device_index);
@@ -303,7 +301,7 @@ NPUStream getStreamFromExternal(
 NPUStream getDefaultNPUStream(c10::DeviceIndex device_index) {
   initNPUStreamsOnce();
   if (device_index == -1) {
-    device_index = current_device();
+    device_index = c10::npu::current_device();
   }
   check_npu(device_index);
   return NPUStreamForId(device_index, makeStreamId(StreamIdType::DEFAULT, 0));
@@ -312,7 +310,7 @@ NPUStream getDefaultNPUStream(c10::DeviceIndex device_index) {
 NPUStream getCurrentNPUStream(c10::DeviceIndex device_index) {
   initNPUStreamsOnce();
   if (device_index == -1) {
-    device_index = current_device();
+    device_index = c10::npu::current_device();
   }
   check_npu(device_index);
   return NPUStreamForId(device_index, current_streams[device_index]);
@@ -329,10 +327,10 @@ std::ostream& operator<<(std::ostream& stream, const NPUStream& s) {
 
 aclError DestroyUsedStreams() {
   c10::DeviceIndex cur_device = 0;
-  NPU_CHECK_ERROR(GetDevice(&cur_device));
+  NPU_CHECK_ERROR(c10::npu::GetDevice(&cur_device));
   std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
   for (const auto deviceId : device_idx_vec) {
-    NPU_CHECK_ERROR(SetDevice(deviceId));
+    NPU_CHECK_ERROR(c10::npu::SetDevice(deviceId));
     for (const auto i : c10::irange(kStreamsPerPool)) {
       for (const auto p : c10::irange(max_compile_time_stream_priorities)) {
         aclrtStream stream = streams[p][deviceId][i];
@@ -346,7 +344,7 @@ aclError DestroyUsedStreams() {
       }
     }
   }
-  NPU_CHECK_ERROR(SetDevice(cur_device));
+  NPU_CHECK_ERROR(c10::npu::SetDevice(cur_device));
   return ACL_ERROR_NONE;
 }
-} // namespace c10::npu
+} // namespace c10::backend

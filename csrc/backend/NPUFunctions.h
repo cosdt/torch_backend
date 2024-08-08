@@ -13,8 +13,8 @@
 #include <npu/acl/include/acl/acl.h>
 #include <mutex>
 #include <optional>
-#include "csrc/core/Macros.h"
 #include "csrc/backend/NPUDeviceProp.h"
+#include "csrc/core/Macros.h"
 #include "npu/core/NPUException.h"
 
 namespace c10::npu {
@@ -85,7 +85,7 @@ getDeviceIndexWithPrimaryContext();
 C10_BACKEND_API std::mutex* getFreeMutex();
 
 C10_BACKEND_API void get_device_properties(
-    c10::npu::NPUDeviceProp* device_prop,
+    c10::backend::NPUDeviceProp* device_prop,
     c10::DeviceIndex device);
 
 } // namespace c10::npu

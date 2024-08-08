@@ -4,7 +4,7 @@
 #include <c10/util/CallOnce.h>
 #include "csrc/backend/NPUContext.h"
 
-namespace c10::npu {
+namespace c10::backend {
 namespace {
 
 /*
@@ -49,4 +49,4 @@ NPUDeviceProp* getDeviceProperties(c10::DeviceIndex device) {
   return &device_properties[device];
 }
 
-} // namespace c10::npu
+} // namespace c10::backend

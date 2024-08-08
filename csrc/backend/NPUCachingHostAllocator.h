@@ -2,8 +2,8 @@
 
 #include <c10/core/Allocator.h>
 
-#include "csrc/core/Macros.h"
 #include "csrc/backend/NPUStream.h"
+#include "csrc/core/Macros.h"
 #include "npu/core/NPUException.h"
 
 c10::Allocator* getNPUCachingHostAllocator(void);
@@ -11,7 +11,7 @@ c10::Allocator* getNPUCachingHostAllocator(void);
 bool NPUCachingHostAllocator_recordEvent(
     void* ptr,
     void* ctx,
-    c10::npu::NPUStream stream);
+    c10::backend::NPUStream stream);
 
 void NPUCachingHostAllocator_emptyCache(void);
 

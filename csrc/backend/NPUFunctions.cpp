@@ -204,7 +204,7 @@ std::mutex* getFreeMutex() {
 }
 
 void get_device_properties(
-    c10::npu::NPUDeviceProp* device_prop,
+    c10::backend::NPUDeviceProp* device_prop,
     c10::DeviceIndex device) {
   const char* device_name;
   device_name = aclrtGetSocName();

@@ -219,7 +219,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> npu_fused_attention_score_fwd(
   at::Tensor softmax_output =
       npu_preparation::apply_tensor(query_layer, std::get<1>(output_sizes));
   at::Tensor drop_mask;
-  auto original_stream = c10::npu::getCurrentNPUStream();
+  auto original_stream = c10::backend::getCurrentNPUStream();
   drop_mask = dropout_gen_mask_nocheck(softmax_output, at::Scalar(keep_prob));
   npu_fused_attention_score_nocheck(
       attention_score,

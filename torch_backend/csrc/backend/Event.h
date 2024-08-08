@@ -1,13 +1,13 @@
 #pragma once
 
 #include <torch/csrc/python_headers.h>
-#include "csrc/core/Macros.h"
 #include "csrc/backend/NPUEvent.h"
+#include "csrc/core/Macros.h"
 
 namespace torch::backend::event {
 
 struct THNPEvent {
-  PyObject_HEAD c10::npu::NPUEvent npu_event;
+  PyObject_HEAD c10::backend::NPUEvent npu_event;
 };
 extern PyObject* THNPEventClass;
 

@@ -2,13 +2,13 @@
 
 #include <cstdint>
 #include <utility>
-#include "csrc/core/Macros.h"
 #include "csrc/backend/NPUGuard.h"
 #include "csrc/backend/NPUStream.h"
+#include "csrc/core/Macros.h"
 #include "npu/acl/include/acl/acl.h"
 #include "npu/core/NPUException.h"
 
-namespace c10::npu {
+namespace c10::backend {
 /*
  * NPUEvents are movable not copyable wrappers around NPU's events.
  * NPUEvents are constructed lazily when first recorded.
@@ -159,4 +159,4 @@ struct C10_BACKEND_API NPUEvent {
   }
 };
 
-} // namespace c10::npu
+} // namespace c10::backend
