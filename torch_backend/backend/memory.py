@@ -32,11 +32,11 @@ __all__ = [
 
 @contextlib.contextmanager
 def _free_mutex():
-    torch_backend._C._npu_lock_mutex()
+    torch_backend._C._lock_mutex()
     try:
         yield
     finally:
-        torch_backend._C._npu_unlock_mutex()
+        torch_backend._C._unlock_mutex()
 
 
 def caching_allocator_alloc(size, device=None, stream=None):
@@ -70,7 +70,7 @@ def caching_allocator_alloc(size, device=None, stream=None):
                         '`torch_backend.npu.Stream` or `int` representing a pointer '
                         'to a exisiting stream')
     with torch_backend.npu.device(device):
-        return torch_backend._C._npu_npuCachingAllocator_raw_alloc(size, stream)
+        return torch_backend._C._CachingAllocator_raw_alloc(size, stream)
 
 
 def caching_allocator_delete(mem_ptr):
@@ -87,7 +87,7 @@ def caching_allocator_delete(mem_ptr):
         See :ref:`npu-memory-management` for more details about NPU memory
         management.
     """
-    torch_backend._C._npu_npuCachingAllocator_raw_delete(mem_ptr)
+    torch_backend._C._CachingAllocator_raw_delete(mem_ptr)
 
 
 def set_per_process_memory_fraction(fraction, device=None) -> None:
@@ -113,7 +113,7 @@ def set_per_process_memory_fraction(fraction, device=None) -> None:
         raise ValueError('Invalid fraction value: {}. '
                          'Allowed range: 0~1'.format(fraction))
 
-    torch_backend._C._npu_setMemoryFraction(fraction, device)
+    torch_backend._C._setMemoryFraction(fraction, device)
 
 
 def empty_cache():
@@ -128,7 +128,7 @@ def empty_cache():
         more details about NPU memory management.
     """
     if is_initialized():
-        torch_backend._C._npu_emptyCache()
+        torch_backend._C._emptyCache()
 
 
 def memory_stats(device=None):
@@ -210,7 +210,7 @@ def memory_stats_as_nested_dict(device=None):
     if not is_initialized():
         return {}
     device = _get_device_index(device, optional=True)
-    return torch_backend._C._npu_memoryStats(device)
+    return torch_backend._C._memoryStats(device)
 
 
 def reset_accumulated_memory_stats(device=None):
@@ -230,7 +230,7 @@ def reset_accumulated_memory_stats(device=None):
         management.
     """
     device = _get_device_index(device, optional=True)
-    return torch_backend._C._npu_resetAccumulatedMemoryStats(device)
+    return torch_backend._C._resetAccumulatedMemoryStats(device)
 
 
 def reset_peak_memory_stats(device=None):
@@ -249,7 +249,7 @@ def reset_peak_memory_stats(device=None):
         management.
     """
     device = _get_device_index(device, optional=True)
-    return torch_backend._C._npu_resetPeakMemoryStats(device)
+    return torch_backend._C._resetPeakMemoryStats(device)
 
 
 def reset_max_memory_allocated(device=None):
@@ -408,7 +408,7 @@ def memory_snapshot():
         See :ref:`npu-memory-management` for more details about NPU memory
         management.
     """
-    return torch_backend._C._npu_memorySnapshot()["segments"]
+    return torch_backend._C._memorySnapshot()["segments"]
 
 
 def _format_size(sz, pref_sz):
@@ -547,7 +547,7 @@ def get_allocator_backend() -> str:
     .. note::
         See :ref:`npu-memory-management` for details on choosing the allocator backend.
     """
-    return torch_backend._C._npu_getAllocatorBackend()
+    return torch_backend._C._getAllocatorBackend()
 
 def _snapshot(device=None):
     """Save a snapshot of NPU memory state at the time it was called.
@@ -623,7 +623,7 @@ def _snapshot(device=None):
     Returns:
         The Snapshot dictionary object
     """
-    return torch_backend._C._npu_memorySnapshot()
+    return torch_backend._C._memorySnapshot()
 
 
 def _dump_snapshot(filename="dump_snapshot.pickle"):

@@ -72,7 +72,6 @@ __all__ = [  # noqa 405
 ]
 
 from typing import Tuple, Union
-from multiprocessing.util import register_after_fork as _register_after_fork
 import traceback
 import threading
 import os
@@ -113,7 +112,6 @@ _tls = threading.local()
 _initialization_lock = threading.Lock()
 _queued_calls = []  # don't invoke these until initialization occurs
 _original_pid = False
-
 
 def _is_in_bad_fork():
     return _is_internal_in_bad_fork
@@ -181,7 +179,7 @@ def _lazy_init():
                 "multiprocessing, you must use the 'spawn' start method"
             )
 
-        torch_backend._C._npu_init()
+        torch_backend._C._init()
 
         _original_pid = os.getpid()
         # Some of the queued calls may reentrantly call _lazy_init();
@@ -193,17 +191,6 @@ def _lazy_init():
         finally:
             delattr(_tls, "is_initializing")
         _initialized = True
-
-
-def _after_fork(arg):
-    global _initialized, _is_internal_in_bad_fork
-    if _initialized and _original_pid != os.getpid():
-        _initialized = False
-        _is_internal_in_bad_fork = True
-        torch_backend._C._npu_set_run_yet_variable_to_false()  # type: ignore[attr-defined]
-
-
-_register_after_fork(_after_fork, _after_fork)
 
 
 def _get_device(device: Union[int, str, torch.device]) -> torch.device:
@@ -268,7 +255,7 @@ def _get_rng_state_offset(device: Union[int, str, torch.device] = "npu") -> int:
 
 
 def is_available():
-    if not hasattr(torch_backend._C, "_npu_setDevice"):
+    if not hasattr(torch_backend._C, "setDevice"):
         return False
     return device_count() > 0
 
@@ -297,6 +284,9 @@ class _NPULegacyStorage(_LegacyStorage):
             "_new_shared_filename: Not available for NPU storage"
         )
 
+# TODO(FFFrog):
+# Option 1: add a decorator to modify the __module__ of storage class below to device name
+# Option 2: add __init__ to _LegacyStorageMeta in PyTorch, in which modify __module__
 
 class ByteStorage(_NPULegacyStorage):
     @classproperty

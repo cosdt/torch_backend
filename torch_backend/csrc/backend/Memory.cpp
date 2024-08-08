@@ -9,7 +9,7 @@
 
 namespace torch::backend::memory {
 
-PyObject* THNPModule_setMemoryFraction(PyObject* _unused, PyObject* args) {
+PyObject* THPModule_setMemoryFraction(PyObject* _unused, PyObject* args) {
   HANDLE_TH_ERRORS
   PyObject* fraction_o = nullptr;
   PyObject* device_o = nullptr;
@@ -30,7 +30,7 @@ PyObject* THNPModule_setMemoryFraction(PyObject* _unused, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-PyObject* THNPModule_resetAccumulatedMemoryStats(
+PyObject* THPModule_resetAccumulatedMemoryStats(
     PyObject* _unused,
     PyObject* arg) {
   HANDLE_TH_ERRORS
@@ -44,7 +44,7 @@ PyObject* THNPModule_resetAccumulatedMemoryStats(
   Py_RETURN_NONE;
 }
 
-PyObject* THNPModule_resetPeakMemoryStats(PyObject* _unused, PyObject* arg) {
+PyObject* THPModule_resetPeakMemoryStats(PyObject* _unused, PyObject* arg) {
   HANDLE_TH_ERRORS
   TORCH_CHECK(
       THPUtils_checkLong(arg), "invalid argument to reset_peak_memory_stats");
@@ -66,7 +66,7 @@ torch::CapturedTraceback* getFromContext(
       "attempting to gather stack context from the wrong StackContext type.");
 }
 
-PyObject* THNPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
+PyObject* THPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
 
   using c10::backend::CachingAllocator::BlockInfo;
@@ -224,7 +224,7 @@ PyObject* THNPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_attachOutOfMemoryObserver(
+PyObject* THPModule_attachOutOfMemoryObserver(
     PyObject* _unused,
     PyObject* observer) {
   HANDLE_TH_ERRORS
@@ -248,7 +248,7 @@ PyObject* THNPModule_attachOutOfMemoryObserver(
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_npuCachingAllocator_raw_alloc(
+PyObject* THPModule_npuCachingAllocator_raw_alloc(
     PyObject* _unused,
     PyObject* args) {
   HANDLE_TH_ERRORS
@@ -271,7 +271,7 @@ PyObject* THNPModule_npuCachingAllocator_raw_alloc(
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_npuCachingAllocator_raw_delete(
+PyObject* THPModule_npuCachingAllocator_raw_delete(
     PyObject* _unused,
     PyObject* obj) {
   HANDLE_TH_ERRORS
@@ -281,13 +281,13 @@ PyObject* THNPModule_npuCachingAllocator_raw_delete(
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_getAllocatorBackend(PyObject* _unused, PyObject* noargs) {
+PyObject* THPModule_getAllocatorBackend(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
   return THPUtils_packString(c10::npu::NPUCachingAllocator::name());
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_memoryStats(PyObject* _unused, PyObject* arg) {
+PyObject* THPModule_memoryStats(PyObject* _unused, PyObject* arg) {
   HANDLE_TH_ERRORS
   TORCH_CHECK(THPUtils_checkLong(arg), "invalid argument to memory_allocated");
 
@@ -340,55 +340,55 @@ PyObject* THNPModule_memoryStats(PyObject* _unused, PyObject* arg) {
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_emptyCache(PyObject* _unused, PyObject* noargs) {
+PyObject* THPModule_emptyCache(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
   c10::npu::NPUCachingAllocator::emptyCache();
   END_HANDLE_TH_ERRORS
   Py_RETURN_NONE;
 }
 
-static struct PyMethodDef THNPModule_methods[] = {
-    {"_npu_setMemoryFraction",
-     (PyCFunction)THNPModule_setMemoryFraction,
+static struct PyMethodDef THPModule_methods[] = {
+    {"_setMemoryFraction",
+     (PyCFunction)THPModule_setMemoryFraction,
      METH_VARARGS,
      nullptr},
-    {"_npu_emptyCache",
-     (PyCFunction)THNPModule_emptyCache,
+    {"_emptyCache",
+     (PyCFunction)THPModule_emptyCache,
      METH_NOARGS,
      nullptr},
-    {"_npu_memoryStats", (PyCFunction)THNPModule_memoryStats, METH_O, nullptr},
-    {"_npu_resetAccumulatedMemoryStats",
-     (PyCFunction)THNPModule_resetAccumulatedMemoryStats,
+    {"_memoryStats", (PyCFunction)THPModule_memoryStats, METH_O, nullptr},
+    {"_resetAccumulatedMemoryStats",
+     (PyCFunction)THPModule_resetAccumulatedMemoryStats,
      METH_O,
      nullptr},
-    {"_npu_resetPeakMemoryStats",
-     (PyCFunction)THNPModule_resetPeakMemoryStats,
+    {"_resetPeakMemoryStats",
+     (PyCFunction)THPModule_resetPeakMemoryStats,
      METH_O,
      nullptr},
-    {"_npu_memorySnapshot",
-     (PyCFunction)THNPModule_memorySnapshot,
+    {"_memorySnapshot",
+     (PyCFunction)THPModule_memorySnapshot,
      METH_NOARGS,
      nullptr},
-    {"_npu_attach_out_of_memory_observer",
-     THNPModule_attachOutOfMemoryObserver,
+    {"attach_out_of_memory_observer",
+     THPModule_attachOutOfMemoryObserver,
      METH_O,
      nullptr},
-    {"_npu_npuCachingAllocator_raw_alloc",
-     (PyCFunction)THNPModule_npuCachingAllocator_raw_alloc,
+    {"_CachingAllocator_raw_alloc",
+     (PyCFunction)THPModule_npuCachingAllocator_raw_alloc,
      METH_VARARGS,
      nullptr},
-    {"_npu_npuCachingAllocator_raw_delete",
-     (PyCFunction)THNPModule_npuCachingAllocator_raw_delete,
+    {"_CachingAllocator_raw_delete",
+     (PyCFunction)THPModule_npuCachingAllocator_raw_delete,
      METH_O,
      nullptr},
-    {"_npu_getAllocatorBackend",
-     (PyCFunction)THNPModule_getAllocatorBackend,
+    {"_getAllocatorBackend",
+     (PyCFunction)THPModule_getAllocatorBackend,
      METH_NOARGS,
      nullptr},
     {nullptr}};
 
 PyMethodDef* python_functions() {
-  return THNPModule_methods;
+  return THPModule_methods;
 }
 
 } // namespace torch::backend::memory

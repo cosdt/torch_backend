@@ -1,4 +1,4 @@
-from typing import Iterable, Union
+from typing import Union
 import torch
 
 import torch_backend

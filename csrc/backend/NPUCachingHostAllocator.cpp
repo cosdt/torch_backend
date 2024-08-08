@@ -38,13 +38,13 @@ struct HostAllocator
     // TODO(FFFrog): implement aclrtMallocHost which don`t need explicitly
     // to create context
     c10::backend::current_device();
-    NPU_CHECK_ERROR(aclrtMallocHost(ptr, size));
+    aclrtMallocHost(ptr, size);
     pinned_ptrs.insert(*ptr);
   }
 
   void free_block(Block* block) override {
     std::unique_lock<std::shared_mutex> lock(mutex_);
-    NPU_CHECK_ERROR(aclrtFreeHost(block->ptr_));
+    aclrtFreeHost(block->ptr_);
     pinned_ptrs.erase(block->ptr_);
   }
 

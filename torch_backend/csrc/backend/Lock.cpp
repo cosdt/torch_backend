@@ -12,7 +12,7 @@ namespace torch::backend::lock {
 // such thread).
 static PyGILState_STATE npuMutexGILState;
 
-PyObject* THNPModule_npuLockMutex(PyObject* module, PyObject* noargs) {
+PyObject* THPModule_npuLockMutex(PyObject* module, PyObject* noargs) {
   auto mutex = c10::backend::getFreeMutex();
   // This has to be a busy loop because we **absolutely need to** hold the GIL
   // or it's a recipe for a deadlock otherwise (if we let other Python threads
@@ -33,26 +33,26 @@ PyObject* THNPModule_npuLockMutex(PyObject* module, PyObject* noargs) {
   Py_RETURN_NONE;
 }
 
-PyObject* THNPModule_npuUnlockMutex(PyObject* module, PyObject* noargs) {
+PyObject* THPModule_npuUnlockMutex(PyObject* module, PyObject* noargs) {
   auto mutex = c10::backend::getFreeMutex();
   PyGILState_Release(npuMutexGILState);
   mutex->unlock();
   Py_RETURN_NONE;
 }
 
-static PyMethodDef THNPModule_methods[] = {
-    {"_npu_lock_mutex",
-     (PyCFunction)THNPModule_npuLockMutex,
+static PyMethodDef THPModule_methods[] = {
+    {"_lock_mutex",
+     (PyCFunction)THPModule_npuLockMutex,
      METH_NOARGS,
      nullptr},
-    {"_npu_unlock_mutex",
-     (PyCFunction)THNPModule_npuUnlockMutex,
+    {"_unlock_mutex",
+     (PyCFunction)THPModule_npuUnlockMutex,
      METH_NOARGS,
      nullptr},
     {nullptr, nullptr, 0, nullptr}};
 
 PyMethodDef* python_functions() {
-  return THNPModule_methods;
+  return THPModule_methods;
 }
 
 } // namespace torch::backend::lock

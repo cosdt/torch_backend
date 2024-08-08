@@ -109,7 +109,7 @@ class Stream(torch_backend._C._NPUStreamBase, _StreamBase):
                 .format(self.device, self.npu_stream))
 
 
-class Event(torch_backend._C._NPUEventBase, _EventBase):
+class Event(torch_backend._C._EventBase, _EventBase):
     r"""Wrapper around a NPU event.
 
     NPU events are synchronization markers that can be used to monitor the

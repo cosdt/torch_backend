@@ -7,8 +7,10 @@
 #include <c10/util/order_preserving_flat_hash_map.h>
 #include <c10/util/typeid.h>
 
-#include "npu/acl/include/acl/acl_base.h"
-#include "npu/acl/include/acl/acl_rt.h"
+// TODO(FFFrog):
+// Remove later
+#include "acl/include/acl/acl_base.h"
+#include "acl/include/acl/acl_rt.h"
 
 namespace c10::backend {
 

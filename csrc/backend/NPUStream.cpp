@@ -7,9 +7,12 @@
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUGuard.h"
 #include "csrc/backend/NPUStream.h"
-#include "npu/acl/include/acl/acl_rt.h"
-#include "npu/adapter/acl_device_adapter.h"
-#include "npu/core/NPUException.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "acl/include/acl/acl_rt.h"
+#include "adapter/acl_device_adapter.h"
+#include "core/NPUException.h"
 
 #define C10_COMPILE_TIME_MAX_NPUS 16
 

@@ -51,7 +51,7 @@ void init(PyObject* module) {
   bindGetDeviceProperties(module);
 }
 
-PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
+PyObject* THPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
   HANDLE_TH_ERRORS
   pybind11::gil_scoped_release no_gil;
   c10::backend::device_synchronize();
@@ -59,7 +59,7 @@ PyObject* THNPModule_npuSynchronize(PyObject* _unused, PyObject* noargs) {
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
+PyObject* THPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
   HANDLE_TH_ERRORS
   TORCH_CHECK(THPUtils_checkLong(arg), "invalid argument to setDevice");
   {
@@ -74,7 +74,7 @@ PyObject* THNPModule_setDevice_wrap(PyObject* self, PyObject* arg) {
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_getDevice_wrap(PyObject* self, PyObject* noargs) {
+PyObject* THPModule_getDevice_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
   torch::utils::device_lazy_init(at::kPrivateUse1);
   // NOLINTNEXTLINE(bugprone-signed-char-misuse)
@@ -83,13 +83,13 @@ PyObject* THNPModule_getDevice_wrap(PyObject* self, PyObject* noargs) {
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_getDeviceCount_wrap(PyObject* self, PyObject* noargs) {
+PyObject* THPModule_getDeviceCount_wrap(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS
   return THPUtils_packUInt64(c10::backend::device_count());
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_npuCanDeviceAccessPeer_wrap(
+PyObject* THPModule_npuCanDeviceAccessPeer_wrap(
     PyObject* self,
     PyObject* args) {
   HANDLE_TH_ERRORS
@@ -108,28 +108,28 @@ PyObject* THNPModule_npuCanDeviceAccessPeer_wrap(
   END_HANDLE_TH_ERRORS
 }
 
-static struct PyMethodDef THNPModule_methods[] = {
-    {"_npu_synchronize",
-     (PyCFunction)THNPModule_npuSynchronize,
+static struct PyMethodDef THPModule_methods[] = {
+    {"_synchronize",
+     (PyCFunction)THPModule_npuSynchronize,
      METH_NOARGS,
      nullptr},
-    {"_npu_setDevice", (PyCFunction)THNPModule_setDevice_wrap, METH_O, nullptr},
-    {"_npu_getDevice",
-     (PyCFunction)THNPModule_getDevice_wrap,
+    {"_setDevice", (PyCFunction)THPModule_setDevice_wrap, METH_O, nullptr},
+    {"_getDevice",
+     (PyCFunction)THPModule_getDevice_wrap,
      METH_NOARGS,
      nullptr},
-    {"_npu_getDeviceCount",
-     (PyCFunction)THNPModule_getDeviceCount_wrap,
+    {"_getDeviceCount",
+     (PyCFunction)THPModule_getDeviceCount_wrap,
      METH_NOARGS,
      nullptr},
-    {"_npu_canDeviceAccessPeer",
-     (PyCFunction)THNPModule_npuCanDeviceAccessPeer_wrap,
+    {"_canDeviceAccessPeer",
+     (PyCFunction)THPModule_npuCanDeviceAccessPeer_wrap,
      METH_VARARGS,
      nullptr},
     {nullptr}};
 
 PyMethodDef* python_functions() {
-  return THNPModule_methods;
+  return THPModule_methods;
 }
 
 } // namespace torch::backend::device

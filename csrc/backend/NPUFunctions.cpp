@@ -2,7 +2,10 @@
 #include <mutex>
 #include <unordered_map>
 #include "csrc/backend/NPUStream.h"
-#include "npu/adapter/acl_device_adapter.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "adapter/acl_device_adapter.h"
 
 namespace c10::backend {
 

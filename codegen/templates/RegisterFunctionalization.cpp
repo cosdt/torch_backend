@@ -9,7 +9,7 @@
 #include <ATen/NativeFunctions.h>
 #include <ATen/Operators.h>
 #include "csrc/aten/generated/CustomFunctions.h"
-#include "npu/core/NPUException.h"
+#include "core/NPUException.h"
 
 namespace at_npu {
 namespace functionalization {

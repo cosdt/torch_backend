@@ -4,12 +4,14 @@
 #include <c10/macros/Macros.h>
 #include <cassert>
 
-#include <npu/acl/include/acl/acl.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUStream.h"
 #include "csrc/core/guard/PrivateUse1GuardImpl.h"
-#include "npu/core/NPUException.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "core/NPUException.h"
 
 namespace c10::backend {
 namespace impl {

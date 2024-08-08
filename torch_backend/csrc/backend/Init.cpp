@@ -8,7 +8,7 @@
 
 namespace torch::backend::init {
 
-static PyObject* THNPModule_initExtension(PyObject* self, PyObject* noargs) {
+static PyObject* THPModule_initExtension(PyObject* self, PyObject* noargs) {
   HANDLE_TH_ERRORS {
     pybind11::gil_scoped_release no_gil;
     at::globalContext().lazyInitPrivateUse1();
@@ -39,12 +39,12 @@ static PyObject* THNPModule_initExtension(PyObject* self, PyObject* noargs) {
   END_HANDLE_TH_ERRORS
 }
 
-static PyMethodDef THNPModule_methods[] = {
-    {"_npu_init", (PyCFunction)THNPModule_initExtension, METH_NOARGS, nullptr},
+static PyMethodDef THPModule_methods[] = {
+    {"_init", (PyCFunction)THPModule_initExtension, METH_NOARGS, nullptr},
     {nullptr, nullptr, 0, nullptr}};
 
 PyMethodDef* python_functions() {
-  return THNPModule_methods;
+  return THPModule_methods;
 }
 
 } // namespace torch::backend::init

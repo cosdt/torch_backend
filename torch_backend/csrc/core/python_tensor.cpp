@@ -285,7 +285,7 @@ static PyObject* generate_tensor_types(PyObject* _unused, PyObject* args) {
   END_HANDLE_TH_ERRORS
 }
 
-static PyMethodDef THNPModule_methods[] = {
+static PyMethodDef THPModule_methods[] = {
     {"generate_tensor_types",
      (PyCFunction)generate_tensor_types,
      METH_VARARGS,
@@ -293,7 +293,7 @@ static PyMethodDef THNPModule_methods[] = {
     {nullptr, nullptr, 0, nullptr}};
 
 PyMethodDef* python_functions() {
-  return THNPModule_methods;
+  return THPModule_methods;
 }
 
 } // namespace torch::backend::tensor

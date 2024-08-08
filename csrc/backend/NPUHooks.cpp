@@ -3,8 +3,11 @@
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUStorageImpl.h"
 #include "csrc/core/Register.h"
-#include "npu/aten/common/ResizeNpu.h"
-#include "npu/framework/FormatHelper.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "aten/common/ResizeNpu.h"
+#include "framework/FormatHelper.h"
 
 namespace c10::backend {
 
