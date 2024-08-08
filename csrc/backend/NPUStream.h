@@ -9,9 +9,12 @@
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/core/Macros.h"
-#include "npu/acl/include/acl/acl.h"
-#include "npu/acl/include/acl/acl_op.h"
-#include "npu/core/NPUException.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "acl/include/acl/acl.h"
+#include "acl/include/acl/acl_op.h"
+#include "core/NPUException.h"
 
 /*
  * Stream pool note.

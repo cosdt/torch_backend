@@ -135,7 +135,7 @@ static PyMethodDef THNPEvent_methods[] = {
 PyTypeObject THNPEventType = {
     PyVarObject_HEAD_INIT(
         nullptr,
-        0) "torch_backend._C._NPUEventBase", /* tp_name */
+        0) "torch_backend._C._EventBase", /* tp_name */
     sizeof(THNPEvent), /* tp_basicsize */
     0, /* tp_itemsize */
     (destructor)THNPEvent_dealloc, /* tp_dealloc */
@@ -180,7 +180,7 @@ void init(PyObject* module) {
     throw python_error();
   }
   Py_INCREF(&THNPEventType);
-  if (PyModule_AddObject(module, "_NPUEventBase", (PyObject*)&THNPEventType) <
+  if (PyModule_AddObject(module, "_EventBase", (PyObject*)&THNPEventType) <
       0) {
     throw python_error();
   }

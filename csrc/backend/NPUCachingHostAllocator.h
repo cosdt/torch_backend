@@ -4,7 +4,10 @@
 
 #include "csrc/backend/NPUStream.h"
 #include "csrc/core/Macros.h"
-#include "npu/core/NPUException.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "core/NPUException.h"
 
 c10::Allocator* getNPUCachingHostAllocator(void);
 

@@ -10,12 +10,15 @@
 #include <c10/core/Device.h>
 #include <c10/macros/Macros.h>
 
-#include <npu/acl/include/acl/acl.h>
 #include <mutex>
 #include <optional>
 #include "csrc/backend/NPUDeviceProp.h"
 #include "csrc/core/Macros.h"
-#include "npu/core/NPUException.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "acl/include/acl/acl.h"
+#include "core/NPUException.h"
 
 namespace c10::backend {
 

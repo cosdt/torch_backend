@@ -393,10 +393,10 @@ def gen_dispatcher_registrations(
     native_func_header = """\
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
-#include "npu/framework/interface/EnvVariables.h"
-#include "npu/framework/FormatHelper.h"
-#include "npu/framework/utils/ForceAclnnList.h"
-#include "npu/aten/OpInterface.h"
+#include "framework/interface/EnvVariables.h"
+#include "framework/FormatHelper.h"
+#include "framework/utils/ForceAclnnList.h"
+#include "aten/OpInterface.h"
 """
     static_template = CodeTemplate(
         """\
@@ -527,7 +527,7 @@ def gen_quantize_register(
 
     native_func_header = """\
 #include <ATen/ops/quantize_per_tensor.h>
-#include "npu/aten/OpInterface.h"
+#include "aten/OpInterface.h"
 """
     static_template = CodeTemplate(
         """\

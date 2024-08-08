@@ -245,7 +245,7 @@ THNPUtils_PySequence_to_NPUStreamList(PyObject* obj) {
   return streams;
 }
 
-PyObject* THNPModule_getCurrentStream_wrap(
+PyObject* THPModule_getCurrentStream_wrap(
     PyObject* /* unused */,
     PyObject* device_index) {
   HANDLE_TH_ERRORS
@@ -269,7 +269,7 @@ PyObject* THNPModule_getCurrentStream_wrap(
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_getDefaultStream_wrap(
+PyObject* THPModule_getDefaultStream_wrap(
     PyObject* self /* unused */,
     PyObject* device_index) {
   HANDLE_TH_ERRORS
@@ -293,7 +293,7 @@ PyObject* THNPModule_getDefaultStream_wrap(
   END_HANDLE_TH_ERRORS
 }
 
-PyObject* THNPModule_setStream_wrap(
+PyObject* THPModule_setStream_wrap(
     PyObject* self,
     PyObject* args,
     PyObject* kwargs) {
@@ -329,23 +329,23 @@ PyObject* THNPModule_setStream_wrap(
   END_HANDLE_TH_ERRORS
 }
 
-static struct PyMethodDef THNPModule_methods[] = {
-    {"_npu_getCurrentStream",
-     (PyCFunction)THNPModule_getCurrentStream_wrap,
+static struct PyMethodDef THPModule_methods[] = {
+    {"_getCurrentStream",
+     (PyCFunction)THPModule_getCurrentStream_wrap,
      METH_O,
      nullptr},
-    {"_npu_getDefaultStream",
-     (PyCFunction)THNPModule_getDefaultStream_wrap,
+    {"_getDefaultStream",
+     (PyCFunction)THPModule_getDefaultStream_wrap,
      METH_O,
      nullptr},
-    {"_npu_setStream",
-     (PyCFunction)THNPModule_setStream_wrap,
+    {"_setStream",
+     (PyCFunction)THPModule_setStream_wrap,
      METH_VARARGS | METH_KEYWORDS,
      nullptr},
     {nullptr}};
 
 PyMethodDef* python_functions() {
-  return THNPModule_methods;
+  return THPModule_methods;
 }
 
 } // namespace torch::backend::stream

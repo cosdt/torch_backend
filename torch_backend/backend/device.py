@@ -23,12 +23,12 @@ def synchronize(device=None):
     """
     torch_backend.backend._lazy_init()
     with torch_backend.backend.device(device):
-        return torch_backend._C._npu_synchronize()
+        return torch_backend._C._synchronize()
 
 
 @lru_cache(maxsize=1)
 def device_count():
-    return torch_backend._C._npu_getDeviceCount()
+    return torch_backend._C._getDeviceCount()
 
 
 def can_device_access_peer(device_id, peer_device_id):
@@ -40,18 +40,18 @@ def can_device_access_peer(device_id, peer_device_id):
         raise AssertionError("Invalid device id")
     if peer_device_id < 0 or peer_device_id >= device_count():
         raise AssertionError("Invalid peer device id")
-    return torch_backend._C._npu_canDeviceAccessPeer(device_id, peer_device_id)
+    return torch_backend._C._canDeviceAccessPeer(device_id, peer_device_id)
 
 
 def set_device(device):
     device_id = _get_device_index(device, optional=True)
     if device_id >= 0:
-        torch_backend._C._npu_setDevice(device_id)
+        torch_backend._C._setDevice(device_id)
 
 
 def current_device():
     torch_backend.backend._lazy_init()
-    return torch_backend._C._npu_getDevice()
+    return torch_backend._C._getDevice()
 
 
 def get_device_name(device_name=None):
@@ -90,14 +90,14 @@ class device(object):
     def __enter__(self):
         if self.idx == -1:
             return
-        self.prev_idx = torch_backend._C._npu_getDevice()
+        self.prev_idx = torch_backend._C._getDevice()
         if self.prev_idx != self.idx:
-            torch_backend._C._npu_setDevice(self.idx)
+            torch_backend._C._setDevice(self.idx)
         torch_backend.backend._lazy_init()
 
     def __exit__(self, *args):
         if self.prev_idx != self.idx:
-            torch_backend._C._npu_setDevice(self.prev_idx)
+            torch_backend._C._setDevice(self.prev_idx)
         return False
 
 

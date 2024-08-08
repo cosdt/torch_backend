@@ -71,7 +71,7 @@ def set_stream(stream):
     """
     if stream is None:
         return
-    torch_backend._C._npu_setStream(stream_id=stream.stream_id,
+    torch_backend._C._setStream(stream_id=stream.stream_id,
                                 device_index=stream.device_index,
                                 device_type=stream.device_type)
 
@@ -86,7 +86,7 @@ def current_stream(device=None):
             (default).
     """
     torch_backend.backend._lazy_init()
-    streamdata = torch_backend._C._npu_getCurrentStream(
+    streamdata = torch_backend._C._getCurrentStream(
         _get_device_index(device, optional=True))
     return torch_backend.backend.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
 
@@ -101,7 +101,7 @@ def default_stream(device=None):
             (default).
     """
     torch_backend.backend._lazy_init()
-    streamdata = torch_backend._C._npu_getDefaultStream(
+    streamdata = torch_backend._C._getDefaultStream(
         _get_device_index(device, optional=True))
     return torch_backend.backend.Stream(stream_id=streamdata[0], device_index=streamdata[1], device_type=streamdata[2])
 
@@ -149,7 +149,7 @@ def _dummy_type(name):
 if not hasattr(torch_backend._C, '_NPUStreamBase'):
     # Define dummy base classes
     torch_backend._C.__dict__['_NPUStreamBase'] = _dummy_type('NPUStreamBase')
-    torch_backend._C.__dict__['_NPUEventBase'] = _dummy_type('NPUEventBase')
+    torch_backend._C.__dict__['_EventBase'] = _dummy_type('NPUEventBase')
 
 
 def is_support_inf_nan():

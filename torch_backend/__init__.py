@@ -1,19 +1,17 @@
-import os
-import atexit
-
-# Disable autoloading before running 'import torch'
-os.environ['TORCH_DEVICE_BACKEND_AUTOLOAD'] = '0'
-
 import torch
+import os
 
-import torch_backend
 import torch_backend._C
 import torch_backend.backend
 import torch_backend.meta
 
+# TODO(FFFrog):
+# an API must been provided by torch_backend to show device name
+# used in torch.
+
 torch.utils.rename_privateuse1_backend("npu")
-# rename device name to 'npu' and register funcs
 torch._register_device_module("npu", torch_backend.backend)
+
 unsupported_dtype = [
     torch.quint8,
     torch.quint4x2,
@@ -28,7 +26,6 @@ torch.utils.generate_methods_for_privateuse1_backend(
     unsupported_dtype=unsupported_dtype,
 )
 
-# this must be placed at the end
 supported_dtypes = [
     torch.uint8,
     torch.int8,

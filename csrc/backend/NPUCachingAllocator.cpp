@@ -5,8 +5,11 @@
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUStream.h"
 #include "csrc/core/allocator/CachingAllocator.h"
-#include "npu/acl/include/acl/acl_base.h"
-#include "npu/acl/include/acl/acl_rt.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "acl/include/acl/acl_base.h"
+#include "acl/include/acl/acl_rt.h"
 
 namespace c10::npu::NPUCachingAllocator {
 class DefaultNPUAllocator final : public NPUAllocator {

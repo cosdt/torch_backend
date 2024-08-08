@@ -2,8 +2,11 @@
 #include <torch/csrc/jit/serialization/pickler.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/core/Register.h"
-#include "npu/acl/include/acl/acl_base.h"
-#include "npu/framework/StorageDescHelper.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "acl/include/acl/acl_base.h"
+#include "framework/StorageDescHelper.h"
 
 namespace c10::backend {
 

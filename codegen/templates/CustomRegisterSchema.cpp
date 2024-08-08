@@ -26,8 +26,8 @@
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/aten/generated/VariableType.h"
-#include "npu/core/NPUException.h"
-#include "npu/aten/OpInterface.h"
+#include "core/NPUException.h"
+#include "aten/OpInterface.h"
 
 namespace at_npu {
 

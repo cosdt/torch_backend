@@ -5,8 +5,11 @@
 #include "csrc/backend/NPUGuard.h"
 #include "csrc/backend/NPUStream.h"
 #include "csrc/core/Macros.h"
-#include "npu/acl/include/acl/acl.h"
-#include "npu/core/NPUException.h"
+
+// TODO(FFFrog):
+// Remove later
+#include "acl/include/acl/acl.h"
+#include "core/NPUException.h"
 
 namespace c10::backend {
 /*
@@ -23,7 +26,7 @@ struct C10_BACKEND_API NPUEvent {
     try {
       if (is_created_) {
         NPUGuard guard(device_index_);
-        NPU_CHECK_ERROR(aclrtDestroyEvent(event_));
+        aclrtDestroyEvent(event_);
       }
     } catch (...) { /* No throw */
     }
@@ -71,7 +74,7 @@ struct C10_BACKEND_API NPUEvent {
       return true;
     }
     aclrtEventRecordedStatus currStatus = ACL_EVENT_RECORDED_STATUS_NOT_READY;
-    NPU_CHECK_ERROR(aclrtQueryEventStatus(event_, &currStatus));
+    aclrtQueryEventStatus(event_, &currStatus);
 
     if (currStatus == ACL_EVENT_RECORDED_STATUS_COMPLETE) {
       return true;
@@ -99,38 +102,36 @@ struct C10_BACKEND_API NPUEvent {
         device_index_,
         " does not match recording stream's device ",
         stream.device_index(),
-        ".",
-        PTA_ERROR(ErrCode::PARAM));
+        ".");
     NPUGuard guard(device_index_);
-    NPU_CHECK_ERROR(aclrtRecordEvent(event_, stream));
+    aclrtRecordEvent(event_, stream);
     was_recorded_ = true;
   }
 
   void block(const NPUStream& stream) {
     if (is_created_) {
       NPUGuard guard(stream.device_index());
-      NPU_CHECK_ERROR(aclrtStreamWaitEvent(stream, event_));
+      aclrtStreamWaitEvent(stream, event_);
     }
   }
 
   float elapsed_time(const NPUEvent& other) const {
     TORCH_CHECK(
         is_created_ && other.isCreated(),
-        "Both events must be recorded before calculating elapsed time.",
-        PTA_ERROR(ErrCode::INTERNAL));
+        "Both events must be recorded before calculating elapsed time.");
     float time_ms = 0;
     // We do not strictly have to set the device index to the same as our event,
     // but if we don't and the current device is not initialized, it will
     // create a new NPU context, which will consume a lot of memory.
     NPUGuard guard(device_index_);
     // raise error if either event is recorded but not yet completed
-    NPU_CHECK_ERROR(aclrtEventElapsedTime(&time_ms, event_, other.event_));
+    aclrtEventElapsedTime(&time_ms, event_, other.event_);
     return time_ms;
   }
 
   void synchronize() const {
     if (is_created_) {
-      NPU_CHECK_ERROR(aclrtSynchronizeEvent(event_));
+      aclrtSynchronizeEvent(event_);
     }
   }
 
@@ -146,7 +147,7 @@ struct C10_BACKEND_API NPUEvent {
   void createEvent(c10::DeviceIndex device_index) {
     device_index_ = device_index;
     NPUGuard guard(device_index_);
-    NPU_CHECK_ERROR(aclrtCreateEventExWithFlag(&event_, flags_));
+    aclrtCreateEventExWithFlag(&event_, flags_);
     is_created_ = true;
   }
 
