@@ -43,7 +43,7 @@ at::Tensor TensorMaker::make_tensor() {
   c10::DataPtr data_ptr{data_, *device_};
 
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<torch_backend::NPUStorageImpl>(
+      c10::make_intrusive<c10::backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           std::move(data_ptr),
@@ -51,7 +51,7 @@ at::Tensor TensorMaker::make_tensor() {
           true);
 
   auto tensor =
-      at::detail::make_tensor<torch_backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
 
   at_npu::native::StorageDescHelper::SetDesc(tensor, sizes_, tensor.strides());
 

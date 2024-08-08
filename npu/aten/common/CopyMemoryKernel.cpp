@@ -32,8 +32,8 @@ at::Tensor& NPUNativeFunctions::copy_memory_(
       src.device().index() == self.device().index(),
       "input tensors of copy_memory_ should have same device index",
       OPS_ERROR(ErrCode::PARAM));
-  auto dst_desc = torch_backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
-  auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto dst_desc = c10::backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
+  auto src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
 
   int dst_size = 0;
   int src_size = 0;

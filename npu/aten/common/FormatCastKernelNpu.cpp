@@ -1,8 +1,8 @@
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/aten/common/FormatCastHelper.h"
 #include "npu/core/NPUBridge.h"
-#include "csrc/backend/NPUStorageImpl.h"
 #include "npu/framework/FormatHelper.h"
 #include "npu/framework/utils/NpuStorageOffsetGuard.h"
 #include "npu/framework/utils/OpAdapter.h"
@@ -38,8 +38,8 @@ at::Tensor& NPUNativeFunctions::npu_format_cast_(
     const at::Tensor& src) {
   torch_backend::utils::torch_check_npu(dst);
   torch_backend::utils::torch_check_npu(src);
-  auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
-  auto dst_desc = torch_backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_;
+  auto src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto dst_desc = c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_;
   if (src_desc.npu_format_ == dst_desc.npu_format_) {
     dst.copy_(src);
     return dst;
@@ -53,7 +53,7 @@ at::Tensor& NPUNativeFunctions::npu_format_cast_(
 
 // conver self to acl_format, write the result into new result tensor
 at::Tensor npu_format_cast_impl(const at::Tensor& src, int64_t acl_format) {
-  auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
   if (src_desc.npu_format_ == acl_format) {
     ASCEND_LOGD("no need to do format cast");
     return src;
@@ -82,7 +82,7 @@ at::Tensor NPUNativeFunctions::npu_format_cast(
     const at::Tensor& src,
     const at::Tensor& dst) {
   torch_backend::utils::torch_check_npu(dst);
-  auto dst_desc = torch_backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_;
+  auto dst_desc = c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_;
   int64_t dst_format = dst_desc.npu_format_;
   return custom_ops::npu_format_cast(src, dst_format);
 }
@@ -92,7 +92,7 @@ at::Tensor& NPUNativeFunctions::npu_format_cast_(
     at::Tensor& src,
     int64_t acl_format) {
   torch_backend::utils::torch_check_npu(src);
-  auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
   if (src_desc.npu_format_ == acl_format) {
     return src;
   }
@@ -118,7 +118,7 @@ at::Tensor& NPUNativeFunctions::npu_format_cast_(
 
 int64_t NPUNativeFunctions::get_npu_format(const at::Tensor& src) {
   torch_backend::utils::torch_check_npu(src);
-  auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
   return src_desc.npu_format_;
 }
 

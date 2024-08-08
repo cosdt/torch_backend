@@ -6,7 +6,7 @@
 #include "csrc/backend/NPUStorageImpl.h"
 #include "csrc/backend/NPUTensorImpl.h"
 
-namespace torch_backend {
+namespace c10::backend {
 NPUTensorImpl::NPUTensorImpl(
     c10::Storage&& storage,
     const caffe2::TypeMeta& data_type)
@@ -54,4 +54,4 @@ c10::intrusive_ptr<c10::TensorImpl> NPUTensorImpl::shallow_copy_and_detach(
   return impl;
 }
 NPUTensorImpl::~NPUTensorImpl() {}
-} // namespace torch_backend
+} // namespace c10::backend

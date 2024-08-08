@@ -277,8 +277,8 @@ int64_t CalcuOpUtil::GetTensorNpuFormat(const at::Tensor& tensor) {
       "device is correct.",
       OPS_ERROR(ErrCode::TYPE));
   if (NpuUtils::check_match(&tensor) || NpuUtils::check_5d_5d_match(tensor)) {
-    const torch_backend::NPUStorageDesc& tensor_desc =
-        torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+    const c10::backend::NPUStorageDesc& tensor_desc =
+        c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
     return tensor_desc.npu_format_;
   } else if (tensor.data_ptr() == nullptr) {
     // transforming faketensor into realtensor and assigning format ND

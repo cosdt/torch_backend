@@ -12,9 +12,9 @@ bool FormatCastHelper::IsSameGroupType(
     const at::Tensor& src,
     const at::Tensor& dst) {
   auto src_format =
-      torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_.npu_format_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_.npu_format_;
   auto dst_format =
-      torch_backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_.npu_format_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_.npu_format_;
   return FormatHelper::GetBaseFormat(src_format) ==
       FormatHelper::GetBaseFormat(dst_format);
 }
@@ -38,7 +38,7 @@ void FormatCastHelper::format_cast_as_base_format(
       "src format must be base format",
       PTA_ERROR(ErrCode::PARAM));
 
-  auto& src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto& src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
   // due to CANN principle : if the ori format of a tensor is the
   // same as the npu format, then its base shape must be same as storage shape
   // so we should not change the storage shape when format cast between base

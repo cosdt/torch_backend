@@ -79,7 +79,7 @@ class CombinedContiguousOpt : public ContiguousOpt {
       OffsetStack& offset_stack) {
     // Record src infos for recovering after trans-contiguous
     auto src_storage_desc =
-        torch_backend::NPUBridge::GetNpuStorageImpl(src)->get_npu_desc();
+        c10::backend::NPUBridge::GetNpuStorageImpl(src)->get_npu_desc();
 
     at::Tensor base_tensor =
         at::empty(src_storage_desc.base_sizes_, src.options());
@@ -109,7 +109,7 @@ class CombinedContiguousOpt : public ContiguousOpt {
       return false;
     }
     auto npu_desc =
-        torch_backend::NPUBridge::GetNpuStorageImpl(tensor)->get_npu_desc();
+        c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->get_npu_desc();
     if ((c10::multiply_integers(tensor.sizes()) !=
          c10::multiply_integers(npu_desc.base_sizes_)) ||
         (tensor.storage_offset() != npu_desc.base_offset_)) {
@@ -480,7 +480,7 @@ Inference order: permute, select, slice.
         auto transfer_tensor = OpPreparation::ApplyTensorWithFormat(
             src.sizes(),
             src.options(),
-            torch_backend::NPUBridge::GetNpuStorageImpl(src)
+            c10::backend::NPUBridge::GetNpuStorageImpl(src)
                 ->get_npu_desc()
                 .npu_format_);
         return (

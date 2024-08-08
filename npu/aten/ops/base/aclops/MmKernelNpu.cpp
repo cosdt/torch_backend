@@ -55,7 +55,7 @@ bool is_transpose_last_two_dims_flex(const at::Tensor& tensor) {
 bool is_transpose_last_two_dims_strict(
     const at::Tensor& tensor,
     bool is_transpose_flex) {
-  auto base_sizes = torch_backend::NPUBridge::GetNpuStorageImpl(tensor)
+  auto base_sizes = c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
                         ->get_npu_desc()
                         .base_sizes_;
   if (is_transpose_flex &&
@@ -223,9 +223,9 @@ at::Tensor& mm_out_npu_nocheck(
     const at::Tensor& self,
     const at::Tensor& mat2) {
   const auto self_desc =
-      torch_backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
   const auto mat2_desc =
-      torch_backend::NPUBridge::GetNpuStorageImpl(mat2)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(mat2)->npu_desc_;
   bool is_self_t_flex = is_transpose_last_two_dims_flex(self);
   bool is_mat2_t_flex = is_transpose_last_two_dims_flex(mat2);
   bool is_self_t_strict =
@@ -267,10 +267,10 @@ at::Tensor& mm_out_npu_nocheck(
   // Recover storage desc of view-transpose tensors, i.e. the inverse process of
   // set_transposed_npu_desc
   if (is_self_t_flex && (!is_self_t_strict)) {
-    torch_backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_ = self_desc;
+    c10::backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_ = self_desc;
   }
   if (is_mat2_t_flex && (!is_mat2_t_strict)) {
-    torch_backend::NPUBridge::GetNpuStorageImpl(mat2)->npu_desc_ = mat2_desc;
+    c10::backend::NPUBridge::GetNpuStorageImpl(mat2)->npu_desc_ = mat2_desc;
   }
 
   return result;

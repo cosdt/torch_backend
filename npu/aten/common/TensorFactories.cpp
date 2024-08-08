@@ -126,7 +126,7 @@ at::Tensor NPUNativeFunctions::empty(
   auto dtype = c10::scalarTypeToTypeMeta(dtype_or_default(dtype_opt));
   int64_t size_bytes = nelements * dtype.itemsize();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<torch_backend::NPUStorageImpl>(
+      c10::make_intrusive<c10::backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           allocator->allocate(size_bytes),
@@ -134,7 +134,7 @@ at::Tensor NPUNativeFunctions::empty(
           true);
 
   auto tensor =
-      at::detail::make_tensor<torch_backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
 
   // Default at::TensorImpl has size [0]
   if (size.size() != 1 || size[0] != 0) {
@@ -260,8 +260,8 @@ at::Tensor empty_like_npu(
       result = at::empty(
           self.sizes(), options.memory_format(memory_format), c10::nullopt);
     } else {
-      auto npu_format =
-          torch_backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_.npu_format_;
+      auto npu_format = c10::backend::NPUBridge::GetNpuStorageImpl(self)
+                            ->npu_desc_.npu_format_;
       result = OpPreparation::ApplyTensorWithFormat(
           self.sizes(), options, npu_format);
     }
@@ -320,7 +320,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
   int64_t nelements = StorageDescHelper::GetMemorySize(size, format, dtype);
   int64_t size_bytes = nelements * dtype.itemsize();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<torch_backend::NPUStorageImpl>(
+      c10::make_intrusive<c10::backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           allocator->allocate(size_bytes),
@@ -328,7 +328,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
           true);
 
   auto tensor =
-      at::detail::make_tensor<torch_backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
 
   // Default NPUTensorImpl has size [0]
   if (size.size() != 1 || size[0] != 0) {

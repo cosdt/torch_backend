@@ -315,12 +315,12 @@ void copy_d2d_dtype(
     const at::Tensor& src,
     bool non_blocking) {
   if (!is_same_format(self, src)) {
-    auto src_desc = torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+    auto src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
     if (src.is_contiguous() && FormatHelper::IsBaseFormatType(src) &&
         src_desc.base_sizes_.size() == 1) {
       StorageDescHelper::ReflushDescBySelf(src);
       copy_d2d_format_cast(self, src);
-      torch_backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_ =
+      c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_ =
           std::move(src_desc);
       return;
     }
