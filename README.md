@@ -61,8 +61,8 @@ GPU integration and accelerating the development of high-performance machine lea
     .
     ├── backends
     │   ├── fake               // dummy backend: provide all weak symbols needed by csrc, we can run this demo without implementing all symbols in REAL Backend by this fake backend.
-    |   ├── npu                // one of REAL Backend: provide API and Structure related witch specific Backends strongly
-    |   ├── cuda               // one of REAL Backend: will be implemented later
+    │   ├── npu                // one of REAL Backend: provide API and Structure related witch specific Backends strongly
+    │   ├── cuda               // one of REAL Backend: will be implemented later
     │   └── ...
     ├── cmake
     ├── codegen                // Code generation: includes registration for forward and backward, backward implementation, backward binding, custom operator routing, reroute routing, etc.
