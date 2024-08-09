@@ -1,12 +1,12 @@
 #include "core/NpuDeviceRAII.h"
-#include "csrc/backend/NPUCachingAllocator.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
-#include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUStream.h"
 #include "acl/include/acl/acl_op_compiler.h"
 #include "adapter/acl_device_adapter.h"
 #include "core/NpuVariables.h"
 #include "core/register/OptionRegister.h"
+#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/NPUStream.h"
 #include "framework/interface/AclOpCompileInterface.h"
 
 namespace c10::npu {
@@ -46,7 +46,7 @@ NPUDeviceRAII::NPUDeviceRAII() : need_finalize_(true) {
 }
 
 NPUDeviceRAII::~NPUDeviceRAII() {
-  NPUCachingHostAllocator_emptyCache();
+  c10::backend::CachingHostAllocator::emptyCache();
   c10::npu::NPUCachingAllocator::emptyCache();
 
   NPU_CHECK_WARN(c10::backend::DestroyUsedStreams());

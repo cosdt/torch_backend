@@ -1,14 +1,14 @@
 #include <ATen/ATen.h>
 
-#include "csrc/aten/generated/CustomFunctions.h"
-#include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "aten/OpInterface.h"
 #include "aten/common/FormatCastHelper.h"
 #include "aten/common/InnerNpuNativeFunction.h"
 #include "core/NPUException.h"
 #include "core/NPUPeerToPeerAccess.h"
 #include "core/register/OptionsManager.h"
+#include "csrc/aten/generated/CustomFunctions.h"
+#include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "framework/FormatHelper.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/contiguous/ContiguousOpt.h"
@@ -134,7 +134,8 @@ void copy_between_host_and_device(
     const auto& host_tensor = torch_backend::utils::is_npu(dst) ? src : dst;
     void* ptr = host_tensor.data_ptr();
     void* ctx = host_tensor.storage().data_ptr().get_context();
-    NPUCachingHostAllocator_recordEvent(ptr, ctx, stream);
+    c10::backend::CachingHostAllocator::recordEvent(
+        ptr, ctx, stream);
   } else {
     aclError error = aclrtSynchronizeStreamWithTimeout(stream, -1);
     auto ret = CalcuOpUtil::AclrtMemcpyWithModeSwitch(

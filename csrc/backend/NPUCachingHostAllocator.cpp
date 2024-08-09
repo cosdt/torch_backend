@@ -16,9 +16,7 @@
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/core/allocator/EventPool.h"
 
-namespace c10::npu {
-
-using namespace c10::backend;
+namespace c10::backend::CachingHostAllocator {
 
 using Block = at::HostBlock<NPUStream>;
 struct HostAllocator
@@ -77,12 +75,11 @@ struct HostAllocator
   std::shared_mutex mutex_{};
   std::set<const void*> pinned_ptrs{};
 };
-} // namespace c10::npu
 
 void raw_local_deleter(void* ptr);
 
 struct NPUCachingHostAllocator final
-    : public at::CachingHostAllocatorInterface<c10::npu::HostAllocator> {
+    : public at::CachingHostAllocatorInterface<HostAllocator> {
   at::DataPtr allocate(size_t size) override {
     auto ptr_and_ctx = impl_->allocate(size);
     return {
@@ -99,7 +96,7 @@ struct NPUCachingHostAllocator final
 
 static NPUCachingHostAllocator npu_caching_host_allocator;
 
-at::Allocator* getNPUCachingHostAllocator() {
+at::Allocator* getAllocator() {
   return &npu_caching_host_allocator;
 }
 
@@ -107,17 +104,16 @@ void raw_local_deleter(void* ptr) {
   npu_caching_host_allocator.free(ptr);
 }
 
-bool NPUCachingHostAllocator_recordEvent(
-    void* ptr,
-    void* ctx,
-    c10::backend::NPUStream stream) {
+bool recordEvent(void* ptr, void* ctx, c10::backend::NPUStream stream) {
   return npu_caching_host_allocator.record_event(ptr, ctx, stream);
 }
 
-void NPUCachingHostAllocator_emptyCache() {
+void emptyCache() {
   npu_caching_host_allocator.empty_cache();
 }
 
-bool NPUCachingHostAllocator_isPinndPtr(const void* ptr) {
+bool isPinndPtr(const void* ptr) {
   return npu_caching_host_allocator.isPinnedPtr(ptr);
 }
+
+} // namespace c10::backend::CachingHostAllocator

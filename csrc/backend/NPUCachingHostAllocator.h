@@ -9,14 +9,15 @@
 // Remove later
 #include "core/NPUException.h"
 
-c10::Allocator* getNPUCachingHostAllocator(void);
+namespace c10::backend::CachingHostAllocator {
 
-bool NPUCachingHostAllocator_recordEvent(
-    void* ptr,
-    void* ctx,
-    c10::backend::NPUStream stream);
+c10::Allocator* getAllocator(void);
 
-void NPUCachingHostAllocator_emptyCache(void);
+bool recordEvent(void* ptr, void* ctx, c10::backend::NPUStream stream);
+
+void emptyCache(void);
 
 // TODO(FFFrog): Remove
-bool NPUCachingHostAllocator_isPinndPtr(const void* ptr);
+bool isPinndPtr(const void* ptr);
+
+} // namespace c10::backend::CachingHostAllocator

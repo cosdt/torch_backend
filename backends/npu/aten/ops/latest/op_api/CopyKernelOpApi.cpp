@@ -14,12 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "aten/common/InnerNpuNativeFunction.h"
 #include "aten/utils/op_api_common.h"
 #include "core/NPUPeerToPeerAccess.h"
+#include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "framework/contiguous/ContiguousOpt.h"
 #include "framework/utils/CalcuOpUtil.h"
 
@@ -45,7 +45,7 @@ void copy_between_host_and_device_opapi(
     const auto& host_tensor = torch_backend::utils::is_npu(dst) ? src : dst;
     void* ptr = host_tensor.data_ptr();
     void* ctx = host_tensor.storage().data_ptr().get_context();
-    NPUCachingHostAllocator_recordEvent(ptr, ctx, stream);
+    c10::backend::CachingHostAllocator::recordEvent(ptr, ctx, stream);
   } else {
     aclError error = aclrtSynchronizeStream(stream);
     auto ret = CalcuOpUtil::AclrtMemcpyWithModeSwitch(
