@@ -9,9 +9,9 @@
 
 ## Current Progress:
 
-  - **Runtime**: Completed components include Device, Stream, Event, Generator, Guard, and Allocator.
-  - **AMP**: Registration and API have been completed.
-  - **Operators**: Migrated NPU operator list and codegen. The next steps will involve operator simplification and codegen refactoring.
+  - [x] **Runtime**: Completed components include Device, Stream, Event, Generator, Guard, and Allocator.
+  - [x] **AMP**: Registration and API have been completed.
+  - [x] **Operators**: Migrated NPU operator list and codegen. The next steps will involve operator simplification and codegen refactoring.
 
 ## Next Steps:
 
