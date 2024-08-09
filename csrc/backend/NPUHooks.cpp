@@ -41,11 +41,11 @@ void NPUHooks::resizePrivateUse1Bytes(
 }
 
 bool NPUHooks::isPinnedPtr(const void* data) const {
-  return NPUCachingHostAllocator_isPinndPtr(data);
+  return c10::backend::HostAllocator::isPinndPtr(data);
 }
 
 at::Allocator* NPUHooks::getPinnedMemoryAllocator() const {
-  return getNPUCachingHostAllocator();
+  return c10::backend::HostAllocator::getAllocator();
 }
 
 at::PrivateUse1HooksInterface* get_npu_hooks() {

@@ -32,7 +32,7 @@ void registerDeviceProperties(PyObject* module) {
       });
 
   m.def("_npu_isHistoryEnabled", []() {
-    return c10::npu::NPUCachingAllocator::isHistoryEnabled();
+    return c10::backend::Allocator::isHistoryEnabled();
   });
 }
 
@@ -114,10 +114,7 @@ static struct PyMethodDef THPModule_methods[] = {
      METH_NOARGS,
      nullptr},
     {"_setDevice", (PyCFunction)THPModule_setDevice_wrap, METH_O, nullptr},
-    {"_getDevice",
-     (PyCFunction)THPModule_getDevice_wrap,
-     METH_NOARGS,
-     nullptr},
+    {"_getDevice", (PyCFunction)THPModule_getDevice_wrap, METH_NOARGS, nullptr},
     {"_getDeviceCount",
      (PyCFunction)THPModule_getDeviceCount_wrap,
      METH_NOARGS,

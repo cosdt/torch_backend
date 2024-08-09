@@ -1,11 +1,11 @@
 #include <mutex>
 #include <set>
 
+#include "core/NPUBridge.h"
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUStorageImpl.h"
-#include "core/NPUBridge.h"
 #include "framework/FormatHelper.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/contiguous/ContiguousOpt.h"
@@ -261,7 +261,7 @@ bool NpuUtils::IsOomError(aclError ret, int index) {
     // oom
     if (index == 1) {
       NPU_CHECK_ERROR(c10::backend::GetDevice(&deviceId));
-      c10::npu::NPUCachingAllocator::emptyDeviceCache(deviceId);
+      c10::backend::Allocator::emptyDeviceCache(deviceId);
       return true;
     }
     AT_ERROR("NPU out of memory. device id: ", deviceId);

@@ -4,7 +4,7 @@
 #include <ATen/native/CPUFallback.h>
 #include <torch/library.h>
 
-namespace {
+namespace at::native::backend {
 static void autograd_fallback(
     const c10::OperatorHandle& op,
     c10::DispatchKeySet dispatch_keys,
@@ -42,4 +42,4 @@ static void cpu_fallback(
 TORCH_LIBRARY_IMPL(_, PrivateUse1, m) {
   m.fallback(torch::CppFunction::makeFromBoxedFunction<&cpu_fallback>());
 }
-} // namespace
+} // namespace at::native::backend

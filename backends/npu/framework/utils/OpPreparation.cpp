@@ -1,9 +1,9 @@
 #include "framework/utils/OpPreparation.h"
 #include <ATen/record_function.h>
+#include "core/NPUBridge.h"
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUStorageImpl.h"
-#include "core/NPUBridge.h"
 #include "framework/FormatHelper.h"
 #include "framework/InferFormat.h"
 #include "framework/utils/CalcuOpUtil.h"
@@ -457,7 +457,7 @@ at::Tensor OpPreparation::apply_tensor_without_format(
 
 at::Tensor OpPreparation::unsafe_empty_workspace(uint64_t workspace_size) {
   ASCEND_LOGD("Alloc workspace %zu bytes unsafely.", workspace_size);
-  c10::Allocator* allocator = c10::npu::NPUCachingAllocator::get();
+  c10::Allocator* allocator = c10::backend::Allocator::get();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
       c10::make_intrusive<c10::backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
