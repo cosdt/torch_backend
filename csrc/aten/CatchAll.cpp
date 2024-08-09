@@ -1,8 +1,7 @@
 #include <c10/core/DispatchKey.h>
 #include <torch/library.h>
 
-namespace at_npu {
-namespace native {
+namespace at::native::backend {
 
 bool _has_compatible_shallow_copy_type(
     const at::Tensor& self,
@@ -27,5 +26,4 @@ TORCH_LIBRARY_IMPL(aten, CatchAll, m) {
       TORCH_FN(_has_compatible_shallow_copy_type));
 }
 
-} // namespace native
-} // namespace at_npu
+} // namespace at::native::backend

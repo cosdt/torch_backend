@@ -1,6 +1,6 @@
 #include <ATen/autocast_mode.h>
 
-namespace {
+namespace at::autocast::backend {
 
 at::Tensor binary_cross_entropy_banned(
     const at::Tensor&,
@@ -183,4 +183,4 @@ TORCH_LIBRARY_IMPL(aten, AutocastPrivateUse1, m) {
       TORCH_FN((&binary_cross_entropy_banned)));
 }
 
-} // namespace
+} // namespace at::autocast::backend
