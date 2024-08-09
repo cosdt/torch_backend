@@ -9,7 +9,7 @@
 // Remove later
 #include "core/NPUException.h"
 
-namespace c10::backend::CachingHostAllocator {
+namespace c10::backend::HostAllocator {
 
 c10::Allocator* getAllocator(void);
 
@@ -20,4 +20,4 @@ void emptyCache(void);
 // TODO(FFFrog): Remove
 bool isPinndPtr(const void* ptr);
 
-} // namespace c10::backend::CachingHostAllocator
+} // namespace c10::backend::HostAllocator

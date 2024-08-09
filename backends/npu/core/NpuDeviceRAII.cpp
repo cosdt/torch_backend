@@ -32,7 +32,7 @@ NPUDeviceRAII::NPUDeviceRAII() : need_finalize_(true) {
     need_finalize_ = false;
   }
   // Init allocator
-  c10::npu::NPUCachingAllocator::init(c10::backend::CachingAllocator::get());
+  c10::backend::Allocator::init(c10::backend::CachingAllocator::get());
 
   c10::DeviceIndex device_id;
   ret = c10::backend::GetDevice(&device_id);
@@ -46,8 +46,8 @@ NPUDeviceRAII::NPUDeviceRAII() : need_finalize_(true) {
 }
 
 NPUDeviceRAII::~NPUDeviceRAII() {
-  c10::backend::CachingHostAllocator::emptyCache();
-  c10::npu::NPUCachingAllocator::emptyCache();
+  c10::backend::HostAllocator::emptyCache();
+  c10::backend::Allocator::emptyCache();
 
   NPU_CHECK_WARN(c10::backend::DestroyUsedStreams());
   NPU_CHECK_WARN(acl_adapter::ResetUsedDevices());

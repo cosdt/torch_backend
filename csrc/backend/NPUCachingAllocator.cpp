@@ -11,10 +11,11 @@
 #include "acl/include/acl/acl_base.h"
 #include "acl/include/acl/acl_rt.h"
 
-namespace c10::npu::NPUCachingAllocator {
+namespace c10::backend::Allocator {
+
 class DefaultNPUAllocator final : public NPUAllocator {
  public:
-  void init(CachingAllocator* delegate) {
+  void init(c10::backend::CachingAllocator::CachingAllocator* delegate) {
     this->delegate = delegate;
   }
 
@@ -41,7 +42,8 @@ class DefaultNPUAllocator final : public NPUAllocator {
   void recordStream(const c10::DataPtr& ptr, c10::Stream stream) override {
     delegate->recordStream(ptr, stream);
   }
-  DeviceStats getDeviceStats(int device) override {
+  c10::backend::CachingAllocator::DeviceStats getDeviceStats(
+      int device) override {
     return delegate->getDeviceStats(device);
   }
   void resetAccumulatedStats(int device) override {
@@ -50,7 +52,7 @@ class DefaultNPUAllocator final : public NPUAllocator {
   void resetPeakStats(int device) override {
     delegate->resetPeakStats(device);
   }
-  SnapshotInfo snapshot() override {
+  c10::backend::CachingAllocator::SnapshotInfo snapshot() override {
     return delegate->snapshot();
   }
   void emptyDeviceCache(int device) override {
@@ -64,18 +66,19 @@ class DefaultNPUAllocator final : public NPUAllocator {
   }
   void recordHistory(
       bool enabled,
-      CreateContextFn context_recorder,
+      c10::backend::CachingAllocator::CreateContextFn context_recorder,
       size_t alloc_trace_max_entries,
-      RecordContext when) override {
+      c10::backend::CachingAllocator::RecordContext when) override {
     delegate->recordHistory(
         enabled, context_recorder, alloc_trace_max_entries, when);
   }
-  void attachOutOfMemoryObserver(OutOfMemoryObserver observer) override {
+  void attachOutOfMemoryObserver(
+      c10::backend::CachingAllocator::OutOfMemoryObserver observer) override {
     delegate->attachOutOfMemoryObserver(observer);
   }
 
  private:
-  CachingAllocator* delegate;
+  c10::backend::CachingAllocator::CachingAllocator* delegate;
 };
 
 class CachingAllocatorHelper
@@ -145,8 +148,9 @@ class CachingAllocatorHelper
     prop.location.id = device;
     prop.reserve = 0;
     int status = aclrtMallocPhysical(handle, size, &prop, flags);
-    return status == ACL_ERROR_RT_MEMORY_ALLOCATION ? MEM_ALLOCATION_ERROR
-                                                    : status;
+    return status == ACL_ERROR_RT_MEMORY_ALLOCATION
+        ? c10::backend::CachingAllocator::MEM_ALLOCATION_ERROR
+        : status;
   }
 
   int memRelease(void* handle) override {
@@ -163,7 +167,7 @@ class CachingAllocatorHelper
   }
 
   int memSetAccess(void* ptr, size_t size, int device) override {
-    return MEM_SUCCESS;
+    return c10::backend::CachingAllocator::MEM_SUCCESS;
   }
 
   int memUnmap(void* ptr, size_t size) override {
@@ -176,12 +180,12 @@ std::atomic<NPUAllocator*> npu_allocator = &defaultNPUAllocator;
 
 REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &defaultNPUAllocator);
 
-void init(CachingAllocator* delegate) {
-  static c10::npu::NPUCachingAllocator::CachingAllocatorHelper helper;
+void init(c10::backend::CachingAllocator::CachingAllocator* delegate) {
+  static CachingAllocatorHelper helper;
   c10::backend::CachingAllocator::registerHelper(&helper);
   c10::backend::CachingAllocator::init(
       c10::backend::device_count_ensure_non_zero());
 
   defaultNPUAllocator.init(delegate);
 }
-} // namespace c10::npu::NPUCachingAllocator
+} // namespace c10::backend::Allocator

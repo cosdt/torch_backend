@@ -6,7 +6,7 @@ namespace native {
 
 void NPUNativeFunctions::record_stream(at::Tensor& self, c10::Stream stream) {
   struct c10::StreamData3 data = stream.pack3();
-  c10::npu::NPUCachingAllocator::recordStream(
+  c10::backend::Allocator::recordStream(
       self.storage().data_ptr(),
       c10::backend::NPUStream::unpack3(
           data.stream_id, data.device_index, data.device_type));

@@ -65,8 +65,8 @@ at::Tensor& NPUNativeFunctions::set_(at::Tensor& self) {
       c10::make_intrusive<c10::backend::NPUStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           0,
-          c10::npu::NPUCachingAllocator::get()->allocate(0),
-          c10::npu::NPUCachingAllocator::get(),
+          c10::backend::Allocator::get()->allocate(0),
+          c10::backend::Allocator::get(),
           true);
   c10::Storage storage(npu_storage_impl);
   set_storage_nd_npu(self, storage, 0, 1, {0}, {});

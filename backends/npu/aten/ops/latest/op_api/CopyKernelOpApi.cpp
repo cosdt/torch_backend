@@ -45,7 +45,7 @@ void copy_between_host_and_device_opapi(
     const auto& host_tensor = torch_backend::utils::is_npu(dst) ? src : dst;
     void* ptr = host_tensor.data_ptr();
     void* ctx = host_tensor.storage().data_ptr().get_context();
-    c10::backend::CachingHostAllocator::recordEvent(ptr, ctx, stream);
+    c10::backend::HostAllocator::recordEvent(ptr, ctx, stream);
   } else {
     aclError error = aclrtSynchronizeStream(stream);
     auto ret = CalcuOpUtil::AclrtMemcpyWithModeSwitch(

@@ -16,7 +16,7 @@
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/core/allocator/EventPool.h"
 
-namespace c10::backend::CachingHostAllocator {
+namespace c10::backend::HostAllocator {
 
 using Block = at::HostBlock<NPUStream>;
 struct HostAllocator
@@ -116,4 +116,4 @@ bool isPinndPtr(const void* ptr) {
   return npu_caching_host_allocator.isPinnedPtr(ptr);
 }
 
-} // namespace c10::backend::CachingHostAllocator
+} // namespace c10::backend::HostAllocator
