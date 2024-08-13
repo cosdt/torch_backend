@@ -164,8 +164,7 @@ class C10_BACKEND_API Stream {
       c10::StreamId stream_id,
       c10::DeviceIndex device_index,
       c10::DeviceType device_type) {
-    return Stream(
-        c10::Stream::unpack3(stream_id, device_index, device_type));
+    return Stream(c10::Stream::unpack3(stream_id, device_index, device_type));
   }
 
  private:
@@ -205,18 +204,16 @@ getStreamFromExternal(aclrtStream ext_stream, c10::DeviceIndex device_index);
  * where most computation occurs when you aren't explicitly using
  * streams.
  */
-C10_BACKEND_API Stream
-getDefaultNPUStream(c10::DeviceIndex device_index = -1);
+C10_BACKEND_API Stream getDefaultStream(c10::DeviceIndex device_index = -1);
 
 /**
  * Get the current NPU stream, for the passed NPU device, or for the
  * current device if no device index is passed.  The current NPU stream
  * will usually be the default NPU stream for the device, but it may
- * be different if someone called 'setCurrentNPUStream' or used 'StreamGuard'
+ * be different if someone called 'setCurrentStream' or used 'StreamGuard'
  * or 'NPUStreamGuard'.
  */
-C10_BACKEND_API Stream
-getCurrentNPUStream(c10::DeviceIndex device_index = -1);
+C10_BACKEND_API Stream getCurrentStream(c10::DeviceIndex device_index = -1);
 
 /**
  * Set the current stream on the device of the passed in stream to be
@@ -228,7 +225,7 @@ getCurrentNPUStream(c10::DeviceIndex device_index = -1);
  * (which will switch both your current device and current stream in the way you
  * expect, and reset it back to its original state afterwards).
  */
-C10_BACKEND_API void setCurrentNPUStream(Stream stream);
+C10_BACKEND_API void setCurrentStream(Stream stream);
 
 std::ostream& operator<<(std::ostream& stream, const Stream& s);
 

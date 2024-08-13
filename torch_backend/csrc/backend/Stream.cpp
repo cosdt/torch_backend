@@ -253,7 +253,7 @@ PyObject* THPModule_getCurrentStream_wrap(
       THPUtils_checkLong(device_index), "invalid argument to getCurrentStream");
 
   c10::DeviceIndex device = THPUtils_unpackDeviceIndex(device_index);
-  auto stream = c10::backend::getCurrentNPUStream(device);
+  auto stream = c10::backend::getCurrentStream(device);
   PyObject* output_tuple = PyTuple_New(3);
   PyTuple_SetItem(
       output_tuple, 0, THPUtils_packInt64(static_cast<int64_t>(stream.id())));
@@ -277,7 +277,7 @@ PyObject* THPModule_getDefaultStream_wrap(
       THPUtils_checkLong(device_index), "invalid argument to getDefaultStream");
 
   c10::DeviceIndex device = THPUtils_unpackDeviceIndex(device_index);
-  auto stream = c10::backend::getDefaultNPUStream(device);
+  auto stream = c10::backend::getDefaultStream(device);
   PyObject* output_tuple = PyTuple_New(3);
   PyTuple_SetItem(
       output_tuple, 0, THPUtils_packInt64(static_cast<int64_t>(stream.id())));
@@ -324,7 +324,7 @@ PyObject* THPModule_setStream_wrap(
   if (device != stream.device_index()) {
     c10::backend::set_device(stream.device_index());
   }
-  c10::backend::setCurrentNPUStream(stream);
+  c10::backend::setCurrentStream(stream);
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }

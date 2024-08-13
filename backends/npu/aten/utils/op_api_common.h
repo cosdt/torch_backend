@@ -24,11 +24,11 @@
 #include <functional>
 #include <type_traits>
 #include <vector>
-#include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/Stream.h"
 #include "aten/utils/KernelNpuOutputSize.h"
 #include "aten/utils/OpConstants.h"
 #include "aten/utils/OpUtils.h"
+#include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/backend/Stream.h"
 #include "framework/OpCommand.h"
 #include "framework/interface/EnvVariables.h"
 #include "framework/utils/OpPreparation.h"
@@ -704,7 +704,7 @@ auto DecodeDevice(Ts&... args) -> at::Device {
         GetOpApiLibName(),                                                   \
         "not found.",                                                        \
         OPS_ERROR(ErrCode::PTR));                                            \
-    auto acl_stream = c10::backend::getCurrentNPUStream().stream();          \
+    auto acl_stream = c10::backend::getCurrentStream().stream();             \
     uint64_t workspace_size = 0;                                             \
     uint64_t* workspace_size_addr = &workspace_size;                         \
     aclOpExecutor* executor = nullptr;                                       \
@@ -792,7 +792,7 @@ auto DecodeDevice(Ts&... args) -> at::Device {
         ", or ",                                                             \
         GetOpApiLibName(),                                                   \
         "not found.");                                                       \
-    auto acl_stream = c10::backend::getCurrentNPUStream().stream(false);     \
+    auto acl_stream = c10::backend::getCurrentStream().stream(false);        \
     uint64_t workspace_size = 0;                                             \
     uint64_t* workspace_size_addr = &workspace_size;                         \
     aclOpExecutor* executor = nullptr;                                       \
@@ -879,7 +879,7 @@ auto DecodeDevice(Ts&... args) -> at::Device {
         GetOpApiLibName(),                                                   \
         "not found.",                                                        \
         OPS_ERROR(ErrCode::PTR));                                            \
-    auto acl_stream = c10::backend::getCurrentNPUStream().stream();          \
+    auto acl_stream = c10::backend::getCurrentStream().stream();             \
     uint64_t workspace_size = 0;                                             \
     uint64_t* workspace_size_addr = &workspace_size;                         \
     aclOpExecutor* executor = nullptr;                                       \
@@ -1036,7 +1036,7 @@ class ConvertedParams {
         GetOpApiLibName(),                                                   \
         "not found.",                                                        \
         OPS_ERROR(ErrCode::PTR));                                            \
-    auto acl_stream = c10::backend::getCurrentNPUStream().stream();          \
+    auto acl_stream = c10::backend::getCurrentStream().stream();             \
     uint64_t workspace_size = 0;                                             \
     uint64_t* workspace_size_addr = &workspace_size;                         \
     aclOpExecutor* executor = nullptr;                                       \

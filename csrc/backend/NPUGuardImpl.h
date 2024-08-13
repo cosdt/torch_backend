@@ -54,10 +54,10 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
     NPU_CHECK_WARN(c10::backend::SetDevice(d.index()));
   }
   c10::Stream getStream(c10::Device d) const noexcept override {
-    return c10::backend::getCurrentNPUStream(d.index()).unwrap();
+    return c10::backend::getCurrentStream(d.index()).unwrap();
   }
   c10::Stream getDefaultStream(c10::Device d) const override {
-    return c10::backend::getDefaultNPUStream(d.index());
+    return c10::backend::getDefaultStream(d.index());
   }
   c10::Stream getStreamFromGlobalPool(
       c10::Device d,
@@ -67,8 +67,8 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
   // NB: These do NOT set the current device
   c10::Stream exchangeStream(c10::Stream s) const noexcept override {
     Stream cs(s);
-    auto old_stream = c10::backend::getCurrentNPUStream(s.device().index());
-    c10::backend::setCurrentNPUStream(cs);
+    auto old_stream = c10::backend::getCurrentStream(s.device().index());
+    c10::backend::setCurrentStream(cs);
     return old_stream.unwrap();
   }
   c10::DeviceIndex deviceCount() const noexcept override {

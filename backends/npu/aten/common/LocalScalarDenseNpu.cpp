@@ -20,7 +20,7 @@ c10::Scalar NPUNativeFunctions::_local_scalar_dense(const at::Tensor& self) {
       "_local_scalar_dense_npu",
       [&] {
         scalar_t value = 0;
-        c10::backend::Stream copy_stream = c10::backend::getCurrentNPUStream();
+        c10::backend::Stream copy_stream = c10::backend::getCurrentStream();
         // Synchronous copy after stream synchronization
         aclError error = aclrtSynchronizeStreamWithTimeout(copy_stream, -1);
         if (error != ACL_ERROR_NONE) {

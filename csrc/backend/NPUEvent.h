@@ -83,7 +83,7 @@ struct C10_BACKEND_API NPUEvent {
   }
 
   void record() {
-    record(getCurrentNPUStream());
+    record(getCurrentStream());
   }
 
   void recordOnce(const Stream& stream) {

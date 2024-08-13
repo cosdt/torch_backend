@@ -35,7 +35,7 @@ void copy_between_host_and_device_opapi(
     aclrtMemcpyKind kind,
     bool non_blocking) {
   int64_t nbytes = dst.numel() * dst.element_size();
-  c10::backend::Stream stream = c10::backend::getCurrentNPUStream();
+  c10::backend::Stream stream = c10::backend::getCurrentStream();
 
   if (non_blocking) {
     auto ret = CalcuOpUtil::LaunchAsyncCopyTaskWithModeSwitch(
@@ -186,7 +186,7 @@ void copy_d2d_baseformat_opapi(
     }
     guard.reset_device(dst.device());
     c10::backend::Stream dst_stream =
-        c10::backend::getCurrentNPUStream(dst.device().index());
+        c10::backend::getCurrentStream(dst.device().index());
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(dst_stream, -1));
     guard.reset_device(src.device());
   } else {
@@ -196,7 +196,7 @@ void copy_d2d_baseformat_opapi(
   }
   EXEC_NPU_CMD(aclnnInplaceCopy, dst, src);
   if (dst.device().index() != src.device().index()) {
-    c10::backend::Stream copy_stream = c10::backend::getCurrentNPUStream();
+    c10::backend::Stream copy_stream = c10::backend::getCurrentStream();
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(copy_stream, -1));
   }
 }

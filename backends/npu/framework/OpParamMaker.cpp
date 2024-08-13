@@ -2,8 +2,8 @@
 #include <unistd.h>
 #include "core/NPUQueue.h"
 
-#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "core/interface/AsyncTaskQueueInterface.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "framework/OpParamMaker.h"
 #include "framework/utils/CalcuOpUtil.h"
 #include "framework/utils/NpuUtils.h"
@@ -89,7 +89,7 @@ void OpAttrMaker::Set(
 }
 
 void OpCommandImpl::SetEnginePriority() {
-  auto stream = c10::backend::getCurrentNPUStream();
+  auto stream = c10::backend::getCurrentStream();
   AddAttr("_performance_prior", true);
   AddAttr<std::string>("_exclude_engines", "AiCore");
 }
@@ -126,7 +126,7 @@ aclError OpCommandImpl::InnerRun(
     c10::SmallVector<int64_t, N>& sync_index,
     c10::SmallVector<at::Tensor, N>& outputTensor) {
   aclError ret;
-  auto stream = c10::backend::getCurrentNPUStream();
+  auto stream = c10::backend::getCurrentStream();
   auto inputSize = params.inBuffer.size();
   auto outputSize = params.outBuffer.size();
   // open the deterministicAlgorithms config
