@@ -1,7 +1,7 @@
 #include "framework/StorageDescHelper.h"
 #include <c10/util/accumulate.h>
-#include "csrc/backend/NPUStorageImpl.h"
 #include "core/NPUBridge.h"
+#include "csrc/backend/StorageImpl.h"
 #include "framework/FormatHelper.h"
 #include "framework/InferFormat.h"
 
@@ -16,8 +16,8 @@ bool StorageDescHelper::MetaDataAreMatch(const at::Tensor* tensor) {
 
 // copy related
 bool StorageDescHelper::IsSameDesc(
-    const c10::backend::NPUStorageDesc& a,
-    const c10::backend::NPUStorageDesc& b) {
+    const c10::backend::StorageDesc& a,
+    const c10::backend::StorageDesc& b) {
   if ((a.origin_format_ != b.origin_format_) ||
       (a.npu_format_ != b.npu_format_)) {
     if ((!FormatHelper::IsBaseFormatType(a.npu_format_)) ||
@@ -46,7 +46,7 @@ bool StorageDescHelper::IsSameSize(
 }
 
 void StorageDescHelper::UpdateDesc(
-    c10::backend::NPUStorageDesc& npuDesc,
+    c10::backend::StorageDesc& npuDesc,
     const c10::IntArrayRef& new_data_sizes,
     const c10::IntArrayRef& new_shape_sizes) {
   int64_t new_data_numel = c10::multiply_integers(new_data_sizes);
@@ -125,9 +125,9 @@ void StorageDescHelper::GetDescForSerialization(
     return;
   }
   auto& desc = c10::backend::NPUBridge::GetNpuStorageImplDesc(tensor);
-  // Record all NPUStorageDesc information
+  // Record all StorageDesc information
   // Due to the limitation of pytorch extension, it is decided to store
-  // information in the key For example, NPUStorageDesc.base_sizes_ is a vector
+  // information in the key For example, StorageDesc.base_sizes_ is a vector
   // including five int64_t values, using string obj "base_size/10/10/10/10/10/"
   // to represent
   auto small_vector_to_str = [](std::string& str,
@@ -176,8 +176,8 @@ void StorageDescHelper::SetDescForSerialization(
     const at::Tensor& tensor,
     std::unordered_map<std::string, bool>& desc_map) {
   auto& cur_desc = c10::backend::NPUBridge::GetNpuStorageImplDesc(tensor);
-  // The NPUStorageDesc object to restore
-  struct c10::backend::NPUStorageDesc load_desc;
+  // The StorageDesc object to restore
+  struct c10::backend::StorageDesc load_desc;
 
   auto str_to_small_vector =
       [](std::string str) -> c10::SmallVector<int64_t, 5> {
@@ -231,7 +231,7 @@ void StorageDescHelper::CopyDesc(at::Tensor& dst, const c10::Storage& src) {
 
 void StorageDescHelper::CopyDesc(
     const at::Tensor& dst,
-    const c10::backend::NPUStorageDesc& src_desc) {
+    const c10::backend::StorageDesc& src_desc) {
   auto& dstDesc = c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_;
   dstDesc = src_desc;
 }
@@ -243,24 +243,24 @@ void StorageDescHelper::ReflushDescBySelf(const at::Tensor& src) {
   desc.base_strides_ = src.strides();
 }
 
-c10::backend::NPUStorageDesc StorageDescHelper::SetDesc(
+c10::backend::StorageDesc StorageDescHelper::SetDesc(
     const caffe2::TypeMeta& dtype) {
   return SetDesc(dtype, {0}, {});
 }
 
-c10::backend::NPUStorageDesc StorageDescHelper::SetDesc(
+c10::backend::StorageDesc StorageDescHelper::SetDesc(
     const caffe2::TypeMeta& dtype,
     const c10::IntArrayRef& size,
     const c10::IntArrayRef& strides) {
   return SetDesc(dtype, size, strides, InferFormat::GuessBaseFormat(size));
 }
 
-c10::backend::NPUStorageDesc StorageDescHelper::SetDesc(
+c10::backend::StorageDesc StorageDescHelper::SetDesc(
     const caffe2::TypeMeta& dtype,
     const c10::IntArrayRef& size,
     const c10::IntArrayRef& strides,
     aclFormat format) {
-  struct c10::backend::NPUStorageDesc npu_desc;
+  struct c10::backend::StorageDesc npu_desc;
   npu_desc.data_type_ = dtype;
   npu_desc.base_sizes_ = size;
   npu_desc.base_strides_ = strides;
@@ -279,7 +279,7 @@ c10::backend::NPUStorageDesc StorageDescHelper::SetDesc(
 }
 
 int64_t StorageDescHelper::GetMemorySize(
-    const c10::backend::NPUStorageDesc& desc) {
+    const c10::backend::StorageDesc& desc) {
   const auto& physical_size = FormatHelper::GetStorageSizes(desc);
   return c10::multiply_integers(physical_size);
 }

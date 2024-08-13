@@ -2,7 +2,7 @@
 
 #include <ATen/Tensor.h>
 #include <c10/core/TensorImpl.h>
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/StorageImpl.h"
 
 namespace c10::backend {
 

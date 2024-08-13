@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/StorageImpl.h"
 #include "framework/utils/NPUDefinition.h"
 
 namespace at_npu {
@@ -23,8 +23,8 @@ class StorageDescHelper {
 
   // helper function of transdata op.
   static bool IsSameDesc(
-      const c10::backend::NPUStorageDesc& a,
-      const c10::backend::NPUStorageDesc& b);
+      const c10::backend::StorageDesc& a,
+      const c10::backend::StorageDesc& b);
   static bool IsSameDesc(const at::Tensor& a, const at::Tensor& b);
 
   // calculate storage size need by npu memory
@@ -51,7 +51,7 @@ class StorageDescHelper {
       aclFormat format);
   static bool CheckDescInit(const c10::Storage& storage);
 
-  // For Serialization to Get and Set NpuStorageDesc
+  // For Serialization to Get and Set StorageDesc
   static void GetDescForSerialization(
       const at::Tensor& dst,
       std::unordered_map<std::string, bool>& desc_map);
@@ -63,10 +63,10 @@ class StorageDescHelper {
   static void CopyDesc(at::Tensor& dst, const c10::Storage& src);
   static void CopyDesc(
       const at::Tensor& dst,
-      const c10::backend::NPUStorageDesc& src_desc);
+      const c10::backend::StorageDesc& src_desc);
 
   static void UpdateDesc(
-      c10::backend::NPUStorageDesc& npuDesc,
+      c10::backend::StorageDesc& npuDesc,
       const c10::IntArrayRef& new_data_sizes,
       const c10::IntArrayRef& new_shape_sizes);
 
@@ -80,14 +80,14 @@ class StorageDescHelper {
   static bool IsSameSize(
       const c10::SmallVector<int64_t, 5>& a,
       const c10::IntArrayRef& b);
-  static int64_t GetMemorySize(const c10::backend::NPUStorageDesc& dst);
+  static int64_t GetMemorySize(const c10::backend::StorageDesc& dst);
   // Set Part
-  static c10::backend::NPUStorageDesc SetDesc(const caffe2::TypeMeta& dtype);
-  static c10::backend::NPUStorageDesc SetDesc(
+  static c10::backend::StorageDesc SetDesc(const caffe2::TypeMeta& dtype);
+  static c10::backend::StorageDesc SetDesc(
       const caffe2::TypeMeta& dtype,
       const c10::IntArrayRef& size,
       const c10::IntArrayRef& strides);
-  static c10::backend::NPUStorageDesc SetDesc(
+  static c10::backend::StorageDesc SetDesc(
       const caffe2::TypeMeta& dtype,
       const c10::IntArrayRef& size,
       const c10::IntArrayRef& strides,

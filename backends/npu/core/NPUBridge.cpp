@@ -2,20 +2,22 @@
 
 namespace c10::backend {
 
-NPUStorageImpl* NPUBridge::GetNpuStorageImpl(c10::StorageImpl* storageImpl) {
-  return static_cast<NPUStorageImpl*>(storageImpl);
+DeviceStorageImpl* NPUBridge::GetNpuStorageImpl(c10::StorageImpl* storageImpl) {
+  return static_cast<DeviceStorageImpl*>(storageImpl);
 }
 
-NPUStorageImpl* NPUBridge::GetNpuStorageImpl(c10::Storage&& storage) {
-  return static_cast<NPUStorageImpl*>(storage.unsafeGetStorageImpl());
+DeviceStorageImpl* NPUBridge::GetNpuStorageImpl(c10::Storage&& storage) {
+  return static_cast<DeviceStorageImpl*>(storage.unsafeGetStorageImpl());
 }
 
-NPUStorageImpl* NPUBridge::GetNpuStorageImpl(const at::Tensor& tensor) {
-  return static_cast<NPUStorageImpl*>(tensor.storage().unsafeGetStorageImpl());
+DeviceStorageImpl* NPUBridge::GetNpuStorageImpl(const at::Tensor& tensor) {
+  return static_cast<DeviceStorageImpl*>(
+      tensor.storage().unsafeGetStorageImpl());
 }
 
-NPUStorageDesc& NPUBridge::GetNpuStorageImplDesc(const at::Tensor& tensor) {
-  return static_cast<NPUStorageImpl*>(tensor.storage().unsafeGetStorageImpl())
+StorageDesc& NPUBridge::GetNpuStorageImplDesc(const at::Tensor& tensor) {
+  return static_cast<DeviceStorageImpl*>(
+             tensor.storage().unsafeGetStorageImpl())
       ->npu_desc_;
 }
 

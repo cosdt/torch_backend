@@ -2,10 +2,10 @@
 
 #include <ATen/ATen.h>
 
-#include "csrc/backend/NPUStorageImpl.h"
-#include "csrc/backend/Stream.h"
 #include "core/NPUBridge.h"
 #include "core/interface/AsyncTaskQueueInterface.h"
+#include "csrc/backend/StorageImpl.h"
+#include "csrc/backend/Stream.h"
 #include "framework/FormatHelper.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/utils/CalcuOpUtil.h"
@@ -15,7 +15,7 @@ namespace at_npu {
 namespace native {
 
 static void storage_resize_npu(
-    c10::backend::NPUStorageImpl& storage,
+    c10::backend::DeviceStorageImpl& storage,
     ptrdiff_t size,
     c10::IntArrayRef new_size) {
   if (!storage.resizable()) {

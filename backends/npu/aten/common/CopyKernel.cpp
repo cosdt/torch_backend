@@ -278,7 +278,7 @@ bool can_use_memcpy(at::Tensor& dst, const at::Tensor& src) {
       return false;
     }
     // Make sure that copy the whole memory.
-    // we just need to compare one of them, because of the NpuStorageDesc
+    // we just need to compare one of them, because of the StorageDesc
     // and metadata(sizes and stride) of src and dst are same.
     if (StorageDescHelper::GetValidMemorySize(src) != src.numel()) {
       return false;

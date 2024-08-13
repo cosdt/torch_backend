@@ -3,7 +3,7 @@
 #include <c10/macros/Macros.h>
 #include "csrc/backend/Stream.h"
 
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/StorageImpl.h"
 #include "csrc/backend/TensorImpl.h"
 
 namespace c10::backend {

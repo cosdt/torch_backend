@@ -41,7 +41,7 @@ class FormatHelper {
       caffe2::TypeMeta dtype);
   // GetStorageSizes used to calculate the storage sizes of op at npu device at
   // different format.
-  static FormatShape GetStorageSizes(const c10::backend::NPUStorageDesc& desc);
+  static FormatShape GetStorageSizes(const c10::backend::StorageDesc& desc);
   static at::Tensor& unsafe_format_cast(
       at::Tensor& self,
       int64_t self_format,

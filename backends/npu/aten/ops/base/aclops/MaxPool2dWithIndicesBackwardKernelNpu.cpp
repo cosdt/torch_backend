@@ -81,7 +81,7 @@ at::Tensor& max_pool2d_with_indices_backward_out_nocheck(
     shape.emplace_back(BLOCKSIZE);
 
     at::Tensor indices_para = indices.view(at::kShort);
-    c10::backend::NPUStorageDesc& desc =
+    c10::backend::StorageDesc& desc =
         c10::backend::NPUBridge::GetNpuStorageImpl(indices_para)->npu_desc_;
     desc.npu_format_ = ACL_FORMAT_NC1HWC0;
     desc.storage_sizes_ = shape;

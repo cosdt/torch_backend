@@ -1,4 +1,4 @@
-#include "csrc/backend/NPUSerialization.h"
+#include "csrc/backend/Serialization.h"
 #include <torch/csrc/jit/serialization/pickler.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/core/Register.h"
@@ -11,8 +11,8 @@
 namespace c10::backend {
 
 REGISTER_TENSOR_BACKEND_META_REGISTRY(
-    c10::backend::npu_info_serialization,
-    c10::backend::npu_info_deserialization);
+    c10::backend::device_info_serialization,
+    c10::backend::device_info_deserialization);
 
 std::unordered_map<std::string, aclFormat> FORMAT_INFO = {
     {"NC1HWC0", ACL_FORMAT_NC1HWC0},
@@ -27,13 +27,13 @@ std::unordered_map<std::string, aclFormat> FORMAT_INFO = {
     {"FRACTAL_Z_3D", ACL_FRACTAL_Z_3D},
 };
 
-void npu_info_serialization(
+void device_info_serialization(
     const at::Tensor& t,
     std::unordered_map<std::string, bool>& map) {
   at_npu::native::StorageDescHelper::GetDescForSerialization(t, map);
 }
 
-void npu_info_deserialization(
+void device_info_deserialization(
     const at::Tensor& t,
     std::unordered_map<std::string, bool>& map) {
   // Set the true stroage description

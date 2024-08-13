@@ -176,7 +176,7 @@ bool FormatHelper::IsBaseFormatType(const at::Tensor& tensor) {
 }
 
 FormatShape FormatHelper::GetStorageSizes(
-    const c10::backend::NPUStorageDesc& desc) {
+    const c10::backend::StorageDesc& desc) {
   auto ori_size = desc.base_sizes_;
   auto format = desc.npu_format_;
   auto dtype = desc.data_type_;
@@ -568,7 +568,7 @@ at::Tensor& FormatHelper::unsafe_format_cast(
     at::Tensor& self,
     int64_t self_format,
     int64_t result_format) {
-  c10::backend::NPUStorageDesc& self_desc =
+  c10::backend::StorageDesc& self_desc =
       c10::backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
   if (self_format == ACL_FORMAT_ND && result_format == ACL_FORMAT_NC1HWC0) {
     auto itemsize = self_desc.data_type_.itemsize();
