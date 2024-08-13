@@ -35,7 +35,7 @@ at::Tensor& normal_(
       std,
       OPS_ERROR(ErrCode::VALUE));
   npu_preparation::check_tensor({}, self, self, self.sizes());
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -58,7 +58,7 @@ at::Tensor& normal_out(
   at::SmallVector<int64_t, SIZE> output_size =
       op_infer::broadcast_ops_npu_output_size(mean, std);
   npu_preparation::check_tensor({mean, std}, result, result, output_size);
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -77,7 +77,7 @@ at::Tensor normal(
       op_infer::broadcast_ops_npu_output_size(mean, std);
   at::Tensor result =
       npu_preparation::apply_tensor_without_format(mean, output_size);
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -100,7 +100,7 @@ at::Tensor& normal_out(
       std,
       OPS_ERROR(ErrCode::VALUE));
   npu_preparation::check_tensor({mean}, result, result);
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -122,7 +122,7 @@ at::Tensor normal(
       std,
       OPS_ERROR(ErrCode::VALUE));
   at::Tensor result = npu_preparation::apply_tensor_without_format(mean);
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -141,7 +141,7 @@ at::Tensor& normal_out(
   DO_COMPATIBILITY(
       aclnnNormalFloatTensor, acl_op::normal_out(mean, std, generator, result));
   npu_preparation::check_tensor({std}, result, result);
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -158,7 +158,7 @@ at::Tensor normal(
   DO_COMPATIBILITY(
       aclnnNormalFloatTensor, acl_op::normal(mean, std, generator));
   at::Tensor result = npu_preparation::apply_tensor_without_format(std);
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -184,7 +184,7 @@ at::Tensor& normal_out(
       std,
       OPS_ERROR(ErrCode::VALUE));
   npu_preparation::check_tensor({}, result, result, size);
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
@@ -223,7 +223,7 @@ at::Tensor normal(
                                   .pinned_memory(pin_memory_opt);
   at::Tensor result =
       npu_preparation::apply_tensor_without_format(size, option);
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       generator, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);

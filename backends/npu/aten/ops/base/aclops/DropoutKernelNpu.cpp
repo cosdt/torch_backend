@@ -89,7 +89,7 @@ at::Tensor dropout_gen_mask(const at::Tensor& self, at::Scalar prob) {
   // so, we set seed1 = 0 to ensure the seed which user set is equal to the seed
   // used by the operator DropOutGenMask
   const auto gen = c10::backend::detail::getDefaultNPUGenerator();
-  auto pair = at::check_generator<c10::backend::NPUGeneratorImpl>(gen)
+  auto pair = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen)
                   ->philox_engine_inputs(INCREMENT);
   // At present, the default value of random number may be very large,
   // which will cause overflow in graph mode, so we set seed = 0 to avoid it.
@@ -170,7 +170,7 @@ at::Tensor npu_dropout_gen_mask(
   // If either seed or seed1 are set to be non-zero, the random number generator
   // is seeded by the given seed. Otherwise, it is seeded by a random seed.
   const auto gen = c10::backend::detail::getDefaultNPUGenerator();
-  auto pair = at::check_generator<c10::backend::NPUGeneratorImpl>(gen)
+  auto pair = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen)
                   ->philox_engine_inputs(10);
   // At present, the default value of random number may be very large,
   // which will cause overflow in graph mode, so we set seed = 0 to avoid it.

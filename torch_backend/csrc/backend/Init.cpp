@@ -3,8 +3,8 @@
 #include <torch/csrc/Exceptions.h>
 #include <torch/csrc/utils/object_ptr.h>
 #include "csrc/aten/generated/python_functions.h"
+#include "csrc/backend/GeneratorImpl.h"
 #include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUGeneratorImpl.h"
 
 namespace torch::backend::init {
 
@@ -25,7 +25,8 @@ static PyObject* THPModule_initExtension(PyObject* self, PyObject* noargs) {
     }
   };
   c10::DeviceIndex num_devices = c10::backend::device_count();
-  auto default_npu_generators = PyTuple_New(static_cast<Py_ssize_t>(num_devices));
+  auto default_npu_generators =
+      PyTuple_New(static_cast<Py_ssize_t>(num_devices));
   for (c10::DeviceIndex i = 0; i < num_devices; i++) {
     auto gen = c10::backend::detail::getDefaultNPUGenerator(i);
     auto cast_gen = (THPGenerator*)THPGenerator_initDefaultGenerator(gen);

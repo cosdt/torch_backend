@@ -1,4 +1,4 @@
-#include "NPUGeneratorImpl.h"
+#include "GeneratorImpl.h"
 #include <ATen/Utils.h>
 #include <ATen/core/GeneratorForPrivateuseone.h>
 #include <c10/core/StreamGuard.h>
@@ -51,14 +51,14 @@ const at::Generator& getDefaultNPUGenerator(c10::DeviceIndex device_index) {
     TORCH_CHECK(idx >= 0 && idx < num_npus, PTA_ERROR(ErrCode::VALUE));
   }
   std::call_once(npu_gens_init_flag[idx], [&] {
-    default_gens_npu[idx] = at::make_generator<NPUGeneratorImpl>(idx);
+    default_gens_npu[idx] = at::make_generator<DeviceGeneratorImpl>(idx);
     default_gens_npu[idx].seed();
   });
   return default_gens_npu[idx];
 }
 
 /**
- * Utility to create a NPUGeneratorImpl. Returns a shared_ptr
+ * Utility to create a DeviceGeneratorImpl. Returns a shared_ptr
  */
 at::Generator createNPUGenerator(c10::DeviceIndex device_index) {
   std::call_once(num_npu_init_flag, initNPUGenVector);
@@ -70,8 +70,8 @@ at::Generator createNPUGenerator(c10::DeviceIndex device_index) {
       idx >= 0 && idx < num_npus,
       "The device_index is invalid.",
       PTA_ERROR(ErrCode::VALUE));
-  auto gen = at::make_generator<NPUGeneratorImpl>(idx);
-  auto npu_gen = at::check_generator<NPUGeneratorImpl>(gen);
+  auto gen = at::make_generator<DeviceGeneratorImpl>(idx);
+  auto npu_gen = at::check_generator<DeviceGeneratorImpl>(gen);
   npu_gen->set_current_seed(c10::default_rng_seed_val);
   npu_gen->set_philox_offset_per_thread(0);
   return gen;
@@ -80,11 +80,11 @@ at::Generator createNPUGenerator(c10::DeviceIndex device_index) {
 } // namespace detail
 
 /**
- * NPUGeneratorImpl class implementation
+ * DeviceGeneratorImpl class implementation
  */
-NPUGeneratorImpl::NPUGeneratorImpl(c10::DeviceIndex device_index)
+DeviceGeneratorImpl::DeviceGeneratorImpl(c10::DeviceIndex device_index)
     : GeneratorImpl(device_index) {
-  // at::npu::assertNotCapturing("Cannot construct a new NPUGeneratorImpl");
+  // at::npu::assertNotCapturing("Cannot construct a new DeviceGeneratorImpl");
 }
 
 #define CAPTURE_DEFAULT_GENS_MSG                                                    \
@@ -94,10 +94,10 @@ NPUGeneratorImpl::NPUGeneratorImpl(c10::DeviceIndex device_index)
   "device, please file an issue."
 
 /**
- * Gets the current internal state of NpuGeneratorImpl. The internal
+ * Gets the current internal state of DeviceGeneratorImpl. The internal
  * state is returned as a CPU byte tensor.
  */
-c10::intrusive_ptr<c10::TensorImpl> NPUGeneratorImpl::get_state() const {
+c10::intrusive_ptr<c10::TensorImpl> DeviceGeneratorImpl::get_state() const {
   // The RNG state comprises the seed, and an offset used for Philox.
   // The following line is just here for BC reason. sizeof curandStateMtgp32 is
   // 4120. It used to be static const size_t states_size = MAX_NUM_BLOCKS *
@@ -131,12 +131,12 @@ c10::intrusive_ptr<c10::TensorImpl> NPUGeneratorImpl::get_state() const {
 }
 
 /**
- * Sets the internal state of NPUGeneratorImpl. The new internal state
+ * Sets the internal state of DeviceGeneratorImpl. The new internal state
  * must be a strided CPU byte tensor and have appropriate size. See
- * comments of NPUGeneratorImpl::state for information about the layout
+ * comments of DeviceGeneratorImpl::state for information about the layout
  * and size of the internal state.
  */
-void NPUGeneratorImpl::set_state(const c10::TensorImpl& new_state) {
+void DeviceGeneratorImpl::set_state(const c10::TensorImpl& new_state) {
   static const size_t seed_size = sizeof(uint64_t);
   static const size_t offset_size = sizeof(int64_t);
   static const size_t total_size = seed_size + offset_size;
@@ -170,7 +170,7 @@ void NPUGeneratorImpl::set_state(const c10::TensorImpl& new_state) {
  *
  * See Note [Acquire lock when using random generators]
  */
-void NPUGeneratorImpl::set_philox_offset_per_thread(uint64_t offset) {
+void DeviceGeneratorImpl::set_philox_offset_per_thread(uint64_t offset) {
   // see Note [Why enforce RNG offset % 4 == 0?]
   TORCH_CHECK(
       offset % 4 == 0,
@@ -180,9 +180,9 @@ void NPUGeneratorImpl::set_philox_offset_per_thread(uint64_t offset) {
 }
 
 /**
- * Gets the current philox_offset_per_thread_ of NpuGeneratorImpl.
+ * Gets the current philox_offset_per_thread_ of DeviceGeneratorImpl.
  */
-uint64_t NPUGeneratorImpl::philox_offset_per_thread() const {
+uint64_t DeviceGeneratorImpl::philox_offset_per_thread() const {
   return philox_offset_per_thread_;
 }
 
@@ -191,7 +191,7 @@ uint64_t NPUGeneratorImpl::philox_offset_per_thread() const {
  * offset_extragraph is the initial offset at the start of the graphed region.
  * offset_intragraph tracks the offset in the graphed region.
  */
-void NPUGeneratorImpl::capture_prologue(int64_t* offset_extragraph) {
+void DeviceGeneratorImpl::capture_prologue(int64_t* offset_extragraph) {
   offset_extragraph_ = offset_extragraph;
   offset_intragraph_ = 0;
   graph_expects_this_gen_ = true;
@@ -200,7 +200,7 @@ void NPUGeneratorImpl::capture_prologue(int64_t* offset_extragraph) {
 /**
  * Called by NpuGraph to finalize a graph capture region for this instance.
  */
-uint64_t NPUGeneratorImpl::capture_epilogue() {
+uint64_t DeviceGeneratorImpl::capture_epilogue() {
   graph_expects_this_gen_ = false;
   return offset_intragraph_;
 }
@@ -226,7 +226,7 @@ uint64_t NPUGeneratorImpl::capture_epilogue() {
  *
  * See Note [Acquire lock when using random generators]
  */
-PhiloxNpuState NPUGeneratorImpl::philox_npu_state(uint64_t increment) {
+PhiloxState DeviceGeneratorImpl::philox_npu_state(uint64_t increment) {
   // rounds increment up to the nearest multiple of 4
   increment = ((increment + 3) / 4) * 4;
   /*
@@ -254,14 +254,14 @@ PhiloxNpuState NPUGeneratorImpl::philox_npu_state(uint64_t increment) {
     return PhiloxNpuState(this->seed_, offset);
   } */
 
-  return PhiloxNpuState(this->seed_, 0);
+  return PhiloxState(this->seed_, 0);
 }
 
 /**
  * Temporarily accommodates call sites that use philox_engine_inputs.
  * Allows incremental refactor of call sites to use philox_npu_state.
  */
-std::pair<uint64_t, uint64_t> NPUGeneratorImpl::philox_engine_inputs(
+std::pair<uint64_t, uint64_t> DeviceGeneratorImpl::philox_engine_inputs(
     uint64_t increment) {
   // rounds increment up to the nearest multiple of 4
   increment = ((increment + 3) / 4) * 4;
@@ -274,10 +274,10 @@ std::pair<uint64_t, uint64_t> NPUGeneratorImpl::philox_engine_inputs(
 }
 
 /*
- * Gets the DeviceType of NPUGeneratorImpl.
+ * Gets the DeviceType of DeviceGeneratorImpl.
  * Used for type checking during run time.
  */
-c10::DeviceType NPUGeneratorImpl::device_type() {
+c10::DeviceType DeviceGeneratorImpl::device_type() {
   return c10::DeviceType::PrivateUse1;
 }
 
@@ -286,8 +286,8 @@ c10::DeviceType NPUGeneratorImpl::device_type() {
  *
  * See Note [Acquire lock when using random generators]
  */
-std::shared_ptr<NPUGeneratorImpl> NPUGeneratorImpl::clone() const {
-  return std::shared_ptr<NPUGeneratorImpl>(this->clone_impl());
+std::shared_ptr<DeviceGeneratorImpl> DeviceGeneratorImpl::clone() const {
+  return std::shared_ptr<DeviceGeneratorImpl>(this->clone_impl());
 }
 
 /**
@@ -295,8 +295,8 @@ std::shared_ptr<NPUGeneratorImpl> NPUGeneratorImpl::clone() const {
  *
  * See Note [Acquire lock when using random generators]
  */
-NPUGeneratorImpl* NPUGeneratorImpl::clone_impl() const {
-  auto gen = new NPUGeneratorImpl(this->device().index());
+DeviceGeneratorImpl* DeviceGeneratorImpl::clone_impl() const {
+  auto gen = new DeviceGeneratorImpl(this->device().index());
   gen->set_current_seed(this->seed_);
   gen->set_philox_offset_per_thread(this->philox_offset_per_thread_);
   return gen;
@@ -304,7 +304,7 @@ NPUGeneratorImpl* NPUGeneratorImpl::clone_impl() const {
 
 // this is used to register generator
 at::Generator make_npu_generator(c10::DeviceIndex device_index) {
-  return at::make_generator<NPUGeneratorImpl>(device_index);
+  return at::make_generator<DeviceGeneratorImpl>(device_index);
 }
 
 REGISTER_GENERATOR_PRIVATEUSE1(make_npu_generator)

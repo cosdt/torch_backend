@@ -30,7 +30,7 @@ at::Tensor& uniform_out_npu(
     double from,
     double to,
     c10::optional<at::Generator> gen_) {
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
       gen_, c10::backend::detail::getDefaultNPUGenerator());
   auto pair = gen->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
