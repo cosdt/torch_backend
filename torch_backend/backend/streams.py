@@ -5,7 +5,7 @@ import torch_backend
 import torch_backend._C
 
 
-class Stream(torch_backend._C._NPUStreamBase, _StreamBase):
+class Stream(torch_backend._C._StreamBase, _StreamBase):
     r"""Wrapper around a NPU stream.
 
     A NPU stream is a linear sequence of execution that belongs to a specific
