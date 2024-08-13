@@ -67,7 +67,8 @@ std::tuple<at::Tensor, at::Tensor> dropout_do_mask_npu(
 
 at::Tensor dropout_gen_mask(const at::Tensor& self, at::Scalar prob) {
   bool is_not_jit_compile = at_npu::native::env::CheckJitDisable();
-  auto desc_ = c10::backend::NPUBridge::GetNpuStorageImpl(self)->get_npu_desc();
+  auto desc_ =
+      c10::backend::NPUBridge::GetNpuStorageImpl(self)->get_device_desc();
   int64_t numels = is_not_jit_compile
       ? c10::multiply_integers(desc_.storage_sizes_)
       : self.numel();
@@ -88,7 +89,7 @@ at::Tensor dropout_gen_mask(const at::Tensor& self, at::Scalar prob) {
   // 127~64   63~0
   // so, we set seed1 = 0 to ensure the seed which user set is equal to the seed
   // used by the operator DropOutGenMask
-  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  const auto gen = c10::backend::detail::getDefaultGenerator();
   auto pair = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen)
                   ->philox_engine_inputs(INCREMENT);
   // At present, the default value of random number may be very large,
@@ -169,7 +170,7 @@ at::Tensor npu_dropout_gen_mask(
   at_npu::native::OpCommand cmd;
   // If either seed or seed1 are set to be non-zero, the random number generator
   // is seeded by the given seed. Otherwise, it is seeded by a random seed.
-  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  const auto gen = c10::backend::detail::getDefaultGenerator();
   auto pair = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen)
                   ->philox_engine_inputs(10);
   // At present, the default value of random number may be very large,

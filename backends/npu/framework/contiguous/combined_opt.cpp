@@ -79,7 +79,7 @@ class CombinedContiguousOpt : public ContiguousOpt {
       OffsetStack& offset_stack) {
     // Record src infos for recovering after trans-contiguous
     auto src_storage_desc =
-        c10::backend::NPUBridge::GetNpuStorageImpl(src)->get_npu_desc();
+        c10::backend::NPUBridge::GetNpuStorageImpl(src)->get_device_desc();
 
     at::Tensor base_tensor =
         at::empty(src_storage_desc.base_sizes_, src.options());
@@ -109,7 +109,7 @@ class CombinedContiguousOpt : public ContiguousOpt {
       return false;
     }
     auto npu_desc =
-        c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->get_npu_desc();
+        c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->get_device_desc();
     if ((c10::multiply_integers(tensor.sizes()) !=
          c10::multiply_integers(npu_desc.base_sizes_)) ||
         (tensor.storage_offset() != npu_desc.base_offset_)) {
@@ -481,7 +481,7 @@ Inference order: permute, select, slice.
             src.sizes(),
             src.options(),
             c10::backend::NPUBridge::GetNpuStorageImpl(src)
-                ->get_npu_desc()
+                ->get_device_desc()
                 .npu_format_);
         return (
             copy_optimize_contiguous_by_given_cases(

@@ -49,9 +49,9 @@ at::Allocator* Hooks::getPinnedMemoryAllocator() const {
 }
 
 at::PrivateUse1HooksInterface* get_device_hooks() {
-  static at::PrivateUse1HooksInterface* npu_hooks;
+  static at::PrivateUse1HooksInterface* device_hooks;
   static c10::once_flag once;
-  c10::call_once(once, [] { npu_hooks = new Hooks(); });
-  return npu_hooks;
+  c10::call_once(once, [] { device_hooks = new Hooks(); });
+  return device_hooks;
 }
 } // namespace c10::backend

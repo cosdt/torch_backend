@@ -175,10 +175,10 @@ class CachingAllocatorHelper
   }
 };
 
-static DefaultDeviceCachingAllocator defaultNPUAllocator;
-std::atomic<DeviceCachingAllocator*> npu_allocator = &defaultNPUAllocator;
+static DefaultDeviceCachingAllocator allocator;
+std::atomic<DeviceCachingAllocator*> device_allocator = &allocator;
 
-REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &defaultNPUAllocator);
+REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &allocator);
 
 void init(c10::backend::CachingAllocator::CachingAllocator* delegate) {
   static CachingAllocatorHelper helper;
@@ -186,6 +186,6 @@ void init(c10::backend::CachingAllocator::CachingAllocator* delegate) {
   c10::backend::CachingAllocator::init(
       c10::backend::device_count_ensure_non_zero());
 
-  defaultNPUAllocator.init(delegate);
+  allocator.init(delegate);
 }
 } // namespace c10::backend::Allocator

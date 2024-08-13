@@ -46,7 +46,7 @@ std::tuple<at::Tensor, at::Tensor> _npu_dropout(
   // 127~64   63~0
   // so, we set seed1 = 0 to ensure the seed which user set is equal to the seed
   // used by the operator DropOutGenMask
-  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  const auto gen = c10::backend::detail::getDefaultGenerator();
   auto pair = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen)
                   ->philox_engine_inputs(10);
   // At present, the default value of random number may be very large,

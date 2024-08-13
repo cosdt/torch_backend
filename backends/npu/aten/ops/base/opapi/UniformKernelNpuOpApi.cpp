@@ -28,7 +28,7 @@ at::Tensor& uniform_(
     c10::optional<at::Generator> gen_) {
   DO_COMPATIBILITY(aclnnInplaceUniform, acl_op::uniform_(self, from, to, gen_));
   auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
-      gen_, c10::backend::detail::getDefaultNPUGenerator());
+      gen_, c10::backend::detail::getDefaultGenerator());
   auto pair = gen->philox_engine_inputs(10);
   int64_t seed = static_cast<int64_t>(pair.first);
   int64_t offset = static_cast<int64_t>(pair.second);

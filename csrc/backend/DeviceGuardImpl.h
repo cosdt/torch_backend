@@ -28,7 +28,7 @@ struct DeviceGuardImpl final : public PrivateUse1GuardImpl {
   c10::Device exchangeDevice(c10::Device d) const override {
     TORCH_INTERNAL_ASSERT(
         d.type() == c10::DeviceType::PrivateUse1,
-        "DeviceType must be NPU. Actual DeviceType is: ",
+        "DeviceType must be 'c10::DeviceType::PrivateUse1'. Actual DeviceType is: ",
         d.type(),
         PTA_ERROR(ErrCode::PARAM));
     c10::Device old_device = getDevice();
@@ -108,21 +108,21 @@ struct DeviceGuardImpl final : public PrivateUse1GuardImpl {
         ".",
         PTA_ERROR(ErrCode::PARAM));
 
-    aclrtEvent npu_event = static_cast<aclrtEvent>(*event);
-    Stream npu_stream{stream};
+    aclrtEvent device_event = static_cast<aclrtEvent>(*event);
+    Stream device_stream{stream};
 
     // Moves to stream's device to record
     const auto orig_device = getDevice();
     setDevice(stream.device());
 
     // Creates the event (lazily)
-    if (!npu_event) {
+    if (!device_event) {
       auto flag_ = ACL_EVENT_SYNC;
-      NPU_CHECK_ERROR(aclrtCreateEventWithFlag(&npu_event, flag_));
+      NPU_CHECK_ERROR(aclrtCreateEventWithFlag(&device_event, flag_));
     }
-    NPU_CHECK_ERROR(aclrtRecordEvent(npu_event, npu_stream));
-    // Makes the void* point to the (possibly just allocated) NPU event
-    *event = npu_event;
+    NPU_CHECK_ERROR(aclrtRecordEvent(device_event, device_stream));
+    // Makes the void* point to the (possibly just allocated) event
+    *event = device_event;
 
     // Resets device
     setDevice(orig_device);
@@ -131,11 +131,11 @@ struct DeviceGuardImpl final : public PrivateUse1GuardImpl {
   void block(void* event, const c10::Stream& stream) const override {
     if (!event)
       return;
-    aclrtEvent npu_event = static_cast<aclrtEvent>(event);
-    Stream npu_stream{stream};
+    aclrtEvent device_event = static_cast<aclrtEvent>(event);
+    Stream device_stream{stream};
     const auto orig_device = getDevice();
     setDevice(stream.device());
-    NPU_CHECK_ERROR(aclrtStreamWaitEvent(npu_stream, npu_event));
+    NPU_CHECK_ERROR(aclrtStreamWaitEvent(device_stream, device_event));
     setDevice(orig_device);
   }
 
@@ -143,17 +143,17 @@ struct DeviceGuardImpl final : public PrivateUse1GuardImpl {
   bool queryEvent(void* event) const override {
     if (!event)
       return true;
-    aclrtEvent npu_event = static_cast<aclrtEvent>(event);
+    aclrtEvent device_event = static_cast<aclrtEvent>(event);
     aclrtEventRecordedStatus status = ACL_EVENT_RECORDED_STATUS_NOT_READY;
-    NPU_CHECK_ERROR(aclrtQueryEventStatus(npu_event, &status));
+    NPU_CHECK_ERROR(aclrtQueryEventStatus(device_event, &status));
     return (status == ACL_EVENT_RECORDED_STATUS_COMPLETE);
   }
 
   void synchronizeEvent(void* event) const override {
     if (!event)
       return;
-    aclrtEvent npu_event = static_cast<aclrtEvent>(event);
-    NPU_CHECK_ERROR(aclrtSynchronizeEvent(npu_event));
+    aclrtEvent device_event = static_cast<aclrtEvent>(event);
+    NPU_CHECK_ERROR(aclrtSynchronizeEvent(device_event));
   }
 };
 

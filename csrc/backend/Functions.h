@@ -5,7 +5,8 @@
 // the event of an error, rather than explicitly pass around error codes.  This
 // leads to more natural APIs.
 //
-// The naming convention used here matches the naming convention of torch.npu
+// The naming convention used here matches the naming convention of
+// torch.backend
 
 #include <c10/core/Device.h>
 #include <c10/macros/Macros.h>
@@ -33,7 +34,7 @@ C10_BACKEND_API void set_device(c10::DeviceIndex device);
 
 C10_BACKEND_API void device_synchronize();
 
-// this function has to be called from callers performing npu synchronizing
+// this function has to be called from callers performing deivce synchronizing
 // operations, to raise proper error or warning
 C10_BACKEND_API void warn_or_error_on_sync();
 

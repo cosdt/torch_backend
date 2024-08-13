@@ -27,10 +27,10 @@ class DeviceCachingAllocator : public c10::Allocator {
       c10::backend::CachingAllocator::OutOfMemoryObserver observer) = 0;
 };
 
-extern std::atomic<DeviceCachingAllocator*> npu_allocator;
+extern std::atomic<DeviceCachingAllocator*> device_allocator;
 
 inline DeviceCachingAllocator* get() {
-  return npu_allocator.load();
+  return device_allocator.load();
 }
 
 void init(c10::backend::CachingAllocator::CachingAllocator* delegate);

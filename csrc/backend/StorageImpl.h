@@ -43,12 +43,12 @@ struct DeviceStorageImpl : public c10::StorageImpl {
   // not private
   StorageDesc npu_desc_;
 
-  StorageDesc get_npu_desc() const {
+  StorageDesc get_device_desc() const {
     return npu_desc_;
   }
 };
 
-c10::intrusive_ptr<c10::StorageImpl> make_npu_storage_impl(
+c10::intrusive_ptr<c10::StorageImpl> make_device_storage_impl(
     c10::StorageImpl::use_byte_size_t,
     c10::SymInt size_bytes,
     c10::DataPtr data_ptr,

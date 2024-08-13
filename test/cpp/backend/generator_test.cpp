@@ -7,8 +7,8 @@ TEST(DeviceGeneratorImpl, TestSingletonDefaultGenerator) {
     GTEST_SKIP() << "NPU is not available";
   }
 
-  auto gen = c10::backend::detail::getDefaultNPUGenerator();
-  auto other = c10::backend::detail::getDefaultNPUGenerator();
+  auto gen = c10::backend::detail::getDefaultGenerator();
+  auto other = c10::backend::detail::getDefaultGenerator();
   EXPECT_EQ(gen, other);
 }
 
@@ -17,10 +17,10 @@ TEST(DeviceGeneratorImpl, TestCloning) {
     GTEST_SKIP() << "NPU is not available";
   }
 
-  auto gen1 = c10::backend::detail::createNPUGenerator();
+  auto gen1 = c10::backend::detail::createGenerator();
   auto npu_gen1 = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen1);
 
-  auto gen2 = c10::backend::detail::createNPUGenerator();
+  auto gen2 = c10::backend::detail::createGenerator();
   gen2 = gen1.clone();
   auto npu_gen2 = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen2);
 
@@ -35,7 +35,7 @@ TEST(DeviceGeneratorImpl, TestGetSetCurrentSeed) {
     GTEST_SKIP() << "NPU is not available";
   }
 
-  auto gen = c10::backend::detail::createNPUGenerator();
+  auto gen = c10::backend::detail::createGenerator();
   auto npu_gen = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen);
   npu_gen->set_current_seed(10);
   EXPECT_EQ(npu_gen->current_seed(), 10);
@@ -52,7 +52,7 @@ TEST(DeviceGeneratorImpl, TestGetSetOffset) {
     GTEST_SKIP() << "NPU is not available";
   }
 
-  auto gen = c10::backend::detail::createNPUGenerator();
+  auto gen = c10::backend::detail::createGenerator();
   auto npu_gen = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen);
   npu_gen->set_offset(100);
   EXPECT_EQ(npu_gen->get_offset(), 100);
@@ -63,7 +63,7 @@ TEST(DeviceGeneratorImpl, TestGetSetPhiloxOffset) {
     GTEST_SKIP() << "NPU is not available";
   }
 
-  auto gen = c10::backend::detail::createNPUGenerator();
+  auto gen = c10::backend::detail::createGenerator();
   auto npu_gen = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen);
   npu_gen->set_philox_offset_per_thread(200);
   EXPECT_EQ(npu_gen->philox_offset_per_thread(), 200);

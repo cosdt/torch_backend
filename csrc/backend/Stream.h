@@ -19,7 +19,7 @@
 /*
  * Stream pool note.
  *
- * A Stream is an abstraction of an actual cuStream on the GPU. NPUStreams
+ * A Stream is an abstraction of an actual cuStream on the GPU. Streams
  * are backed by cuStreams, but they use several pools to minimize the costs
  * associated with creating, retaining, and destroying cuStreams.
  *
@@ -53,7 +53,7 @@
  * (every OS thread has a separate current stream, as one might expect),
  * the stream pool is global across all threads; stream 0 is always stream 0
  * no matter which thread you use it on.  Multiple threads can synchronize
- * on the same stream.  Although the NPU documentation is not very clear
+ * on the same stream.  Although the documentation is not very clear
  * on the matter, streams are thread safe; e.g., it is safe to enqueue
  * a kernel on the same stream from two different threads.
  */
@@ -62,16 +62,16 @@ namespace c10::backend {
 
 static constexpr int max_compile_time_stream_priorities = 2;
 
-// Value object representing a NPU stream.  This is just a wrapper
-// around c10::Stream, but it comes with a little extra NPU-specific
+// Value object representing a stream.  This is just a wrapper
+// around c10::Stream, but it comes with a little extra device-specific
 // functionality (conversion to aclrtStream), and a guarantee that
-// the wrapped c10::Stream really is a NPU stream.
+// the wrapped c10::Stream really is a stream.
 class C10_BACKEND_API Stream {
  public:
   enum Unchecked { UNCHECKED };
 
   /// Construct a Stream from a Stream.  This construction is checked,
-  /// and will raise an error if the Stream is not, in fact, a NPU stream.
+  /// and will raise an error if the Stream is not, in fact, a stream.
   explicit Stream(c10::Stream stream) : stream_(stream) {
     TORCH_CHECK(
         stream_.device_type() == c10::DeviceType::PrivateUse1,
@@ -97,7 +97,7 @@ class C10_BACKEND_API Stream {
   }
 
   // Implicit conversion to pytorch Stream. (a.k.a., forget that the stream is a
-  /// NPU stream).
+  /// stream).
   operator c10::Stream() const {
     return unwrap();
   }
@@ -107,13 +107,13 @@ class C10_BACKEND_API Stream {
     return c10::DeviceType::PrivateUse1;
   }
 
-  // Get the NPU device index that this stream is associated with.
+  // Get the device index that this stream is associated with.
   c10::DeviceIndex device_index() const {
     return stream_.device_index();
   }
 
   // Get the full Device that this stream is associated with.  The Device
-  // is guaranteed to be a NPU device.
+  // is guaranteed to be a device.
   c10::Device device() const {
     return c10::Device(c10::DeviceType::PrivateUse1, device_index());
   }
@@ -172,14 +172,14 @@ class C10_BACKEND_API Stream {
 };
 
 /**
- * Get a new stream from the NPU stream pool.  You can think of this
+ * Get a new stream from the stream pool.  You can think of this
  * as "creating" a new stream, but no such creation actually happens;
  * instead, streams are preallocated from the pool and returned in a
  * round-robin fashion.
  *
  * You can request a stream from the high priority pool by setting
  * isHighPriority to true, or a stream for a specific device by setting device
- * (defaulting to the current NPU stream.)
+ * (defaulting to the current stream.)
  */
 C10_BACKEND_API Stream getStreamFromPool(
     const bool isHighPriority = false,
@@ -199,7 +199,7 @@ C10_BACKEND_API Stream
 getStreamFromExternal(aclrtStream ext_stream, c10::DeviceIndex device_index);
 
 /**
- * Get the default NPU stream, for the passed NPU device, or for the
+ * Get the default stream, for the passed device, or for the
  * current device if no device index is passed.  The default stream is
  * where most computation occurs when you aren't explicitly using
  * streams.
@@ -207,11 +207,11 @@ getStreamFromExternal(aclrtStream ext_stream, c10::DeviceIndex device_index);
 C10_BACKEND_API Stream getDefaultStream(c10::DeviceIndex device_index = -1);
 
 /**
- * Get the current NPU stream, for the passed NPU device, or for the
- * current device if no device index is passed.  The current NPU stream
- * will usually be the default NPU stream for the device, but it may
+ * Get the current stream, for the passed device, or for the
+ * current device if no device index is passed.  The current stream
+ * will usually be the default stream for the device, but it may
  * be different if someone called 'setCurrentStream' or used 'StreamGuard'
- * or 'NPUStreamGuard'.
+ * or 'StreamGuard'.
  */
 C10_BACKEND_API Stream getCurrentStream(c10::DeviceIndex device_index = -1);
 
@@ -221,7 +221,7 @@ C10_BACKEND_API Stream getCurrentStream(c10::DeviceIndex device_index = -1);
  * has *nothing* to do with the current device: it toggles the current
  * stream of the device of the passed stream.
  *
- * Confused?  Avoid using this function; prefer using 'NPUStreamGuard' instead
+ * Confused?  Avoid using this function; prefer using 'StreamGuard' instead
  * (which will switch both your current device and current stream in the way you
  * expect, and reset it back to its original state afterwards).
  */

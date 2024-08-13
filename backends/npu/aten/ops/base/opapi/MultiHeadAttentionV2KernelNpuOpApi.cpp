@@ -110,7 +110,7 @@ at::Tensor gen_mask(
   int64_t length = (numels + 256 - 1) / 256 * 256 / 8;
   length += 32;
   if (get_status(keep_prob) == DropOutStatus::DROPOUT_NORMAL) {
-    const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+    const auto gen = c10::backend::detail::getDefaultGenerator();
     auto pair = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen)
                     ->philox_engine_inputs(10);
     seed = static_cast<int64_t>(pair.first);

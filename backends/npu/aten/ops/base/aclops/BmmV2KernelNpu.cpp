@@ -40,7 +40,7 @@ bool is_transpose_last_two_dims_v2(const at::Tensor& Tensors) {
   int64_t tensor_size =
       static_cast<int64_t>(Tensors.storage().nbytes()) / Tensors.element_size();
   auto tensor_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(Tensors)->get_npu_desc();
+      c10::backend::NPUBridge::GetNpuStorageImpl(Tensors)->get_device_desc();
   if (tensor_desc.base_sizes_.size() == static_cast<uint64_t>(Tensors.dim()) &&
       Tensors.stride(dim2) == 1 && Tensors.stride(dim1) == Tensors.size(dim2) &&
       Tensors.size(dim1) == tensor_desc.base_sizes_[dim2] &&

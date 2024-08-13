@@ -55,7 +55,7 @@ at::Tensor dropout_gen_byte_mask(const at::Tensor& self, at::Scalar prob) {
   // 127~64   63~0
   // so, we set seed2 = 0 to ensure the seed which user set is equal to the seed
   // used by the operator DropOutGenMaskV3
-  const auto gen = c10::backend::detail::getDefaultNPUGenerator();
+  const auto gen = c10::backend::detail::getDefaultGenerator();
   const int64_t seed = static_cast<int64_t>(gen.current_seed());
   const int64_t seed2 = 0;
   cmd.Name("DropOutGenMaskV3")

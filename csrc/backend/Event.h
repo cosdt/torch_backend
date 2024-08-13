@@ -13,8 +13,8 @@
 
 namespace c10::backend {
 /*
- * NPUEvents are movable not copyable wrappers around NPU's events.
- * NPUEvents are constructed lazily when first recorded.
+ * Events are movable not copyable wrappers around device's events.
+ * Events are constructed lazily when first recorded.
  */
 struct C10_BACKEND_API Event {
   // Constructors
@@ -122,7 +122,7 @@ struct C10_BACKEND_API Event {
     float time_ms = 0;
     // We do not strictly have to set the device index to the same as our event,
     // but if we don't and the current device is not initialized, it will
-    // create a new NPU context, which will consume a lot of memory.
+    // create a new context, which will consume a lot of memory.
     DeviceGuard guard(device_index_);
     // raise error if either event is recorded but not yet completed
     aclrtEventElapsedTime(&time_ms, event_, other.event_);
@@ -135,7 +135,7 @@ struct C10_BACKEND_API Event {
     }
   }
 
-  // npu do not support IpcEventHandle until now
+  // do not support IpcEventHandle until now
 
  private:
   unsigned int flags_ = ACL_EVENT_SYNC;

@@ -31,7 +31,7 @@ at::Tensor& bernoulli_(
     c10::optional<at::Generator> gen) {
   DO_COMPATIBILITY(aclnnInplaceBernoulli, acl_op::bernoulli_(self, p, gen));
   auto gen_ = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
-      gen, c10::backend::detail::getDefaultNPUGenerator());
+      gen, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_->philox_engine_inputs(PHILOX_DEFAULT_NUM);
   const uint64_t seed = pair.first;
   const uint64_t offset = pair.second;
@@ -48,7 +48,7 @@ at::Tensor& bernoulli_(
   DO_COMPATIBILITY(
       aclnnInplaceBernoulliTensor, acl_op::bernoulli_(self, p, gen));
   auto gen_ = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
-      gen, c10::backend::detail::getDefaultNPUGenerator());
+      gen, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_->philox_engine_inputs(PHILOX_DEFAULT_NUM);
   const uint64_t seed = pair.first;
   const uint64_t offset = pair.second;

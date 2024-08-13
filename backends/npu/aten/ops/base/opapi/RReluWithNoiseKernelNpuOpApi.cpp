@@ -33,7 +33,7 @@ at::Tensor rrelu_with_noise(
       acl_op::rrelu_with_noise(self, noise, lower, upper, training, generator));
   at::Tensor result = npu_preparation::apply_tensor_without_format(self);
   auto gen_ = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
-      generator, c10::backend::detail::getDefaultNPUGenerator());
+      generator, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_->philox_engine_inputs(1 << 28);
   const int64_t seed = static_cast<int64_t>(pair.first);
   const int64_t offset = static_cast<int64_t>(pair.second);
@@ -64,7 +64,7 @@ at::Tensor& rrelu_with_noise_(
       acl_op::rrelu_with_noise_(
           self, noise, lower, upper, training, generator));
   auto gen_ = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
-      generator, c10::backend::detail::getDefaultNPUGenerator());
+      generator, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_->philox_engine_inputs(1 << 28);
   const int64_t seed = static_cast<int64_t>(pair.first);
   const int64_t offset = static_cast<int64_t>(pair.second);
@@ -95,7 +95,7 @@ at::Tensor& rrelu_with_noise_out(
           self, noise, lower, upper, training, generator, output));
   npu_preparation::check_tensor({self, noise}, output, self);
   auto gen_ = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
-      generator, c10::backend::detail::getDefaultNPUGenerator());
+      generator, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_->philox_engine_inputs(1 << 28);
   const int64_t seed = static_cast<int64_t>(pair.first);
   const int64_t offset = static_cast<int64_t>(pair.second);

@@ -28,7 +28,7 @@ static PyObject* THPModule_initExtension(PyObject* self, PyObject* noargs) {
   auto default_npu_generators =
       PyTuple_New(static_cast<Py_ssize_t>(num_devices));
   for (c10::DeviceIndex i = 0; i < num_devices; i++) {
-    auto gen = c10::backend::detail::getDefaultNPUGenerator(i);
+    auto gen = c10::backend::detail::getDefaultGenerator(i);
     auto cast_gen = (THPGenerator*)THPGenerator_initDefaultGenerator(gen);
     // This reference is meant to be given away, so no need to incref here.
     PyTuple_SetItem(default_npu_generators, i, (PyObject*)cast_gen);

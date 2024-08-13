@@ -3,7 +3,7 @@
 
 namespace c10::backend {
 
-C10_SET_STORAGE_IMPL_CREATE(&c10::backend::make_npu_storage_impl);
+C10_SET_STORAGE_IMPL_CREATE(&c10::backend::make_device_storage_impl);
 
 DeviceStorageImpl::DeviceStorageImpl(
     use_byte_size_t use_byte_size,
@@ -22,7 +22,7 @@ void DeviceStorageImpl::release_resources() {
   StorageImpl::release_resources();
 }
 
-c10::intrusive_ptr<c10::StorageImpl> make_npu_storage_impl(
+c10::intrusive_ptr<c10::StorageImpl> make_device_storage_impl(
     c10::StorageImpl::use_byte_size_t,
     c10::SymInt size_bytes,
     c10::DataPtr data_ptr,

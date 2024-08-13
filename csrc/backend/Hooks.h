@@ -10,7 +10,7 @@ struct TORCH_API Hooks : public at::PrivateUse1HooksInterface {
   const at::Generator& getDefaultGenerator(
       c10::DeviceIndex device_index) override {
     static auto device_gen =
-        c10::backend::detail::getDefaultNPUGenerator(device_index);
+        c10::backend::detail::getDefaultGenerator(device_index);
     return device_gen;
   }
   void initPrivateUse1() const override;
