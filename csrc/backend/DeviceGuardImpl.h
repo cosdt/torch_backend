@@ -15,10 +15,10 @@
 
 namespace c10::backend {
 namespace impl {
-struct NPUGuardImpl final : public PrivateUse1GuardImpl {
-  NPUGuardImpl() = default;
+struct DeviceGuardImpl final : public PrivateUse1GuardImpl {
+  DeviceGuardImpl() = default;
 
-  explicit NPUGuardImpl(c10::DeviceType t) {
+  explicit DeviceGuardImpl(c10::DeviceType t) {
     TORCH_INTERNAL_ASSERT(
         t == static_type,
         "DeviceType must be 'c10::DeviceType::PrivateUse1'. Actual DeviceType is: ",

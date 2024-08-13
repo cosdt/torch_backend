@@ -3,7 +3,7 @@
 #include "core/NPUQueue.h"
 
 #include "core/interface/AsyncTaskQueueInterface.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
+#include "csrc/backend/CachingHostAllocator.h"
 #include "framework/OpParamMaker.h"
 #include "framework/utils/CalcuOpUtil.h"
 #include "framework/utils/NpuUtils.h"

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <utility>
-#include "csrc/backend/NPUGuard.h"
+#include "csrc/backend/DeviceGuard.h"
 #include "csrc/backend/Stream.h"
 #include "csrc/core/Macros.h"
 
@@ -25,7 +25,7 @@ struct C10_BACKEND_API Event {
   ~Event() {
     try {
       if (is_created_) {
-        NPUGuard guard(device_index_);
+        DeviceGuard guard(device_index_);
         aclrtDestroyEvent(event_);
       }
     } catch (...) { /* No throw */
@@ -103,14 +103,14 @@ struct C10_BACKEND_API Event {
         " does not match recording stream's device ",
         stream.device_index(),
         ".");
-    NPUGuard guard(device_index_);
+    DeviceGuard guard(device_index_);
     aclrtRecordEvent(event_, stream);
     was_recorded_ = true;
   }
 
   void block(const Stream& stream) {
     if (is_created_) {
-      NPUGuard guard(stream.device_index());
+      DeviceGuard guard(stream.device_index());
       aclrtStreamWaitEvent(stream, event_);
     }
   }
@@ -123,7 +123,7 @@ struct C10_BACKEND_API Event {
     // We do not strictly have to set the device index to the same as our event,
     // but if we don't and the current device is not initialized, it will
     // create a new NPU context, which will consume a lot of memory.
-    NPUGuard guard(device_index_);
+    DeviceGuard guard(device_index_);
     // raise error if either event is recorded but not yet completed
     aclrtEventElapsedTime(&time_ms, event_, other.event_);
     return time_ms;
@@ -146,7 +146,7 @@ struct C10_BACKEND_API Event {
 
   void createEvent(c10::DeviceIndex device_index) {
     device_index_ = device_index;
-    NPUGuard guard(device_index_);
+    DeviceGuard guard(device_index_);
     aclrtCreateEventExWithFlag(&event_, flags_);
     is_created_ = true;
   }

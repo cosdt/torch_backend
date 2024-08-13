@@ -10,8 +10,8 @@
 #include "acl/include/acl/acl.h"
 #include "acl/include/ge/ge_error_codes.h"
 
-#include "csrc/backend/NPUCachingAllocator.h"
 #include "core/interface/AsyncTaskQueueInterface.h"
+#include "csrc/backend/DeviceCachingAllocator.h"
 #include "framework/interface/AclOpCompileInterface.h"
 
 using std::string;

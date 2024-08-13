@@ -11,9 +11,9 @@
 #include <unordered_set>
 #include <utility>
 
+#include "csrc/backend/CachingHostAllocator.h"
 #include "csrc/backend/Event.h"
 #include "csrc/backend/Functions.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "csrc/core/allocator/EventPool.h"
 
 namespace c10::backend::HostAllocator {
@@ -77,7 +77,7 @@ struct HostAllocator
 
 void raw_local_deleter(void* ptr);
 
-struct NPUCachingHostAllocator final
+struct CachingHostAllocator final
     : public at::CachingHostAllocatorInterface<HostAllocator> {
   at::DataPtr allocate(size_t size) override {
     auto ptr_and_ctx = impl_->allocate(size);
@@ -93,26 +93,26 @@ struct NPUCachingHostAllocator final
   }
 };
 
-static NPUCachingHostAllocator npu_caching_host_allocator;
+static CachingHostAllocator caching_host_allocator;
 
 at::Allocator* getAllocator() {
-  return &npu_caching_host_allocator;
+  return &caching_host_allocator;
 }
 
 void raw_local_deleter(void* ptr) {
-  npu_caching_host_allocator.free(ptr);
+  caching_host_allocator.free(ptr);
 }
 
 bool recordEvent(void* ptr, void* ctx, c10::backend::Stream stream) {
-  return npu_caching_host_allocator.record_event(ptr, ctx, stream);
+  return caching_host_allocator.record_event(ptr, ctx, stream);
 }
 
 void emptyCache() {
-  npu_caching_host_allocator.empty_cache();
+  caching_host_allocator.empty_cache();
 }
 
 bool isPinndPtr(const void* ptr) {
-  return npu_caching_host_allocator.isPinnedPtr(ptr);
+  return caching_host_allocator.isPinnedPtr(ptr);
 }
 
 } // namespace c10::backend::HostAllocator

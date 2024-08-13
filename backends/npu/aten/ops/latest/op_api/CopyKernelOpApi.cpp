@@ -19,7 +19,7 @@
 #include "core/NPUPeerToPeerAccess.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/aten/generated/NPUOpApiNativeFunctions.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
+#include "csrc/backend/CachingHostAllocator.h"
 #include "framework/contiguous/ContiguousOpt.h"
 #include "framework/utils/CalcuOpUtil.h"
 

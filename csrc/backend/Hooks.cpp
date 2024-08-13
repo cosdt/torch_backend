@@ -1,6 +1,6 @@
 #include "csrc/backend/Hooks.h"
+#include "csrc/backend/CachingHostAllocator.h"
 #include "csrc/backend/Functions.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "csrc/backend/StorageImpl.h"
 #include "csrc/core/Register.h"
 

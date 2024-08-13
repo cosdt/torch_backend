@@ -3,7 +3,7 @@
 #include <c10/core/Allocator.h>
 #include "aten/common/TensorFactories.h"
 #include "core/NPUException.h"
-#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/DeviceCachingAllocator.h"
 #include "csrc/backend/Functions.h"
 #include "csrc/backend/StorageImpl.h"
 #include "framework/StorageDescHelper.h"

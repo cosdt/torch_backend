@@ -3,7 +3,7 @@
 #include "csrc/core/allocator/CachingAllocator.h"
 
 namespace c10::backend::Allocator {
-class NPUAllocator : public c10::Allocator {
+class DeviceCachingAllocator : public c10::Allocator {
  public:
   virtual void* raw_alloc_with_stream(size_t nbytes, void* stream) = 0;
   virtual void raw_delete(void* ptr) = 0;
@@ -27,9 +27,9 @@ class NPUAllocator : public c10::Allocator {
       c10::backend::CachingAllocator::OutOfMemoryObserver observer) = 0;
 };
 
-extern std::atomic<NPUAllocator*> npu_allocator;
+extern std::atomic<DeviceCachingAllocator*> npu_allocator;
 
-inline NPUAllocator* get() {
+inline DeviceCachingAllocator* get() {
   return npu_allocator.load();
 }
 

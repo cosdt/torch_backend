@@ -8,7 +8,7 @@
 #include "core/register/OptionsManager.h"
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
+#include "csrc/backend/CachingHostAllocator.h"
 #include "framework/FormatHelper.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/contiguous/ContiguousOpt.h"

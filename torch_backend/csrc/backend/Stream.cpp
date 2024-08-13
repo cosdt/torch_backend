@@ -3,7 +3,7 @@
 #include <structmember.h>
 #include <torch/csrc/Device.h>
 #include <torch/csrc/THP.h>
-#include "csrc/backend/NPUGuard.h"
+#include "csrc/backend/DeviceGuard.h"
 
 namespace torch::backend::stream {
 

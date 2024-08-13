@@ -5,10 +5,10 @@
 #include <torch/csrc/utils/python_numbers.h>
 
 #include "csrc/backend/Context.h"
+#include "csrc/backend/DeviceCachingAllocator.h"
+#include "csrc/backend/DeviceGuard.h"
 #include "csrc/backend/DeviceProp.h"
 #include "csrc/backend/Functions.h"
-#include "csrc/backend/NPUCachingAllocator.h"
-#include "csrc/backend/NPUGuard.h"
 
 #include "torch_backend/csrc/backend/Device.h"
 

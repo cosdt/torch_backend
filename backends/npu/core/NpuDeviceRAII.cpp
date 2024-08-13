@@ -3,9 +3,9 @@
 #include "adapter/acl_device_adapter.h"
 #include "core/NpuVariables.h"
 #include "core/register/OptionRegister.h"
+#include "csrc/backend/CachingHostAllocator.h"
+#include "csrc/backend/DeviceCachingAllocator.h"
 #include "csrc/backend/Functions.h"
-#include "csrc/backend/NPUCachingAllocator.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
 #include "csrc/backend/Stream.h"
 #include "framework/interface/AclOpCompileInterface.h"
 

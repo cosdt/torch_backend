@@ -1,4 +1,4 @@
-#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/DeviceCachingAllocator.h"
 #include <c10/util/Optional.h>
 #include <c10/util/irange.h>
 #include <iostream>
@@ -13,7 +13,7 @@
 
 namespace c10::backend::Allocator {
 
-class DefaultNPUAllocator final : public NPUAllocator {
+class DefaultDeviceCachingAllocator final : public DeviceCachingAllocator {
  public:
   void init(c10::backend::CachingAllocator::CachingAllocator* delegate) {
     this->delegate = delegate;
@@ -59,7 +59,7 @@ class DefaultNPUAllocator final : public NPUAllocator {
     delegate->emptyDeviceCache(device);
   }
   std::string name() override {
-    return "DefaultNPUAllocator";
+    return "DefaultDeviceCachingAllocator";
   }
   bool isHistoryEnabled() override {
     return delegate->isHistoryEnabled();
@@ -175,8 +175,8 @@ class CachingAllocatorHelper
   }
 };
 
-static DefaultNPUAllocator defaultNPUAllocator;
-std::atomic<NPUAllocator*> npu_allocator = &defaultNPUAllocator;
+static DefaultDeviceCachingAllocator defaultNPUAllocator;
+std::atomic<DeviceCachingAllocator*> npu_allocator = &defaultNPUAllocator;
 
 REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &defaultNPUAllocator);
 

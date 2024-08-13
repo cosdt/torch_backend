@@ -3,7 +3,7 @@
 #include <torch/csrc/Device.h>
 #include <torch/csrc/THP.h>
 #include <torch/csrc/utils/python_arg_parser.h>
-#include "csrc/backend/NPUGuard.h"
+#include "csrc/backend/DeviceGuard.h"
 
 #include "torch_backend/csrc/backend/Event.h"
 #include "torch_backend/csrc/backend/Stream.h"
