@@ -21,7 +21,7 @@
 #include "core/NPUBridge.h"
 #include "core/NPUException.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/DeviceCachingAllocator.h"
 #include "csrc/backend/StorageImpl.h"
 #include "csrc/backend/TensorImpl.h"
 #include "framework/InferFormat.h"

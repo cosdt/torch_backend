@@ -4,9 +4,9 @@
 
 namespace c10::backend {
 
-struct NPUDeviceProp {
+struct DeviceProp {
   std::string name{};
   size_t totalGlobalMem = 0;
 };
 
-} // namespace c10::npu
+} // namespace c10::backend

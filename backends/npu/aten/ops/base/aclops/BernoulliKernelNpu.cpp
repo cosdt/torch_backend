@@ -31,8 +31,8 @@ at::Tensor& bernoulli_npu_nocheck(
     at::Tensor& result,
     double p,
     c10::optional<at::Generator> gen) {
-  auto gen_ = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
-      gen, c10::backend::detail::getDefaultNPUGenerator());
+  auto gen_ = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
+      gen, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
   const int64_t offset = static_cast<int64_t>(pair.second);
@@ -56,8 +56,8 @@ at::Tensor& bernoulli_npu_nocheck(
     at::Tensor& result,
     const at::Tensor& p,
     c10::optional<at::Generator> gen) {
-  auto gen_ = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
-      gen, c10::backend::detail::getDefaultNPUGenerator());
+  auto gen_ = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
+      gen, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
   const int64_t offset = static_cast<int64_t>(pair.second);

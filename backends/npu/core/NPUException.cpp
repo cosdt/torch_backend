@@ -1,6 +1,6 @@
 #include "core/NPUException.h"
-#include "csrc/backend/NPUFunctions.h"
 #include "core/register/OptionsManager.h"
+#include "csrc/backend/Functions.h"
 
 std::unordered_map<SubModule, std::string> submoduleMap = {
     {SubModule::PTA, "PTA"},

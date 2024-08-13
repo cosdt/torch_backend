@@ -27,8 +27,8 @@ at::Tensor& multinomial_op_api(
     int64_t num_samples,
     bool replacement,
     c10::optional<at::Generator> gen) {
-  auto gen_ = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
-      gen, c10::backend::detail::getDefaultNPUGenerator());
+  auto gen_ = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
+      gen, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_->philox_engine_inputs(10);
   const uint64_t seed = pair.first;
   const uint64_t offset = pair.second;

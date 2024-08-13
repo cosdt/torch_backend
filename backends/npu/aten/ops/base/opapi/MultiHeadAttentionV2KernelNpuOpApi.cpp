@@ -14,9 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "csrc/aten/generated/CustomFunctions.h"
 #include "aten/OpApiInterface.h"
 #include "aten/utils/op_api_common.h"
+#include "csrc/aten/generated/CustomFunctions.h"
 #include "framework/utils/RandomOpAdapter.h"
 
 namespace op_api {
@@ -110,8 +110,8 @@ at::Tensor gen_mask(
   int64_t length = (numels + 256 - 1) / 256 * 256 / 8;
   length += 32;
   if (get_status(keep_prob) == DropOutStatus::DROPOUT_NORMAL) {
-    const auto gen = c10::backend::detail::getDefaultNPUGenerator();
-    auto pair = at::check_generator<c10::backend::NPUGeneratorImpl>(gen)
+    const auto gen = c10::backend::detail::getDefaultGenerator();
+    auto pair = at::check_generator<c10::backend::DeviceGeneratorImpl>(gen)
                     ->philox_engine_inputs(10);
     seed = static_cast<int64_t>(pair.first);
     offset = static_cast<int64_t>(pair.second);

@@ -42,7 +42,7 @@ bool is_transpose_last_two_dims_strict(
     const at::Tensor& tensor,
     bool is_transpose_flex) {
   auto base_sizes = c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
-                        ->get_npu_desc()
+                        ->get_device_desc()
                         .base_sizes_;
   if (is_transpose_flex &&
       base_sizes.size() == static_cast<uint64_t>(tensor.dim()) &&

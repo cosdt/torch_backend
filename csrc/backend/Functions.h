@@ -5,14 +5,15 @@
 // the event of an error, rather than explicitly pass around error codes.  This
 // leads to more natural APIs.
 //
-// The naming convention used here matches the naming convention of torch.npu
+// The naming convention used here matches the naming convention of
+// torch.backend
 
 #include <c10/core/Device.h>
 #include <c10/macros/Macros.h>
 
 #include <mutex>
 #include <optional>
-#include "csrc/backend/NPUDeviceProp.h"
+#include "csrc/backend/DeviceProp.h"
 #include "csrc/core/Macros.h"
 
 // TODO(FFFrog):
@@ -33,7 +34,7 @@ C10_BACKEND_API void set_device(c10::DeviceIndex device);
 
 C10_BACKEND_API void device_synchronize();
 
-// this function has to be called from callers performing npu synchronizing
+// this function has to be called from callers performing deivce synchronizing
 // operations, to raise proper error or warning
 C10_BACKEND_API void warn_or_error_on_sync();
 
@@ -60,7 +61,7 @@ C10_BACKEND_API aclrtContext GetDeviceContext(c10::DeviceIndex device);
 
 enum class SyncDebugMode { L_DISABLED = 0, L_WARN, L_ERROR };
 
-// it's used to store npu synchronization state
+// it's used to store device synchronization state
 // through this global state to determine the synchronization debug mode
 class WarningState {
  public:
@@ -88,7 +89,7 @@ getDeviceIndexWithPrimaryContext();
 C10_BACKEND_API std::mutex* getFreeMutex();
 
 C10_BACKEND_API void get_device_properties(
-    c10::backend::NPUDeviceProp* device_prop,
+    c10::backend::DeviceProp* device_prop,
     c10::DeviceIndex device);
 
 } // namespace c10::backend

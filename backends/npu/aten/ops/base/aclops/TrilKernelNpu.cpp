@@ -51,7 +51,7 @@ at::Tensor& tril_out(
 at::Tensor tril(const at::Tensor& self, int64_t diagonal) {
   auto is_last_two_dims = [&self]() {
     auto self_storage = c10::backend::NPUBridge::GetNpuStorageImpl(self)
-                            ->get_npu_desc()
+                            ->get_device_desc()
                             .storage_sizes_;
     if (self_storage.size() <= 1) {
       return false;

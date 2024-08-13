@@ -11,9 +11,9 @@
 #include <unordered_set>
 #include <utility>
 
-#include "csrc/backend/NPUCachingHostAllocator.h"
-#include "csrc/backend/NPUEvent.h"
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/CachingHostAllocator.h"
+#include "csrc/backend/Event.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/core/allocator/EventPool.h"
 
 namespace c10::backend::HostAllocator {
@@ -22,7 +22,7 @@ using Block = at::HostBlock<Stream>;
 struct HostAllocator
     : public at::CachingHostAllocatorImpl<
           Stream,
-          c10::backend::CachingAllocator::EventPool<NPUEvent>::Event> {
+          c10::backend::CachingAllocator::EventPool<Event>::Event> {
  public:
   bool isPinndPtr(const void* ptr) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
@@ -48,26 +48,25 @@ struct HostAllocator
 
   void record_stream(
       std::optional<std::vector<
-          c10::backend::CachingAllocator::EventPool<NPUEvent>::Event>>& events,
+          c10::backend::CachingAllocator::EventPool<Event>::Event>>& events,
       Stream stream) override {
     auto event = create_event_internal(stream.device_index());
     event->record(stream);
     events->push_back(std::move(event));
   }
 
-  bool query_event(c10::backend::CachingAllocator::EventPool<NPUEvent>::Event&
-                       event) override {
+  bool query_event(
+      c10::backend::CachingAllocator::EventPool<Event>::Event& event) override {
     return event->query();
   }
 
-  c10::backend::CachingAllocator::EventPool<NPUEvent>::Event
-  create_event_internal(c10::DeviceIndex idx) {
+  c10::backend::CachingAllocator::EventPool<Event>::Event create_event_internal(
+      c10::DeviceIndex idx) {
     // Leak the event pool to avoid shutdown issue.
     static auto* event_pool =
-        new c10::backend::CachingAllocator::EventPool<NPUEvent>(
+        new c10::backend::CachingAllocator::EventPool<Event>(
             device_count(), []() {
-              return std::make_unique<NPUEvent>(
-                  ACL_EVENT_CAPTURE_STREAM_PROGRESS);
+              return std::make_unique<Event>(ACL_EVENT_CAPTURE_STREAM_PROGRESS);
             });
     return event_pool->get(idx);
   }
@@ -78,7 +77,7 @@ struct HostAllocator
 
 void raw_local_deleter(void* ptr);
 
-struct NPUCachingHostAllocator final
+struct CachingHostAllocator final
     : public at::CachingHostAllocatorInterface<HostAllocator> {
   at::DataPtr allocate(size_t size) override {
     auto ptr_and_ctx = impl_->allocate(size);
@@ -94,26 +93,26 @@ struct NPUCachingHostAllocator final
   }
 };
 
-static NPUCachingHostAllocator npu_caching_host_allocator;
+static CachingHostAllocator caching_host_allocator;
 
 at::Allocator* getAllocator() {
-  return &npu_caching_host_allocator;
+  return &caching_host_allocator;
 }
 
 void raw_local_deleter(void* ptr) {
-  npu_caching_host_allocator.free(ptr);
+  caching_host_allocator.free(ptr);
 }
 
 bool recordEvent(void* ptr, void* ctx, c10::backend::Stream stream) {
-  return npu_caching_host_allocator.record_event(ptr, ctx, stream);
+  return caching_host_allocator.record_event(ptr, ctx, stream);
 }
 
 void emptyCache() {
-  npu_caching_host_allocator.empty_cache();
+  caching_host_allocator.empty_cache();
 }
 
 bool isPinndPtr(const void* ptr) {
-  return npu_caching_host_allocator.isPinnedPtr(ptr);
+  return caching_host_allocator.isPinnedPtr(ptr);
 }
 
 } // namespace c10::backend::HostAllocator

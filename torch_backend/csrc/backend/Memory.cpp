@@ -5,7 +5,7 @@
 #include <torch/csrc/utils/device_lazy_init.h>
 #include <torch/csrc/utils/python_arg_parser.h>
 #include <torch/csrc/utils/python_numbers.h>
-#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/DeviceCachingAllocator.h"
 
 namespace torch::backend::memory {
 
@@ -317,8 +317,7 @@ PyObject* THPModule_memoryStats(PyObject* _unused, PyObject* arg) {
     return dict;
   };
 
-  const DeviceStats stats =
-      c10::backend::Allocator::getDeviceStats(device);
+  const DeviceStats stats = c10::backend::Allocator::getDeviceStats(device);
 
   py::dict result;
   result["num_alloc_retries"] = stats.num_alloc_retries;

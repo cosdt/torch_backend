@@ -134,7 +134,7 @@ bool OpPreparation::is_scalar_wrapped_to_tensor(const at::Tensor& tensor) {
 c10::SmallVector<int64_t, 5> OpPreparation::get_tensor_desc_base_sizes(
     const at::Tensor& tensor) {
   return c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
-      ->get_npu_desc()
+      ->get_device_desc()
       .base_sizes_;
 }
 

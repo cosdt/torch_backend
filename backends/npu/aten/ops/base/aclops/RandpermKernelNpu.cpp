@@ -28,8 +28,9 @@ at::Tensor& randperm_out_nocheck(
     at::Tensor& result,
     int64_t n,
     c10::optional<at::Generator> gen) {
-  auto gen_val = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
-      gen, c10::backend::detail::getDefaultNPUGenerator());
+  auto gen_val =
+      at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
+          gen, c10::backend::detail::getDefaultGenerator());
   auto pair = gen_val->philox_engine_inputs(10);
   const int64_t seed = static_cast<int64_t>(pair.first);
   const int64_t offset = static_cast<int64_t>(pair.second);

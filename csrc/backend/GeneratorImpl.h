@@ -10,12 +10,12 @@
 
 namespace c10::backend {
 /**
- * Note [NPU Graph-safe RNG states]
+ * Note [Device Graph-safe RNG states]
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Strategy:
  * ~~~~~~~~~
- * A NPU graph containing multiple RNG ops behaves like a
+ * A device graph containing multiple RNG ops behaves like a
  * single giant kernel from the perspective of ops external
  * to the graph.  During graph capture, logic below records
  * the total of all offset increments that occur in the graphed
@@ -23,22 +23,21 @@ namespace c10::backend {
  * entire graph.
  *
  * When the graph reruns, the logic that reruns it
- * increments this device's NPU generator's offset
+ * increments this device generator's offset
  * by that total.
  *
  * Meanwhile, within the graph, at capture time, instead of
- * populating PhiloxNpuStates with the uint64_t offset pulled
- * directly from the global state, PhiloNpuState instead
+ * populating PhiloxStates with the uint64_t offset pulled
+ * directly from the global state, PhiloState instead
  * holds a pointer to one-element stream-local int64_t device tensor
  * holding an initial offset value, and a uint64_t holding an
  * intra-graph offset. (The intra-graph offset starts from zero
  * when capture begins.)  In each consumer kernel,
- * at::npu::philox::unpack computes the offset to use for this kernel
+ * at::device::philox::unpack computes the offset to use for this kernel
  * as intra-graph offset + *initial offset.
  *
  * When the graph reruns, the logic that reruns it first
- * fill_s the initial offset tensor with this device's
- * NPU generator's current offset.
+ * fill_s the initial offset tensor with this device generator's current offset.
  *
  * The control flow above ensures graphed execution is bitwise
  * identical to eager execution as long as RNG ops are enqueued
@@ -47,20 +46,20 @@ namespace c10::backend {
  *
  * Usage:
  * ~~~~~~
- * PhiloxNPUState in this file, and unpack() in
- * npu/NPUGraphsUtils.cuh allow non-divergent use of
- * NPUGeneratorImpl whether graph capture is underway or not.
+ * PhiloxState in this file, and unpack() in
+ * GraphsUtils.cuh allow non-divergent use of
+ * DeviceGeneratorImpl whether graph capture is underway or not.
  *
- * Each PhiloxNpuState instance should be used for one and only one
+ * Each PhiloxState instance should be used for one and only one
  * consumer kernel.
  *
- * Example (see e.g. native/npu/Dropout.cu):
+ * Example (see e.g. native/device/Dropout.cu):
  *
- * #include <ATen/NPUGeneratorImpl.h>
- * #include <ATen/npu/NPUGraphsUtils.cuh>
+ * #include <ATen/GeneratorImpl.h>
+ * #include <ATen/device/GraphsUtils.cuh>
  *
- * __global__ void kernel(..., PhiloxnpuState philox_args) {
- *   auto seeds = at::npu::philox::unpack(philox_args);
+ * __global__ void kernel(..., PhiloxState philox_args) {
+ *   auto seeds = at::device::philox::unpack(philox_args);
  *   IndexType idx = blockIdx.x * blockDim.x + threadIdx.x;
  *   curandStatePhilox4_32_10_t state;
  *   curand_init(std::get<0>(seeds), // seed
@@ -71,13 +70,13 @@ namespace c10::backend {
  * }
  *
  * host_caller(...) {
- *   PhiloxnpuState rng_engine_inputs;
+ *   PhiloxState rng_engine_inputs;
  *   {
  *     // See Note [Acquire lock when using random generators]
  *     std::lock_guard<std::mutex> lock(gen->mutex_);
  *
  *     // gen could be HostState or DevState here! No divergent code needed!
- *     rng_engine_inputs = gen->philox_npu_state(offset_increment);
+ *     rng_engine_inputs = gen->philox_state(offset_increment);
  *   }
  *   kernel<<<...>>>(..., rng_engine_inputs);
  * }
@@ -85,16 +84,16 @@ namespace c10::backend {
  */
 
 // Stores state values. Passed as a kernel argument. See "Usage:" above.
-struct PhiloxNpuState {
-  PhiloxNpuState() = default;
-  PhiloxNpuState(const PhiloxNpuState&) = default;
+struct PhiloxState {
+  PhiloxState() = default;
+  PhiloxState(const PhiloxState&) = default;
   // Called if graph capture is not underway
-  PhiloxNpuState(uint64_t seed, uint64_t offset) {
+  PhiloxState(uint64_t seed, uint64_t offset) {
     seed_ = seed;
     offset_.val = offset;
   }
   // Called if graph capture is underway
-  PhiloxNpuState(
+  PhiloxState(
       uint64_t seed,
       int64_t* offset_extragraph,
       uint32_t offset_intragraph) {
@@ -104,7 +103,7 @@ struct PhiloxNpuState {
     captured_ = true;
   }
 
-  // Public members, directly accessible by at::Npu::philox::unpack.
+  // Public members, directly accessible by at::device::philox::unpack.
   // If we made them private with getters/setters, the getters/setters
   // would have to be __device__, and we can't declare __device__ in ATen.
   union Payload {
@@ -118,29 +117,28 @@ struct PhiloxNpuState {
   bool captured_ = false;
 };
 
-struct TORCH_BACKEND_API NPUGeneratorImpl
+struct TORCH_BACKEND_API DeviceGeneratorImpl
     : public c10::backend::Generator::GeneratorImpl {
   // Constructors
-  NPUGeneratorImpl(c10::DeviceIndex device_index = -1);
-  ~NPUGeneratorImpl() = default;
+  DeviceGeneratorImpl(c10::DeviceIndex device_index = -1);
+  ~DeviceGeneratorImpl() = default;
 
-  // NPUGeneratorImpl methods
-  std::shared_ptr<NPUGeneratorImpl> clone() const;
+  std::shared_ptr<DeviceGeneratorImpl> clone() const;
   void set_state(const c10::TensorImpl& new_state) override;
   c10::intrusive_ptr<c10::TensorImpl> get_state() const override;
   void set_philox_offset_per_thread(uint64_t offset);
   uint64_t philox_offset_per_thread() const;
   void capture_prologue(int64_t* offset_extragraph);
   uint64_t capture_epilogue();
-  PhiloxNpuState philox_npu_state(uint64_t increment);
+  PhiloxState philox_state(uint64_t increment);
 
   // Temporarily accommodates call sites that use philox_engine_inputs.
-  // Allows incremental refactor of call sites to use philox_npu_state.
+  // Allows incremental refactor of call sites to use philox_state.
   std::pair<uint64_t, uint64_t> philox_engine_inputs(uint64_t increment);
   static c10::DeviceType device_type();
 
  private:
-  NPUGeneratorImpl* clone_impl() const override;
+  DeviceGeneratorImpl* clone_impl() const override;
   uint64_t seed_ = c10::default_rng_seed_val;
   uint64_t philox_offset_per_thread_ = 0;
   int64_t* offset_extragraph_ = nullptr;
@@ -149,9 +147,9 @@ struct TORCH_BACKEND_API NPUGeneratorImpl
 };
 
 namespace detail {
-TORCH_BACKEND_API const at::Generator& getDefaultNPUGenerator(
+TORCH_BACKEND_API const at::Generator& getDefaultGenerator(
     c10::DeviceIndex device_index = -1);
-TORCH_BACKEND_API at::Generator createNPUGenerator(
+TORCH_BACKEND_API at::Generator createGenerator(
     c10::DeviceIndex device_index = -1);
 
 } // namespace detail

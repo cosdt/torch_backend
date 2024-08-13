@@ -7,7 +7,7 @@
 namespace c10::backend {
 
 // TensorImpl class is derived from c10::TensorImpl, and it is only used to
-// handle an NPU tensor. Its scope is just to handle an NPUTensor.
+// handle an device tensor.
 class TensorImpl : public c10::TensorImpl {
  public:
   explicit TensorImpl(

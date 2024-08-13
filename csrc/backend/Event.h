@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <utility>
-#include "csrc/backend/NPUGuard.h"
+#include "csrc/backend/DeviceGuard.h"
 #include "csrc/backend/Stream.h"
 #include "csrc/core/Macros.h"
 
@@ -13,32 +13,32 @@
 
 namespace c10::backend {
 /*
- * NPUEvents are movable not copyable wrappers around NPU's events.
- * NPUEvents are constructed lazily when first recorded.
+ * Events are movable not copyable wrappers around device's events.
+ * Events are constructed lazily when first recorded.
  */
-struct C10_BACKEND_API NPUEvent {
+struct C10_BACKEND_API Event {
   // Constructors
   // Default value for `flags` is specified below
-  NPUEvent() noexcept = default;
-  NPUEvent(unsigned int flags) noexcept : flags_{flags} {}
+  Event() noexcept = default;
+  Event(unsigned int flags) noexcept : flags_{flags} {}
 
-  ~NPUEvent() {
+  ~Event() {
     try {
       if (is_created_) {
-        NPUGuard guard(device_index_);
+        DeviceGuard guard(device_index_);
         aclrtDestroyEvent(event_);
       }
     } catch (...) { /* No throw */
     }
   }
 
-  NPUEvent(const NPUEvent&) = delete;
-  NPUEvent& operator=(const NPUEvent&) = delete;
+  Event(const Event&) = delete;
+  Event& operator=(const Event&) = delete;
 
-  NPUEvent(NPUEvent&& other) noexcept {
+  Event(Event&& other) noexcept {
     moveHelper(std::move(other));
   }
-  NPUEvent& operator=(NPUEvent&& other) noexcept {
+  Event& operator=(Event&& other) noexcept {
     if (this != &other) {
       moveHelper(std::move(other));
     }
@@ -103,27 +103,27 @@ struct C10_BACKEND_API NPUEvent {
         " does not match recording stream's device ",
         stream.device_index(),
         ".");
-    NPUGuard guard(device_index_);
+    DeviceGuard guard(device_index_);
     aclrtRecordEvent(event_, stream);
     was_recorded_ = true;
   }
 
   void block(const Stream& stream) {
     if (is_created_) {
-      NPUGuard guard(stream.device_index());
+      DeviceGuard guard(stream.device_index());
       aclrtStreamWaitEvent(stream, event_);
     }
   }
 
-  float elapsed_time(const NPUEvent& other) const {
+  float elapsed_time(const Event& other) const {
     TORCH_CHECK(
         is_created_ && other.isCreated(),
         "Both events must be recorded before calculating elapsed time.");
     float time_ms = 0;
     // We do not strictly have to set the device index to the same as our event,
     // but if we don't and the current device is not initialized, it will
-    // create a new NPU context, which will consume a lot of memory.
-    NPUGuard guard(device_index_);
+    // create a new context, which will consume a lot of memory.
+    DeviceGuard guard(device_index_);
     // raise error if either event is recorded but not yet completed
     aclrtEventElapsedTime(&time_ms, event_, other.event_);
     return time_ms;
@@ -135,7 +135,7 @@ struct C10_BACKEND_API NPUEvent {
     }
   }
 
-  // npu do not support IpcEventHandle until now
+  // do not support IpcEventHandle until now
 
  private:
   unsigned int flags_ = ACL_EVENT_SYNC;
@@ -146,12 +146,12 @@ struct C10_BACKEND_API NPUEvent {
 
   void createEvent(c10::DeviceIndex device_index) {
     device_index_ = device_index;
-    NPUGuard guard(device_index_);
+    DeviceGuard guard(device_index_);
     aclrtCreateEventExWithFlag(&event_, flags_);
     is_created_ = true;
   }
 
-  void moveHelper(NPUEvent&& other) {
+  void moveHelper(Event&& other) {
     std::swap(flags_, other.flags_);
     std::swap(is_created_, other.is_created_);
     std::swap(was_recorded_, other.was_recorded_);

@@ -74,7 +74,7 @@ class PermuteContiguousOpt : public ContiguousOpt {
       const c10::SmallVector<int64_t, MAX_DIM>& sizes) {
     // Refresh src Tensor to match output self Tensor
     auto src_desc_stored =
-        c10::backend::NPUBridge::GetNpuStorageImpl(src)->get_npu_desc();
+        c10::backend::NPUBridge::GetNpuStorageImpl(src)->get_device_desc();
     auto& src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
     src_desc.base_sizes_ = sizes;
     src_desc.base_strides_ = StorageDescHelper::ComputeStrideFromShape(

@@ -1,6 +1,6 @@
-#include "csrc/backend/NPUHooks.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Hooks.h"
+#include "csrc/backend/CachingHostAllocator.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/StorageImpl.h"
 #include "csrc/core/Register.h"
 
@@ -11,21 +11,21 @@
 
 namespace c10::backend {
 
-TORCH_DECLARE_REGISTRY(PrivateUse1HooksRegistry, NPUHooks, NPUHooksArgs);
+TORCH_DECLARE_REGISTRY(PrivateUse1HooksRegistry, Hooks, HooksArgs);
 
-AT_REGISTER_PRIVATEUSE1_HOOKS_INTERFACE(c10::backend::get_npu_hooks());
+AT_REGISTER_PRIVATEUSE1_HOOKS_INTERFACE(c10::backend::get_device_hooks());
 
-C10_DEFINE_REGISTRY(PrivateUse1HooksRegistry, NPUHooks, NPUHooksArgs)
+C10_DEFINE_REGISTRY(PrivateUse1HooksRegistry, Hooks, HooksArgs)
 
-void NPUHooks::initPrivateUse1() const {
+void Hooks::initPrivateUse1() const {
   c10::npu::TryInitDevice();
 }
 
-bool NPUHooks::hasPrimaryContext(c10::DeviceIndex device_index) const {
+bool Hooks::hasPrimaryContext(c10::DeviceIndex device_index) const {
   return hasPrimaryContext(device_index);
 }
 
-void NPUHooks::resizePrivateUse1Bytes(
+void Hooks::resizePrivateUse1Bytes(
     const c10::Storage& storage,
     size_t new_bytes) const {
   auto storage_impl = static_cast<c10::backend::DeviceStorageImpl*>(
@@ -40,18 +40,18 @@ void NPUHooks::resizePrivateUse1Bytes(
   at_npu::native::storage_resize_npu(*storage_impl, new_bytes, new_size);
 }
 
-bool NPUHooks::isPinnedPtr(const void* data) const {
+bool Hooks::isPinnedPtr(const void* data) const {
   return c10::backend::HostAllocator::isPinndPtr(data);
 }
 
-at::Allocator* NPUHooks::getPinnedMemoryAllocator() const {
+at::Allocator* Hooks::getPinnedMemoryAllocator() const {
   return c10::backend::HostAllocator::getAllocator();
 }
 
-at::PrivateUse1HooksInterface* get_npu_hooks() {
-  static at::PrivateUse1HooksInterface* npu_hooks;
+at::PrivateUse1HooksInterface* get_device_hooks() {
+  static at::PrivateUse1HooksInterface* device_hooks;
   static c10::once_flag once;
-  c10::call_once(once, [] { npu_hooks = new NPUHooks(); });
-  return npu_hooks;
+  c10::call_once(once, [] { device_hooks = new Hooks(); });
+  return device_hooks;
 }
 } // namespace c10::backend

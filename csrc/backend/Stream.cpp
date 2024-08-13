@@ -4,8 +4,8 @@
 #include <iostream>
 #include <vector>
 
-#include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUGuard.h"
+#include "csrc/backend/DeviceGuard.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/Stream.h"
 
 // TODO(FFFrog):
@@ -175,7 +175,7 @@ static void initSingleStream(int p, c10::DeviceIndex device_index, int i) {
 static void initDeviceStreamState(c10::DeviceIndex device_index) {
   // Switches to the requested device so streams are properly associated
   // with it.
-  NPUGuard device_guard{device_index};
+  DeviceGuard device_guard{device_index};
   for (const auto i : c10::irange(kStreamsPerPool)) {
     for (const auto p : c10::irange(max_compile_time_stream_priorities)) {
       initSingleStream(p, device_index, i);

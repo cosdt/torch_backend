@@ -3,7 +3,7 @@
 #include <torch/csrc/Device.h>
 #include <torch/csrc/THP.h>
 #include <torch/csrc/utils/python_arg_parser.h>
-#include "csrc/backend/NPUGuard.h"
+#include "csrc/backend/DeviceGuard.h"
 
 #include "torch_backend/csrc/backend/Event.h"
 #include "torch_backend/csrc/backend/Stream.h"
@@ -44,14 +44,14 @@ static PyObject* THNPEvent_pynew(
   unsigned int flags = 0;
   flags =
       enable_timing ? (ACL_EVENT_TIME_LINE | ACL_EVENT_SYNC) : ACL_EVENT_SYNC;
-  new (&self->npu_event) c10::backend::NPUEvent(flags);
+  new (&self->npu_event) c10::backend::Event(flags);
 
   return (PyObject*)ptr.release();
   END_HANDLE_TH_ERRORS
 }
 
 static void THNPEvent_dealloc(THNPEvent* self) {
-  self->npu_event.~NPUEvent();
+  self->npu_event.~Event();
   Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -180,8 +180,7 @@ void init(PyObject* module) {
     throw python_error();
   }
   Py_INCREF(&THNPEventType);
-  if (PyModule_AddObject(module, "_EventBase", (PyObject*)&THNPEventType) <
-      0) {
+  if (PyModule_AddObject(module, "_EventBase", (PyObject*)&THNPEventType) < 0) {
     throw python_error();
   }
 }

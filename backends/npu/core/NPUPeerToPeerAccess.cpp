@@ -5,7 +5,7 @@
 #include "acl/include/acl/acl_rt.h"
 #include "core/NPUException.h"
 #include "core/NPUPeerToPeerAccess.h"
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Functions.h"
 
 // A maximum of 8 P2P links can be created on a NPU device
 #define C10_P2P_ACCESS_MAX_NPUS 8

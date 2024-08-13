@@ -2,7 +2,7 @@
 #include <vector>
 
 #include <c10/util/CallOnce.h>
-#include "csrc/backend/NPUContext.h"
+#include "csrc/backend/Context.h"
 
 namespace c10::backend {
 namespace {
@@ -17,9 +17,9 @@ namespace {
 c10::DeviceIndex num_devices = -1;
 c10::once_flag init_flag;
 std::deque<c10::once_flag> device_prop_flags;
-std::vector<NPUDeviceProp> device_properties;
+std::vector<DeviceProp> device_properties;
 
-void initNPUContextVectors() {
+void initContextVectors() {
   num_devices = c10::backend::device_count();
   device_prop_flags.resize(num_devices);
   device_properties.resize(num_devices);
@@ -40,8 +40,8 @@ inline void check_device(c10::DeviceIndex device) {
 }
 } // anonymous namespace
 
-NPUDeviceProp* getDeviceProperties(c10::DeviceIndex device) {
-  c10::call_once(init_flag, initNPUContextVectors);
+DeviceProp* getDeviceProperties(c10::DeviceIndex device) {
+  c10::call_once(init_flag, initContextVectors);
   if (device == -1)
     device = c10::backend::current_device();
   check_device(device);

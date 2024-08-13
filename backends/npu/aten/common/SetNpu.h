@@ -5,7 +5,7 @@
 #include "aten/common/ResizeNpu.h"
 #include "core/NPUBridge.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/DeviceCachingAllocator.h"
 #include "csrc/backend/StorageImpl.h"
 #include "framework/StorageDescHelper.h"
 

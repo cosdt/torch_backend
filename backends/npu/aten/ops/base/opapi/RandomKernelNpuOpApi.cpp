@@ -57,8 +57,8 @@ at::Tensor& random_op_api_(
     int64_t from,
     int64_t to,
     c10::optional<at::Generator> gen_) {
-  auto gen = at::get_generator_or_default<c10::backend::NPUGeneratorImpl>(
-      gen_, c10::backend::detail::getDefaultNPUGenerator());
+  auto gen = at::get_generator_or_default<c10::backend::DeviceGeneratorImpl>(
+      gen_, c10::backend::detail::getDefaultGenerator());
   auto pair = gen->philox_engine_inputs(10);
   EXEC_NPU_CMD(aclnnInplaceRandom, self, from, to, pair.first, pair.second);
   return self;

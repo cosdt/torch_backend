@@ -14,7 +14,7 @@ ContiguousTensorDesc TransContiguous::GetTensorDescInfo(
     const at::Tensor& src,
     const OptimizationCases& opt_cases) {
   auto src_base_info =
-      c10::backend::NPUBridge::GetNpuStorageImpl(src)->get_npu_desc();
+      c10::backend::NPUBridge::GetNpuStorageImpl(src)->get_device_desc();
   c10::SmallVector<int64_t, MAX_DIM> src_size_inferred;
   c10::SmallVector<int64_t, MAX_DIM> src_stride_inferred;
   c10::SmallVector<int64_t, MAX_DIM> src_storage_size_inferred =
@@ -55,7 +55,7 @@ bool TransContiguous::CheckClone(const at::Tensor& src, at::Tensor& self) {
   if (StorageDescHelper::OffsetAreMatch(&self) && self.is_contiguous() &&
       src.sizes().equals(self.sizes()) &&
       self.sizes().equals(c10::backend::NPUBridge::GetNpuStorageImpl(self)
-                              ->get_npu_desc()
+                              ->get_device_desc()
                               .base_sizes_)) {
     return true;
   }
@@ -194,7 +194,7 @@ c10::optional<at::Tensor> TransContiguous::ContiguousOptimizeWithAnyFormat(
       src.sizes(),
       src.options(),
       c10::backend::NPUBridge::GetNpuStorageImpl(src)
-          ->get_npu_desc()
+          ->get_device_desc()
           .npu_format_);
   ContiguousTensorDesc src_desc = GetTensorDescInfo(src, opt_cases);
   if (cached_contiguous_optimize_with_anyformat_(self, src, src_desc)) {
