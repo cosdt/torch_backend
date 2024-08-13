@@ -18,10 +18,10 @@
 
 namespace c10::backend::HostAllocator {
 
-using Block = at::HostBlock<NPUStream>;
+using Block = at::HostBlock<Stream>;
 struct HostAllocator
     : public at::CachingHostAllocatorImpl<
-          NPUStream,
+          Stream,
           c10::backend::CachingAllocator::EventPool<NPUEvent>::Event> {
  public:
   bool isPinndPtr(const void* ptr) {
@@ -49,7 +49,7 @@ struct HostAllocator
   void record_stream(
       std::optional<std::vector<
           c10::backend::CachingAllocator::EventPool<NPUEvent>::Event>>& events,
-      NPUStream stream) override {
+      Stream stream) override {
     auto event = create_event_internal(stream.device_index());
     event->record(stream);
     events->push_back(std::move(event));
@@ -104,7 +104,7 @@ void raw_local_deleter(void* ptr) {
   npu_caching_host_allocator.free(ptr);
 }
 
-bool recordEvent(void* ptr, void* ctx, c10::backend::NPUStream stream) {
+bool recordEvent(void* ptr, void* ctx, c10::backend::Stream stream) {
   return npu_caching_host_allocator.record_event(ptr, ctx, stream);
 }
 

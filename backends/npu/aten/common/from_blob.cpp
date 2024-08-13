@@ -5,7 +5,7 @@
 #include "core/NPUException.h"
 #include "csrc/backend/NPUCachingAllocator.h"
 #include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/StorageImpl.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/utils/OpAdapter.h"
 
@@ -43,7 +43,7 @@ at::Tensor TensorMaker::make_tensor() {
   c10::DataPtr data_ptr{data_, *device_};
 
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<c10::backend::NPUStorageImpl>(
+      c10::make_intrusive<c10::backend::DeviceStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           std::move(data_ptr),
@@ -51,7 +51,7 @@ at::Tensor TensorMaker::make_tensor() {
           true);
 
   auto tensor =
-      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::TensorImpl>(storage_impl, dtype);
 
   at_npu::native::StorageDescHelper::SetDesc(tensor, sizes_, tensor.strides());
 

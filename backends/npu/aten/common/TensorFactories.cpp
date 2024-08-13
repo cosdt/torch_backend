@@ -22,8 +22,8 @@
 #include "core/NPUException.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUCachingAllocator.h"
-#include "csrc/backend/NPUStorageImpl.h"
-#include "csrc/backend/NPUTensorImpl.h"
+#include "csrc/backend/StorageImpl.h"
+#include "csrc/backend/TensorImpl.h"
 #include "framework/InferFormat.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/contiguous/ContiguousOpt.h"
@@ -126,7 +126,7 @@ at::Tensor NPUNativeFunctions::empty(
   auto dtype = c10::scalarTypeToTypeMeta(dtype_or_default(dtype_opt));
   int64_t size_bytes = nelements * dtype.itemsize();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<c10::backend::NPUStorageImpl>(
+      c10::make_intrusive<c10::backend::DeviceStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           allocator->allocate(size_bytes),
@@ -134,7 +134,7 @@ at::Tensor NPUNativeFunctions::empty(
           true);
 
   auto tensor =
-      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::TensorImpl>(storage_impl, dtype);
 
   // Default at::TensorImpl has size [0]
   if (size.size() != 1 || size[0] != 0) {
@@ -320,7 +320,7 @@ at::Tensor NPUNativeFunctions::empty_with_format(
   int64_t nelements = StorageDescHelper::GetMemorySize(size, format, dtype);
   int64_t size_bytes = nelements * dtype.itemsize();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<c10::backend::NPUStorageImpl>(
+      c10::make_intrusive<c10::backend::DeviceStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes,
           allocator->allocate(size_bytes),
@@ -328,9 +328,9 @@ at::Tensor NPUNativeFunctions::empty_with_format(
           true);
 
   auto tensor =
-      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::TensorImpl>(storage_impl, dtype);
 
-  // Default NPUTensorImpl has size [0]
+  // Default TensorImpl has size [0]
   if (size.size() != 1 || size[0] != 0) {
     tensor.unsafeGetTensorImpl()->set_sizes_contiguous(size);
   }

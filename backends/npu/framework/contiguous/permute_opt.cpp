@@ -1,6 +1,6 @@
-#include "csrc/backend/NPUStorageImpl.h"
 #include "aten/OpInterface.h"
 #include "core/NPUBridge.h"
+#include "csrc/backend/StorageImpl.h"
 #include "framework/contiguous/ContiguousOpt.h"
 #include "framework/utils/OpAdapter.h"
 

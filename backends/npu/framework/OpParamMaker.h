@@ -1,14 +1,14 @@
 #ifndef __PULGIN_NATIVE_UTILS_OP_PARAM_MAKER__
 #define __PULGIN_NATIVE_UTILS_OP_PARAM_MAKER__
 
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 
 #include <thread>
-#include "csrc/backend/NPUStorageImpl.h"
-#include "csrc/core/Macros.h"
 #include "acl/include/acl/acl_base.h"
 #include "core/interface/AsyncTaskQueueInterface.h"
 #include "core/register/OptionsManager.h"
+#include "csrc/backend/StorageImpl.h"
+#include "csrc/core/Macros.h"
 #include "framework/NPUDefine.h"
 #include "framework/interface/AclOpCompileInterface.h"
 #include "framework/interface/EnvVariables.h"
@@ -55,7 +55,7 @@ class AclTensorDescMaker {
 
   AclTensorDescMaker& Create(
       aclDataType dataType,
-      c10::backend::NPUStorageDesc storageDesc) {
+      c10::backend::StorageDesc storageDesc) {
     c10::SmallVector<int64_t, 5> dims;
     // if aclDataType is ACL_STRING, storageDims is empty.
     if (dataType != ACL_STRING) {

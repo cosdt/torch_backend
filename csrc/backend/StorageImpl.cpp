@@ -1,11 +1,11 @@
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/StorageImpl.h"
 #include "csrc/core/Register.h"
 
 namespace c10::backend {
 
 C10_SET_STORAGE_IMPL_CREATE(&c10::backend::make_npu_storage_impl);
 
-NPUStorageImpl::NPUStorageImpl(
+DeviceStorageImpl::DeviceStorageImpl(
     use_byte_size_t use_byte_size,
     size_t size_bytes,
     at::DataPtr data_ptr,
@@ -18,7 +18,7 @@ NPUStorageImpl::NPUStorageImpl(
           allocator,
           resizable) {}
 
-void NPUStorageImpl::release_resources() {
+void DeviceStorageImpl::release_resources() {
   StorageImpl::release_resources();
 }
 
@@ -31,15 +31,15 @@ c10::intrusive_ptr<c10::StorageImpl> make_npu_storage_impl(
   if (data_ptr == nullptr) {
     data_ptr = allocator->allocate(size_bytes.as_int_unchecked());
   }
-  // Correctly create NPUStorageImpl object.
+  // Correctly create DeviceStorageImpl object.
   c10::intrusive_ptr<c10::StorageImpl> npu_storage_impl =
-      c10::make_intrusive<NPUStorageImpl>(
+      c10::make_intrusive<DeviceStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           size_bytes.as_int_unchecked(),
           std::move(data_ptr),
           allocator,
           resizable);
-  // There is no need to consider the NPUStorageDesc information, it will be
+  // There is no need to consider the StorageDesc information, it will be
   // carried out in the subsequent processing.
   return npu_storage_impl;
 }

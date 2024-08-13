@@ -3,7 +3,7 @@
 #include "core/NPUBridge.h"
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/StorageImpl.h"
 #include "framework/FormatHelper.h"
 #include "framework/InferFormat.h"
 #include "framework/utils/CalcuOpUtil.h"
@@ -459,7 +459,7 @@ at::Tensor OpPreparation::unsafe_empty_workspace(uint64_t workspace_size) {
   ASCEND_LOGD("Alloc workspace %zu bytes unsafely.", workspace_size);
   c10::Allocator* allocator = c10::backend::Allocator::get();
   c10::intrusive_ptr<c10::StorageImpl> storage_impl =
-      c10::make_intrusive<c10::backend::NPUStorageImpl>(
+      c10::make_intrusive<c10::backend::DeviceStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           workspace_size,
           allocator->allocate(workspace_size),
@@ -467,7 +467,7 @@ at::Tensor OpPreparation::unsafe_empty_workspace(uint64_t workspace_size) {
           true);
   static auto dtype = c10::scalarTypeToTypeMeta(dtype_or_default(at::kByte));
   auto tensor =
-      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::TensorImpl>(storage_impl, dtype);
   tensor.unsafeGetTensorImpl()->empty_tensor_restride(
       c10::MemoryFormat::Contiguous);
   return tensor;

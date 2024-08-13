@@ -36,7 +36,7 @@ std::tuple<at::Tensor, at::Tensor> _npu_dropout(
       at_npu::native::OpPreparation::apply_tensor_without_format(self);
   at::Tensor mask;
 
-  auto original_stream = c10::backend::getCurrentNPUStream();
+  auto original_stream = c10::backend::getCurrentStream();
   mask = at_npu::native::OpPreparation::apply_tensor_without_format(
       {length}, self.options().dtype(at::kByte));
   at::IntArrayRef shapeArray(self.sizes());

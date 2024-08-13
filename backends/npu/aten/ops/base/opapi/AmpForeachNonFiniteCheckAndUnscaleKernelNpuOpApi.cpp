@@ -47,7 +47,7 @@ static bool amp_foreach_non_finite_check(at::TensorList& scaled_grads) {
   uint64_t buff_size = 64;
   void* host_mem_out = nullptr;
   void* device_mem_out = nullptr;
-  aclrtStream aclStream = c10::backend::getCurrentNPUStream().stream();
+  aclrtStream aclStream = c10::backend::getCurrentStream().stream();
 
   aclError err = aclrtMallocHost((void**)&host_mem_out, buff_size);
   NON_FINITE_CHECK_RESULT_ESTIMATE(

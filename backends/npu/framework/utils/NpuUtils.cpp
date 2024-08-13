@@ -5,7 +5,7 @@
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/StorageImpl.h"
 #include "framework/FormatHelper.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/contiguous/ContiguousOpt.h"
@@ -126,7 +126,7 @@ void NpuUtils::RefreshFormat(const at::Tensor& tensor) {
 }
 
 at::Tensor metadata_convert_match(const at::Tensor& src, bool numelEq) {
-  // Only when a tensor monopolizes a storage can NpuStorageDesc be
+  // Only when a tensor monopolizes a storage can StorageDesc be
   // refreshed. When the original format is not NCHW, the npu_format_cast to
   // NCHW will generate a temporary tensor, which always monopolizes its own
   // storage.
@@ -208,8 +208,7 @@ at::Tensor NpuUtils::format_contiguous(const at::Tensor& src) {
   // case2:meta data not match, sizes or strides of presentation
   // layer is different from that of storage layer
   if (!StorageDescHelper::MetaDataAreMatch(&src)) {
-    // Fix not match case2, tensor should have matched metadata and
-    // NPUStorageDesc.
+    // Fix not match case2, tensor should have matched metadata and StorageDesc.
     RECORD_FUNCTION("format_contiguous", vector<c10::IValue>({src}));
     return metadata_convert_match_without_copy_optimize(src);
   }
@@ -236,8 +235,7 @@ at::Tensor NpuUtils::format_contiguous_add_copy_optimize(
   // case2:meta data not match, sizes or strides of presentation
   // layer is different from that of storage layer
   if (!StorageDescHelper::MetaDataAreMatch(&src)) {
-    // Fix not match case2, tensor should have matched metadata and
-    // NPUStorageDesc.
+    // Fix not match case2, tensor should have matched metadata and StorageDesc.
     RECORD_FUNCTION("format_contiguousV2", vector<c10::IValue>({src}));
     return metadata_convert_match_with_copy_optimize(src);
   }

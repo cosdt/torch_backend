@@ -14,15 +14,15 @@ namespace {
  * Device properties are lazily initialized when the first time properties are
  * requested for a device.
  */
-c10::DeviceIndex num_npus = -1;
+c10::DeviceIndex num_devices = -1;
 c10::once_flag init_flag;
 std::deque<c10::once_flag> device_prop_flags;
 std::vector<NPUDeviceProp> device_properties;
 
 void initNPUContextVectors() {
-  num_npus = c10::backend::device_count();
-  device_prop_flags.resize(num_npus);
-  device_properties.resize(num_npus);
+  num_devices = c10::backend::device_count();
+  device_prop_flags.resize(num_devices);
+  device_properties.resize(num_devices);
 }
 
 void initDeviceProperty(c10::DeviceIndex device) {
@@ -31,11 +31,11 @@ void initDeviceProperty(c10::DeviceIndex device) {
 
 inline void check_device(c10::DeviceIndex device) {
   TORCH_CHECK(
-      device >= 0 && device < num_npus,
+      device >= 0 && device < num_devices,
       "device is out of range, device is ",
       static_cast<int>(device),
       ", total number of device is ",
-      static_cast<int>(num_npus),
+      static_cast<int>(num_devices),
       ".");
 }
 } // anonymous namespace

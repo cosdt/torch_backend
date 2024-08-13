@@ -97,8 +97,8 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
           self.device().index());
     }
     guard.reset_device(self.device());
-    c10::backend::NPUStream dst_stream =
-        c10::backend::getCurrentNPUStream(self.device().index());
+    c10::backend::Stream dst_stream =
+        c10::backend::getCurrentStream(self.device().index());
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(dst_stream, -1));
     guard.reset_device(src.device());
   }
@@ -110,7 +110,7 @@ void copy_d2d(at::Tensor& self, const at::Tensor& src, bool non_blocking) {
   copy_d2d_dtype(self, src, non_blocking);
   // synchronize src stream for different devices copy
   if (self.device().index() != src.device().index()) {
-    c10::backend::NPUStream copy_stream = c10::backend::getCurrentNPUStream();
+    c10::backend::Stream copy_stream = c10::backend::getCurrentStream();
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(copy_stream, -1));
   }
 }
@@ -124,7 +124,7 @@ void copy_between_host_and_device(
     aclrtMemcpyKind kind,
     bool non_blocking) {
   int64_t nbytes = dst.numel() * dst.element_size();
-  c10::backend::NPUStream stream = c10::backend::getCurrentNPUStream();
+  c10::backend::Stream stream = c10::backend::getCurrentStream();
 
   if (non_blocking) {
     auto ret = CalcuOpUtil::LaunchAsyncCopyTaskWithModeSwitch(
@@ -278,7 +278,7 @@ bool can_use_memcpy(at::Tensor& dst, const at::Tensor& src) {
       return false;
     }
     // Make sure that copy the whole memory.
-    // we just need to compare one of them, because of the NpuStorageDesc
+    // we just need to compare one of them, because of the StorageDesc
     // and metadata(sizes and stride) of src and dst are same.
     if (StorageDescHelper::GetValidMemorySize(src) != src.numel()) {
       return false;

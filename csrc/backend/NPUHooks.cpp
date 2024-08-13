@@ -1,7 +1,7 @@
 #include "csrc/backend/NPUHooks.h"
 #include "csrc/backend/NPUCachingHostAllocator.h"
 #include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/backend/StorageImpl.h"
 #include "csrc/core/Register.h"
 
 // TODO(FFFrog):
@@ -28,7 +28,7 @@ bool NPUHooks::hasPrimaryContext(c10::DeviceIndex device_index) const {
 void NPUHooks::resizePrivateUse1Bytes(
     const c10::Storage& storage,
     size_t new_bytes) const {
-  auto storage_impl = static_cast<c10::backend::NPUStorageImpl*>(
+  auto storage_impl = static_cast<c10::backend::DeviceStorageImpl*>(
       storage.unsafeGetStorageImpl());
   auto format = storage_impl->npu_desc_.npu_format_;
   if (!at_npu::native::FormatHelper::IsBaseFormatType(format)) {

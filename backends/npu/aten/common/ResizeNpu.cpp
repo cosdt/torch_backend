@@ -1,8 +1,8 @@
 #include <ATen/ATen.h>
 #include <ATen/NamedTensorUtils.h>
 
-#include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "aten/common/ResizeNpu.h"
+#include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "framework/FormatHelper.h"
 
 namespace at_npu {
@@ -39,7 +39,7 @@ const at::Tensor& NPUNativeFunctions::resize_(
     return resize_named_tensor_(self, size, format);
   }
   // because of resize _impl_npu_ only support at base format, so
-  // no need to reflush NpuStorageDesc here.
+  // no need to reflush StorageDesc here.
   at::Tensor temp_self = self;
   if (!FormatHelper::IsBaseFormatType(self)) {
     NPUNativeFunctions::npu_format_cast_(

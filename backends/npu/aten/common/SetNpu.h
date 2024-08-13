@@ -2,11 +2,11 @@
 #include <ATen/NativeFunctions.h>
 #include <ATen/native/Resize.h>
 
-#include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "aten/common/ResizeNpu.h"
 #include "core/NPUBridge.h"
-#include "csrc/backend/NPUStorageImpl.h"
+#include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUCachingAllocator.h"
+#include "csrc/backend/StorageImpl.h"
 #include "framework/StorageDescHelper.h"
 
 namespace at_npu {

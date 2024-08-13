@@ -42,12 +42,12 @@ at::Tensor& NPUNativeFunctions::set_(
     StorageDescHelper::CopyDesc(self, src);
     return self;
   }
-  // NPUStorageImpl create by constructor, NPUStorageDesc is not initialized by
-  // SetDesc.
+  // DeviceStorageImpl create by constructor, DeviceStorageImpl is not
+  // initialized by SetDesc.
   if (CheckStorageDesc(self, src)) {
     StorageDescHelper::SetDesc(self, size, stride);
   } else {
-    // Check input tensor propertys. If conditions are not met, NPUStorageDesc
+    // Check input tensor propertys. If conditions are not met, StorageDesc
     // base_sizes_ change to 1D. Conditions:
     // 1. Tensor storage_offset == 0
     // 2. Tnput tensor is contiguous
@@ -62,7 +62,7 @@ at::Tensor& NPUNativeFunctions::set_(
 at::Tensor& NPUNativeFunctions::set_(at::Tensor& self) {
   caffe2::TypeMeta dtype = self.dtype();
   c10::intrusive_ptr<c10::StorageImpl> npu_storage_impl =
-      c10::make_intrusive<c10::backend::NPUStorageImpl>(
+      c10::make_intrusive<c10::backend::DeviceStorageImpl>(
           c10::StorageImpl::use_byte_size_t(),
           0,
           c10::backend::Allocator::get()->allocate(0),
@@ -99,7 +99,7 @@ at::Tensor& NPUNativeFunctions::set_(at::Tensor& self, c10::Storage src) {
     StorageDescHelper::CopyDesc(self, src);
     return self;
   }
-  // NPUStorageImpl create by constructor, NPUStorageDesc is not initialized by
+  // DeviceStorageImpl create by constructor, StorageDesc is not initialized by
   // SetDesc.
   StorageDescHelper::SetDesc(
       self,

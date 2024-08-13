@@ -6,7 +6,7 @@
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 #include "csrc/core/guard/PrivateUse1GuardImpl.h"
 
 // TODO(FFFrog):
@@ -54,10 +54,10 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
     NPU_CHECK_WARN(c10::backend::SetDevice(d.index()));
   }
   c10::Stream getStream(c10::Device d) const noexcept override {
-    return c10::backend::getCurrentNPUStream(d.index()).unwrap();
+    return c10::backend::getCurrentStream(d.index()).unwrap();
   }
   c10::Stream getDefaultStream(c10::Device d) const override {
-    return c10::backend::getDefaultNPUStream(d.index());
+    return c10::backend::getDefaultStream(d.index());
   }
   c10::Stream getStreamFromGlobalPool(
       c10::Device d,
@@ -66,9 +66,9 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
   }
   // NB: These do NOT set the current device
   c10::Stream exchangeStream(c10::Stream s) const noexcept override {
-    NPUStream cs(s);
-    auto old_stream = c10::backend::getCurrentNPUStream(s.device().index());
-    c10::backend::setCurrentNPUStream(cs);
+    Stream cs(s);
+    auto old_stream = c10::backend::getCurrentStream(s.device().index());
+    c10::backend::setCurrentStream(cs);
     return old_stream.unwrap();
   }
   c10::DeviceIndex deviceCount() const noexcept override {
@@ -109,7 +109,7 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
         PTA_ERROR(ErrCode::PARAM));
 
     aclrtEvent npu_event = static_cast<aclrtEvent>(*event);
-    NPUStream npu_stream{stream};
+    Stream npu_stream{stream};
 
     // Moves to stream's device to record
     const auto orig_device = getDevice();
@@ -132,7 +132,7 @@ struct NPUGuardImpl final : public PrivateUse1GuardImpl {
     if (!event)
       return;
     aclrtEvent npu_event = static_cast<aclrtEvent>(event);
-    NPUStream npu_stream{stream};
+    Stream npu_stream{stream};
     const auto orig_device = getDevice();
     setDevice(stream.device());
     NPU_CHECK_ERROR(aclrtStreamWaitEvent(npu_stream, npu_event));

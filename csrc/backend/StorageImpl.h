@@ -14,7 +14,7 @@
 
 namespace c10::backend {
 
-struct NPUStorageDesc {
+struct StorageDesc {
  public:
   struct use_byte_size_t {};
 
@@ -29,21 +29,21 @@ struct NPUStorageDesc {
   caffe2::TypeMeta data_type_;
 };
 
-struct NPUStorageImpl : public c10::StorageImpl {
-  explicit NPUStorageImpl(
+struct DeviceStorageImpl : public c10::StorageImpl {
+  explicit DeviceStorageImpl(
       use_byte_size_t use_byte_size,
       size_t size_bytes,
       at::DataPtr data_ptr,
       at::Allocator* allocator,
       bool resizable);
-  ~NPUStorageImpl() override = default;
+  ~DeviceStorageImpl() override = default;
 
   void release_resources() override;
 
   // not private
-  NPUStorageDesc npu_desc_;
+  StorageDesc npu_desc_;
 
-  NPUStorageDesc get_npu_desc() const {
+  StorageDesc get_npu_desc() const {
     return npu_desc_;
   }
 };

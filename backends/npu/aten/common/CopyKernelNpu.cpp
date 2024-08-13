@@ -1,12 +1,12 @@
 #include <ATen/record_function.h>
 #include <c10/core/Scalar.h>
 
-#include "csrc/backend/NPUStorageImpl.h"
-#include "csrc/backend/NPUStream.h"
 #include "aten/OpInterface.h"
 #include "aten/common/InnerNpuNativeFunction.h"
 #include "core/NPUBridge.h"
 #include "core/interface/AsyncTaskQueueInterface.h"
+#include "csrc/backend/StorageImpl.h"
+#include "csrc/backend/Stream.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/utils/CalcuOpUtil.h"
 #include "framework/utils/OpAdapter.h"

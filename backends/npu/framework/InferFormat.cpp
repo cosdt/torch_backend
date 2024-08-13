@@ -1,7 +1,7 @@
 #include "framework/InferFormat.h"
-#include "csrc/backend/NPUStorageImpl.h"
 #include "core/NPUBridge.h"
 #include "core/register/OptionsManager.h"
+#include "csrc/backend/StorageImpl.h"
 #include "framework/FormatHelper.h"
 
 namespace at_npu {

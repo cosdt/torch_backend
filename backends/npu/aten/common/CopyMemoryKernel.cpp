@@ -1,11 +1,11 @@
 #include <ATen/ATen.h>
 
-#include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUStream.h"
 #include "acl/include/acl/acl.h"
 #include "core/NPUBridge.h"
 #include "core/NPUException.h"
 #include "core/interface/AsyncTaskQueueInterface.h"
+#include "csrc/aten/generated/NPUNativeFunctions.h"
+#include "csrc/backend/Stream.h"
 #include "framework/FormatHelper.h"
 #include "framework/utils/CalcuOpUtil.h"
 
@@ -67,7 +67,7 @@ at::Tensor& NPUNativeFunctions::copy_memory_(
   NPU_CHECK_ERROR(ret);
 
   if (!non_blocking) {
-    c10::backend::NPUStream stream = c10::backend::getCurrentNPUStream();
+    c10::backend::Stream stream = c10::backend::getCurrentStream();
     NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(stream, -1));
   }
   return self;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "c10/core/Storage.h"
-#include "csrc/backend/NPUStream.h"
 #include "acl/include/acl/acl_rt.h"
+#include "c10/core/Storage.h"
+#include "csrc/backend/Stream.h"
 
 namespace c10::npu {
 namespace queue {

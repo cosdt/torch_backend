@@ -6,7 +6,7 @@
 #include "csrc/backend/NPUCachingAllocator.h"
 #include "csrc/backend/NPUCachingHostAllocator.h"
 #include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 #include "framework/interface/AclOpCompileInterface.h"
 
 namespace c10::npu {
