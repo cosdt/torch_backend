@@ -42,8 +42,8 @@ at::Tensor& NPUNativeFunctions::set_(
     StorageDescHelper::CopyDesc(self, src);
     return self;
   }
-  // DeviceStorageImpl create by constructor, DeviceStorageImpl is not
-  // initialized by SetDesc.
+  // DeviceStorageImpl create by constructor, StorageDesc is not initialized by
+  // SetDesc.
   if (CheckStorageDesc(self, src)) {
     StorageDescHelper::SetDesc(self, size, stride);
   } else {
