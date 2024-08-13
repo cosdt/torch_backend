@@ -3,7 +3,7 @@
 #include <c10/util/irange.h>
 #include <iostream>
 #include "csrc/backend/NPUFunctions.h"
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 #include "csrc/core/allocator/CachingAllocator.h"
 
 // TODO(FFFrog):

@@ -1,12 +1,12 @@
 #include <ATen/record_function.h>
 #include <string>
 
-#include "csrc/aten/generated/CustomFunctions.h"
-#include "csrc/backend/NPUCachingHostAllocator.h"
-#include "csrc/backend/NPUFunctions.h"
 #include "core/NPUException.h"
 #include "core/interface/AsyncTaskQueueInterface.h"
 #include "core/register/OptionsManager.h"
+#include "csrc/aten/generated/CustomFunctions.h"
+#include "csrc/backend/NPUCachingHostAllocator.h"
+#include "csrc/backend/NPUFunctions.h"
 #include "framework/OpCmdHelper.h"
 #include "framework/OpCommand.h"
 #include "framework/utils/NpuStorageOffsetGuard.h"
@@ -170,7 +170,7 @@ OpCommand& OpCommand::Sync(c10::SmallVector<int64_t, N>& index) {
 }
 
 OpCommand& OpCommand::Sync() {
-  c10::backend::NPUStream stream = c10::backend::getCurrentNPUStream();
+  c10::backend::Stream stream = c10::backend::getCurrentNPUStream();
   NPU_CHECK_ERROR(aclrtSynchronizeStreamWithTimeout(stream, -1));
   return *this;
 }

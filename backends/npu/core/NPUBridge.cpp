@@ -19,8 +19,8 @@ NPUStorageDesc& NPUBridge::GetNpuStorageImplDesc(const at::Tensor& tensor) {
       ->npu_desc_;
 }
 
-NPUTensorImpl* NPUBridge::GetNpuTensorImpl(const at::Tensor& tensor) {
-  return static_cast<NPUTensorImpl*>(tensor.unsafeGetTensorImpl());
+TensorImpl* NPUBridge::GetNpuTensorImpl(const at::Tensor& tensor) {
+  return static_cast<TensorImpl*>(tensor.unsafeGetTensorImpl());
 }
 
 } // namespace c10::backend

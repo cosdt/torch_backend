@@ -50,8 +50,8 @@ static PyObject* THNPStream_pynew(
     return nullptr;
   }
 
-  c10::backend::NPUStream stream = (stream_id || device_index || device_type)
-      ? c10::backend::NPUStream::unpack3(
+  c10::backend::Stream stream = (stream_id || device_index || device_type)
+      ? c10::backend::Stream::unpack3(
             stream_id, device_index, static_cast<c10::DeviceType>(device_type))
       : c10::backend::getStreamFromPool(false);
 
@@ -59,14 +59,14 @@ static PyObject* THNPStream_pynew(
   self->stream_id = static_cast<int64_t>(stream.id());
   self->device_index = static_cast<int64_t>(stream.device_index());
   self->device_type = static_cast<int64_t>(stream.device_type());
-  new (&self->npu_stream) c10::backend::NPUStream(stream);
+  new (&self->npu_stream) c10::backend::Stream(stream);
 
   return (PyObject*)ptr.release();
   END_HANDLE_TH_ERRORS
 }
 
 static void THNPStream_dealloc(THNPStream* self) {
-  self->npu_stream.~NPUStream();
+  self->npu_stream.~Stream();
   Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -212,7 +212,7 @@ void init(PyObject* module) {
   }
 }
 
-std::vector<c10::optional<c10::backend::NPUStream>>
+std::vector<c10::optional<c10::backend::Stream>>
 THNPUtils_PySequence_to_NPUStreamList(PyObject* obj) {
   if (!PySequence_Check(obj)) {
     throw std::runtime_error(
@@ -224,13 +224,13 @@ THNPUtils_PySequence_to_NPUStreamList(PyObject* obj) {
         "expected PySequence, but got " + std::string(THPUtils_typename(obj)));
   }
 
-  std::vector<c10::optional<c10::backend::NPUStream>> streams;
+  std::vector<c10::optional<c10::backend::Stream>> streams;
   Py_ssize_t length = PySequence_Fast_GET_SIZE(seq.get());
   for (Py_ssize_t i = 0; i < length; i++) {
     PyObject* stream = PySequence_Fast_GET_ITEM(seq.get(), i);
 
     if (PyObject_IsInstance(stream, THNPStreamClass)) {
-      streams.emplace_back(c10::backend::NPUStream::unpack3(
+      streams.emplace_back(c10::backend::Stream::unpack3(
           (reinterpret_cast<THNPStream*>(stream))->stream_id,
           (reinterpret_cast<THNPStream*>(stream))->device_index,
           static_cast<c10::DeviceType>(
@@ -315,7 +315,7 @@ PyObject* THPModule_setStream_wrap(
           &device_type)) {
   }
 
-  auto stream = c10::backend::NPUStream::unpack3(
+  auto stream = c10::backend::Stream::unpack3(
       stream_id,
       static_cast<c10::DeviceIndex>(device_index),
       static_cast<c10::DeviceType>(device_type));

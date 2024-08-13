@@ -3,7 +3,7 @@
 #include <ATen/ATen.h>
 
 #include "csrc/backend/NPUStorageImpl.h"
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 #include "core/NPUBridge.h"
 #include "core/interface/AsyncTaskQueueInterface.h"
 #include "framework/FormatHelper.h"

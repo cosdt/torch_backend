@@ -2,7 +2,7 @@
 #include <c10/core/Scalar.h>
 
 #include "csrc/backend/NPUStorageImpl.h"
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 #include "aten/OpInterface.h"
 #include "aten/common/InnerNpuNativeFunction.h"
 #include "core/NPUBridge.h"

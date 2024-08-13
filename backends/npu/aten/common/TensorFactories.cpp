@@ -23,7 +23,7 @@
 #include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "csrc/backend/NPUCachingAllocator.h"
 #include "csrc/backend/NPUStorageImpl.h"
-#include "csrc/backend/NPUTensorImpl.h"
+#include "csrc/backend/TensorImpl.h"
 #include "framework/InferFormat.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/contiguous/ContiguousOpt.h"
@@ -134,7 +134,7 @@ at::Tensor NPUNativeFunctions::empty(
           true);
 
   auto tensor =
-      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::TensorImpl>(storage_impl, dtype);
 
   // Default at::TensorImpl has size [0]
   if (size.size() != 1 || size[0] != 0) {
@@ -328,9 +328,9 @@ at::Tensor NPUNativeFunctions::empty_with_format(
           true);
 
   auto tensor =
-      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::TensorImpl>(storage_impl, dtype);
 
-  // Default NPUTensorImpl has size [0]
+  // Default TensorImpl has size [0]
   if (size.size() != 1 || size[0] != 0) {
     tensor.unsafeGetTensorImpl()->set_sizes_contiguous(size);
   }

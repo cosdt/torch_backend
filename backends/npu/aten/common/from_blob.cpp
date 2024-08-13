@@ -51,7 +51,7 @@ at::Tensor TensorMaker::make_tensor() {
           true);
 
   auto tensor =
-      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::TensorImpl>(storage_impl, dtype);
 
   at_npu::native::StorageDescHelper::SetDesc(tensor, sizes_, tensor.strides());
 

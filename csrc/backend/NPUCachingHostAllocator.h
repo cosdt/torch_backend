@@ -2,7 +2,7 @@
 
 #include <c10/core/Allocator.h>
 
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 #include "csrc/core/Macros.h"
 
 // TODO(FFFrog):
@@ -13,7 +13,7 @@ namespace c10::backend::HostAllocator {
 
 c10::Allocator* getAllocator(void);
 
-bool recordEvent(void* ptr, void* ctx, c10::backend::NPUStream stream);
+bool recordEvent(void* ptr, void* ctx, c10::backend::Stream stream);
 
 void emptyCache(void);
 

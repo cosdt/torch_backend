@@ -2,13 +2,13 @@
 
 #include <torch/csrc/Stream.h>
 #include <torch/csrc/python_headers.h>
+#include "csrc/backend/Stream.h"
 #include "csrc/core/Macros.h"
-#include "csrc/backend/NPUStream.h"
 
 namespace torch::backend::stream {
 
 struct THNPStream : THPStream {
-  c10::backend::NPUStream npu_stream;
+  c10::backend::Stream npu_stream;
 };
 
 TORCH_BACKEND_API void init(PyObject* module);

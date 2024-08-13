@@ -1,7 +1,7 @@
 #include "csrc/backend/NPUFunctions.h"
 #include <mutex>
 #include <unordered_map>
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 
 // TODO(FFFrog):
 // Remove later

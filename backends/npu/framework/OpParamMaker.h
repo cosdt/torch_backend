@@ -1,7 +1,7 @@
 #ifndef __PULGIN_NATIVE_UTILS_OP_PARAM_MAKER__
 #define __PULGIN_NATIVE_UTILS_OP_PARAM_MAKER__
 
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 
 #include <thread>
 #include "csrc/backend/NPUStorageImpl.h"

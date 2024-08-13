@@ -6,15 +6,15 @@
 
 namespace c10::backend {
 
-// NPUTensorImpl class is derived from c10::TensorImpl, and it is only used to
+// TensorImpl class is derived from c10::TensorImpl, and it is only used to
 // handle an NPU tensor. Its scope is just to handle an NPUTensor.
-class NPUTensorImpl : public c10::TensorImpl {
+class TensorImpl : public c10::TensorImpl {
  public:
-  explicit NPUTensorImpl(
+  explicit TensorImpl(
       c10::Storage&& storage,
       const caffe2::TypeMeta& data_type);
 
-  void shallow_copy_from(const c10::intrusive_ptr<TensorImpl>& impl) final;
+  void shallow_copy_from(const c10::intrusive_ptr<c10::TensorImpl>& impl) final;
 
   c10::intrusive_ptr<c10::TensorImpl> shallow_copy_and_detach(
       const c10::VariableVersion& version_counter,
@@ -30,11 +30,11 @@ class NPUTensorImpl : public c10::TensorImpl {
       bool allow_tensor_metadata_change) const final;
 
  public:
-  NPUTensorImpl(const NPUTensorImpl&) = delete;
-  NPUTensorImpl& operator=(const NPUTensorImpl&) = delete;
-  NPUTensorImpl(NPUTensorImpl&&) = default;
-  NPUTensorImpl& operator=(NPUTensorImpl&&) = default;
-  ~NPUTensorImpl();
+  TensorImpl(const TensorImpl&) = delete;
+  TensorImpl& operator=(const TensorImpl&) = delete;
+  TensorImpl(TensorImpl&&) = default;
+  TensorImpl& operator=(TensorImpl&&) = default;
+  ~TensorImpl();
 };
 
-} // namespace torch_backend
+} // namespace c10::backend

@@ -6,7 +6,7 @@
 
 #include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUGuard.h"
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 
 // TODO(FFFrog):
 // Remove later
@@ -35,7 +35,7 @@ static std::once_flag device_flags[C10_COMPILE_TIME_MAX_NPUS];
 // The device flags track the initialization of each device, while
 // the low and high priority counters track, for each device, the next stream
 // in the pool to be returned when a stream is requested (round-robin fashion
-// , see the note in NPUStream.h).
+// , see the note in Stream.h).
 static std::array<
     std::array<std::atomic<uint32_t>, C10_COMPILE_TIME_MAX_NPUS>,
     max_compile_time_stream_priorities>
@@ -184,7 +184,7 @@ static void initDeviceStreamState(c10::DeviceIndex device_index) {
   }
 }
 
-static void initNPUStreamsOnce() {
+static void initStreamsOnce() {
   // Inits default and secondary streams (once, globally)
   c10::call_once(init_flag, initGlobalStreamState);
 
@@ -200,7 +200,7 @@ static void initNPUStreamsOnce() {
   }
 }
 
-static inline void check_npu(c10::DeviceIndex device_index) {
+static inline void check_device(c10::DeviceIndex device_index) {
   AT_ASSERT(
       device_index >= 0 && device_index < num_npus,
       "Invalid device_index : ",
@@ -216,11 +216,9 @@ static uint32_t get_idx(std::atomic<uint32_t>& counter) {
   return raw_idx % kStreamsPerPool;
 }
 
-NPUStream NPUStreamForId(
-    c10::DeviceIndex device_index,
-    c10::StreamId stream_id) {
-  return NPUStream(
-      NPUStream::UNCHECKED,
+Stream NPUStreamForId(c10::DeviceIndex device_index, c10::StreamId stream_id) {
+  return Stream(
+      Stream::UNCHECKED,
       c10::Stream(
           c10::Stream::UNSAFE,
           c10::Device(c10::DeviceType::PrivateUse1, device_index),
@@ -229,7 +227,7 @@ NPUStream NPUStreamForId(
 
 } // namespace
 
-aclrtStream NPUStream::stream() const {
+aclrtStream Stream::stream() const {
   c10::DeviceIndex device_index = stream_.device_index();
   c10::StreamId stream_id = stream_.id();
   StreamIdType st = streamIdType(stream_id);
@@ -266,13 +264,13 @@ aclrtStream NPUStream::stream() const {
 // Returns a stream from the requested pool
 // Note: when called the first time on a device, this will create the
 // stream pools for that device.
-NPUStream getStreamFromPool(const int priority, c10::DeviceIndex device_index) {
-  initNPUStreamsOnce();
+Stream getStreamFromPool(const int priority, c10::DeviceIndex device_index) {
+  initStreamsOnce();
   if (device_index == -1) {
     device_index = c10::backend::current_device();
   }
 
-  check_npu(device_index);
+  check_device(device_index);
 
   // Initializes the stream pools (once)
   std::call_once(
@@ -286,45 +284,43 @@ NPUStream getStreamFromPool(const int priority, c10::DeviceIndex device_index) {
   return NPUStreamForId(device_index, makeStreamId(id_type, idx));
 }
 
-NPUStream getStreamFromPool(
-    const bool isHighPriority,
-    c10::DeviceIndex device) {
-  initNPUStreamsOnce();
+Stream getStreamFromPool(const bool isHighPriority, c10::DeviceIndex device) {
+  initStreamsOnce();
   int priority = isHighPriority ? -max_compile_time_stream_priorities + 1 : 0;
   return getStreamFromPool(priority, device);
 }
 
-NPUStream getStreamFromExternal(
+Stream getStreamFromExternal(
     aclrtStream ext_stream,
     c10::DeviceIndex device_index) {
   // The stream pointer will be the actual id
   return NPUStreamForId(device_index, reinterpret_cast<int64_t>(ext_stream));
 }
 
-NPUStream getDefaultNPUStream(c10::DeviceIndex device_index) {
-  initNPUStreamsOnce();
+Stream getDefaultNPUStream(c10::DeviceIndex device_index) {
+  initStreamsOnce();
   if (device_index == -1) {
     device_index = c10::backend::current_device();
   }
-  check_npu(device_index);
+  check_device(device_index);
   return NPUStreamForId(device_index, makeStreamId(StreamIdType::DEFAULT, 0));
 }
 
-NPUStream getCurrentNPUStream(c10::DeviceIndex device_index) {
-  initNPUStreamsOnce();
+Stream getCurrentNPUStream(c10::DeviceIndex device_index) {
+  initStreamsOnce();
   if (device_index == -1) {
     device_index = c10::backend::current_device();
   }
-  check_npu(device_index);
+  check_device(device_index);
   return NPUStreamForId(device_index, current_streams[device_index]);
 }
 
-void setCurrentNPUStream(NPUStream stream) {
-  initNPUStreamsOnce();
+void setCurrentNPUStream(Stream stream) {
+  initStreamsOnce();
   current_streams[stream.device_index()] = stream.id();
 }
 
-std::ostream& operator<<(std::ostream& stream, const NPUStream& s) {
+std::ostream& operator<<(std::ostream& stream, const Stream& s) {
   return stream << s.unwrap();
 }
 

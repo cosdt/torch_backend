@@ -2,7 +2,7 @@
 
 #include <c10/core/StorageImpl.h>
 #include "csrc/backend/NPUStorageImpl.h"
-#include "csrc/backend/NPUTensorImpl.h"
+#include "csrc/backend/TensorImpl.h"
 
 namespace c10::backend {
 
@@ -20,8 +20,8 @@ class NPUBridge {
   // tensor to NPUStorageDesc
   static NPUStorageDesc& GetNpuStorageImplDesc(const at::Tensor& tensor);
 
-  // tensor to NPUTensorImpl
-  static NPUTensorImpl* GetNpuTensorImpl(const at::Tensor& tensor);
+  // tensor to TensorImpl
+  static TensorImpl* GetNpuTensorImpl(const at::Tensor& tensor);
 };
 
 } // namespace c10::backend

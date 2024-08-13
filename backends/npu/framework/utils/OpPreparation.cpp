@@ -467,7 +467,7 @@ at::Tensor OpPreparation::unsafe_empty_workspace(uint64_t workspace_size) {
           true);
   static auto dtype = c10::scalarTypeToTypeMeta(dtype_or_default(at::kByte));
   auto tensor =
-      at::detail::make_tensor<c10::backend::NPUTensorImpl>(storage_impl, dtype);
+      at::detail::make_tensor<c10::backend::TensorImpl>(storage_impl, dtype);
   tensor.unsafeGetTensorImpl()->empty_tensor_restride(
       c10::MemoryFormat::Contiguous);
   return tensor;

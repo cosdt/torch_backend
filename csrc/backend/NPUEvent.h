@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <utility>
 #include "csrc/backend/NPUGuard.h"
-#include "csrc/backend/NPUStream.h"
+#include "csrc/backend/Stream.h"
 #include "csrc/core/Macros.h"
 
 // TODO(FFFrog):
@@ -86,12 +86,12 @@ struct C10_BACKEND_API NPUEvent {
     record(getCurrentNPUStream());
   }
 
-  void recordOnce(const NPUStream& stream) {
+  void recordOnce(const Stream& stream) {
     if (!was_recorded_)
       record(stream);
   }
 
-  void record(const NPUStream& stream) {
+  void record(const Stream& stream) {
     if (!is_created_) {
       createEvent(stream.device_index());
     }
@@ -108,7 +108,7 @@ struct C10_BACKEND_API NPUEvent {
     was_recorded_ = true;
   }
 
-  void block(const NPUStream& stream) {
+  void block(const Stream& stream) {
     if (is_created_) {
       NPUGuard guard(stream.device_index());
       aclrtStreamWaitEvent(stream, event_);

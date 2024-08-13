@@ -85,14 +85,14 @@ struct NPUStreamGuard {
   }
 
   /// Returns the NPU stream that was set at the time the guard was constructed.
-  NPUStream original_stream() const {
-    return NPUStream(NPUStream::UNCHECKED, guard_.original_stream());
+  Stream original_stream() const {
+    return Stream(Stream::UNCHECKED, guard_.original_stream());
   }
 
   /// Returns the most recent NPU stream that was set using this device guard,
   /// either from construction, or via set_stream.
-  NPUStream current_stream() const {
-    return NPUStream(NPUStream::UNCHECKED, guard_.current_stream());
+  Stream current_stream() const {
+    return Stream(Stream::UNCHECKED, guard_.current_stream());
   }
 
   /// Returns the most recent NPU device that was set using this device guard,
@@ -149,10 +149,10 @@ struct OptionalNPUStreamGuard {
 
   /// Returns the NPU stream that was set at the time the guard was most
   /// recently initialized, or nullopt if the guard is uninitialized.
-  c10::optional<NPUStream> original_stream() const {
+  c10::optional<Stream> original_stream() const {
     auto r = guard_.original_stream();
     if (r.has_value()) {
-      return c10::make_optional(NPUStream(NPUStream::UNCHECKED, r.value()));
+      return c10::make_optional(Stream(Stream::UNCHECKED, r.value()));
     } else {
       return c10::nullopt;
     }
@@ -161,10 +161,10 @@ struct OptionalNPUStreamGuard {
   /// Returns the most recent NPU stream that was set using this stream guard,
   /// either from construction, or via reset_stream, if the guard is
   /// initialized, or nullopt if the guard is uninitialized.
-  c10::optional<NPUStream> current_stream() const {
+  c10::optional<Stream> current_stream() const {
     auto r = guard_.current_stream();
     if (r.has_value()) {
-      return c10::make_optional(NPUStream(NPUStream::UNCHECKED, r.value()));
+      return c10::make_optional(Stream(Stream::UNCHECKED, r.value()));
     } else {
       return c10::nullopt;
     }
@@ -182,7 +182,7 @@ struct OptionalNPUStreamGuard {
 
 /// A variant of MultiStreamGuard that is specialized for NPU.
 struct NPUMultiStreamGuard {
-  explicit NPUMultiStreamGuard(at::ArrayRef<NPUStream> streams)
+  explicit NPUMultiStreamGuard(at::ArrayRef<Stream> streams)
       : guard_(unwrapStreams(streams)) {}
 
   /// Copy is disallowed
@@ -199,11 +199,11 @@ struct NPUMultiStreamGuard {
   c10::impl::InlineMultiStreamGuard<c10::backend::impl::NPUGuardImpl> guard_;
 
   static std::vector<c10::Stream> unwrapStreams(
-      at::ArrayRef<NPUStream> NPUStreams) {
+      at::ArrayRef<Stream> NPUStreams) {
     std::vector<c10::Stream> streams;
     streams.reserve(NPUStreams.size());
-    for (const NPUStream& NPUStream : NPUStreams) {
-      streams.push_back(NPUStream);
+    for (const Stream& Stream : NPUStreams) {
+      streams.push_back(Stream);
     }
     return streams;
   }
