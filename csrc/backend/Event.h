@@ -16,13 +16,13 @@ namespace c10::backend {
  * NPUEvents are movable not copyable wrappers around NPU's events.
  * NPUEvents are constructed lazily when first recorded.
  */
-struct C10_BACKEND_API NPUEvent {
+struct C10_BACKEND_API Event {
   // Constructors
   // Default value for `flags` is specified below
-  NPUEvent() noexcept = default;
-  NPUEvent(unsigned int flags) noexcept : flags_{flags} {}
+  Event() noexcept = default;
+  Event(unsigned int flags) noexcept : flags_{flags} {}
 
-  ~NPUEvent() {
+  ~Event() {
     try {
       if (is_created_) {
         NPUGuard guard(device_index_);
@@ -32,13 +32,13 @@ struct C10_BACKEND_API NPUEvent {
     }
   }
 
-  NPUEvent(const NPUEvent&) = delete;
-  NPUEvent& operator=(const NPUEvent&) = delete;
+  Event(const Event&) = delete;
+  Event& operator=(const Event&) = delete;
 
-  NPUEvent(NPUEvent&& other) noexcept {
+  Event(Event&& other) noexcept {
     moveHelper(std::move(other));
   }
-  NPUEvent& operator=(NPUEvent&& other) noexcept {
+  Event& operator=(Event&& other) noexcept {
     if (this != &other) {
       moveHelper(std::move(other));
     }
@@ -115,7 +115,7 @@ struct C10_BACKEND_API NPUEvent {
     }
   }
 
-  float elapsed_time(const NPUEvent& other) const {
+  float elapsed_time(const Event& other) const {
     TORCH_CHECK(
         is_created_ && other.isCreated(),
         "Both events must be recorded before calculating elapsed time.");
@@ -151,7 +151,7 @@ struct C10_BACKEND_API NPUEvent {
     is_created_ = true;
   }
 
-  void moveHelper(NPUEvent&& other) {
+  void moveHelper(Event&& other) {
     std::swap(flags_, other.flags_);
     std::swap(is_created_, other.is_created_);
     std::swap(was_recorded_, other.was_recorded_);

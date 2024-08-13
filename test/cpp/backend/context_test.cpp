@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "csrc/backend/NPUContext.h"
+#include "csrc/backend/Context.h"
 
 TEST(NPUContextTest, TestGetDeviceProperties) {
   if (!c10::backend::is_available()) {

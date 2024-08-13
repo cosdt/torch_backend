@@ -3,7 +3,7 @@
 #include <ATen/core/GeneratorForPrivateuseone.h>
 #include <c10/core/StreamGuard.h>
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Functions.h"
 
 namespace c10::backend {
 namespace detail {

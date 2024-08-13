@@ -5,7 +5,7 @@
 #include <cassert>
 
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/Stream.h"
 #include "csrc/core/guard/PrivateUse1GuardImpl.h"
 

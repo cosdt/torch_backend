@@ -4,7 +4,7 @@
 #include "aten/common/TensorFactories.h"
 #include "core/NPUException.h"
 #include "csrc/backend/NPUCachingAllocator.h"
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/StorageImpl.h"
 #include "framework/StorageDescHelper.h"
 #include "framework/utils/OpAdapter.h"

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/NPUGuard.h"
 #include "csrc/backend/Stream.h"
 

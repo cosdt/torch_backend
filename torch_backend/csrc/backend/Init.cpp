@@ -3,8 +3,8 @@
 #include <torch/csrc/Exceptions.h>
 #include <torch/csrc/utils/object_ptr.h>
 #include "csrc/aten/generated/python_functions.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/GeneratorImpl.h"
-#include "csrc/backend/NPUFunctions.h"
 
 namespace torch::backend::init {
 

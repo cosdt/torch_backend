@@ -4,7 +4,7 @@
 #include "core/NPUBridge.h"
 #include "csrc/aten/generated/CustomFunctions.h"
 #include "csrc/aten/generated/NPUNativeFunctions.h"
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/StorageImpl.h"
 #include "framework/FormatHelper.h"
 #include "framework/StorageDescHelper.h"

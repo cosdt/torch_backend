@@ -12,7 +12,7 @@
 
 #include <mutex>
 #include <optional>
-#include "csrc/backend/NPUDeviceProp.h"
+#include "csrc/backend/DeviceProp.h"
 #include "csrc/core/Macros.h"
 
 // TODO(FFFrog):
@@ -60,7 +60,7 @@ C10_BACKEND_API aclrtContext GetDeviceContext(c10::DeviceIndex device);
 
 enum class SyncDebugMode { L_DISABLED = 0, L_WARN, L_ERROR };
 
-// it's used to store npu synchronization state
+// it's used to store device synchronization state
 // through this global state to determine the synchronization debug mode
 class WarningState {
  public:
@@ -88,7 +88,7 @@ getDeviceIndexWithPrimaryContext();
 C10_BACKEND_API std::mutex* getFreeMutex();
 
 C10_BACKEND_API void get_device_properties(
-    c10::backend::NPUDeviceProp* device_prop,
+    c10::backend::DeviceProp* device_prop,
     c10::DeviceIndex device);
 
 } // namespace c10::backend

@@ -1,6 +1,6 @@
 #include "torch_backend/csrc/backend/Lock.h"
 #include <pybind11/pybind11.h>
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Functions.h"
 
 namespace torch::backend::lock {
 
@@ -41,10 +41,7 @@ PyObject* THPModule_npuUnlockMutex(PyObject* module, PyObject* noargs) {
 }
 
 static PyMethodDef THPModule_methods[] = {
-    {"_lock_mutex",
-     (PyCFunction)THPModule_npuLockMutex,
-     METH_NOARGS,
-     nullptr},
+    {"_lock_mutex", (PyCFunction)THPModule_npuLockMutex, METH_NOARGS, nullptr},
     {"_unlock_mutex",
      (PyCFunction)THPModule_npuUnlockMutex,
      METH_NOARGS,

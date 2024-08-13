@@ -1,6 +1,6 @@
-#include "csrc/backend/NPUFunctions.h"
 #include <mutex>
 #include <unordered_map>
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/Stream.h"
 
 // TODO(FFFrog):
@@ -207,7 +207,7 @@ std::mutex* getFreeMutex() {
 }
 
 void get_device_properties(
-    c10::backend::NPUDeviceProp* device_prop,
+    c10::backend::DeviceProp* device_prop,
     c10::DeviceIndex device) {
   const char* device_name;
   device_name = aclrtGetSocName();

@@ -4,10 +4,10 @@
 #include <torch/csrc/utils/pybind.h>
 #include <torch/csrc/utils/python_numbers.h>
 
+#include "csrc/backend/Context.h"
+#include "csrc/backend/DeviceProp.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/NPUCachingAllocator.h"
-#include "csrc/backend/NPUContext.h"
-#include "csrc/backend/NPUDeviceProp.h"
-#include "csrc/backend/NPUFunctions.h"
 #include "csrc/backend/NPUGuard.h"
 
 #include "torch_backend/csrc/backend/Device.h"
@@ -18,11 +18,10 @@ namespace torch::backend::device {
 
 void registerDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
-  py::class_<c10::backend::NPUDeviceProp>(m, "_NPUDeviceProperties")
-      .def_readonly("name", &c10::backend::NPUDeviceProp::name)
-      .def_readonly(
-          "total_memory", &c10::backend::NPUDeviceProp::totalGlobalMem)
-      .def("__repr__", [](const c10::backend::NPUDeviceProp& prop) {
+  py::class_<c10::backend::DeviceProp>(m, "_NPUDeviceProperties")
+      .def_readonly("name", &c10::backend::DeviceProp::name)
+      .def_readonly("total_memory", &c10::backend::DeviceProp::totalGlobalMem)
+      .def("__repr__", [](const c10::backend::DeviceProp& prop) {
         std::ostringstream stream;
         stream << "_NPUDeviceProperties(name='" << prop.name
                << "', total_memory="
@@ -40,7 +39,7 @@ void bindGetDeviceProperties(PyObject* module) {
   auto m = py::handle(module).cast<py::module>();
   m.def(
       "_npu_getDeviceProperties",
-      [](c10::DeviceIndex deviceid) -> c10::backend::NPUDeviceProp* {
+      [](c10::DeviceIndex deviceid) -> c10::backend::DeviceProp* {
         return c10::backend::getDeviceProperties(deviceid);
       },
       py::return_value_policy::reference);

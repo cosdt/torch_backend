@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
+#include "csrc/backend/Context.h"
 #include "csrc/backend/GeneratorImpl.h"
-#include "csrc/backend/NPUContext.h"
 
 TEST(DeviceGeneratorImpl, TestSingletonDefaultGenerator) {
   if (!c10::backend::is_available()) {

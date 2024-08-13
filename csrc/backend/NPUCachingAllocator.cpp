@@ -2,7 +2,7 @@
 #include <c10/util/Optional.h>
 #include <c10/util/irange.h>
 #include <iostream>
-#include "csrc/backend/NPUFunctions.h"
+#include "csrc/backend/Functions.h"
 #include "csrc/backend/Stream.h"
 #include "csrc/core/allocator/CachingAllocator.h"
 
