@@ -146,9 +146,9 @@ def _dummy_type(name):
     return type(name, (object,), {"__init__": init_err})
 
 
-if not hasattr(torch_backend._C, '_NPUStreamBase'):
+if not hasattr(torch_backend._C, '_StreamBase'):
     # Define dummy base classes
-    torch_backend._C.__dict__['_NPUStreamBase'] = _dummy_type('NPUStreamBase')
+    torch_backend._C.__dict__['_StreamBase'] = _dummy_type('StreamBase')
     torch_backend._C.__dict__['_EventBase'] = _dummy_type('NPUEventBase')
 
 

@@ -159,7 +159,7 @@ static PyMethodDef THNPStream_methods[] = {
 PyTypeObject THNPStreamType = {
     PyVarObject_HEAD_INIT(
         nullptr,
-        0) "torch_backend._C._NPUStreamBase", /* tp_name */
+        0) "torch_backend._C._StreamBase", /* tp_name */
     sizeof(THNPStream), /* tp_basicsize */
     0, /* tp_itemsize */
     (destructor)THNPStream_dealloc, /* tp_dealloc */
@@ -206,7 +206,7 @@ void init(PyObject* module) {
     throw python_error();
   }
   Py_INCREF(&THNPStreamType);
-  if (PyModule_AddObject(module, "_NPUStreamBase", (PyObject*)&THNPStreamType) <
+  if (PyModule_AddObject(module, "_StreamBase", (PyObject*)&THNPStreamType) <
       0) {
     throw python_error();
   }
