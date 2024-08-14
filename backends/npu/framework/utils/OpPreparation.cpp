@@ -237,14 +237,14 @@ void OpPreparation::check_memory(
 
 at::Tensor OpPreparation::cast_to_ori_format(const at::Tensor& tensor) {
   auto& tensor_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->storage_desc_;
   auto ret = custom_ops::npu_format_cast(tensor, tensor_desc.origin_format_);
   return ret;
 }
 
 at::Tensor& OpPreparation::cast_to_ori_format(at::Tensor& tensor) {
   auto& tensor_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->storage_desc_;
   NPUNativeFunctions::npu_format_cast_(tensor, tensor_desc.origin_format_);
   return tensor;
 }
@@ -406,14 +406,14 @@ void OpPreparation::CheckOut(
 
 at::Tensor OpPreparation::CastBackToOriFormat(const at::Tensor& tensor) {
   auto& tensor_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->storage_desc_;
   auto ret = custom_ops::npu_format_cast(tensor, tensor_desc.origin_format_);
   return ret;
 }
 
 at::Tensor& OpPreparation::CastBackToOriFormat(at::Tensor& tensor) {
   auto& tensor_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->storage_desc_;
   NPUNativeFunctions::npu_format_cast_(tensor, tensor_desc.origin_format_);
   return tensor;
 }

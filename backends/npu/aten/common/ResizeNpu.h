@@ -25,7 +25,7 @@ static void storage_resize_npu(
 
   at::DataPtr new_data = storage.allocator()->allocate(size);
   auto storage_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(&storage)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(&storage)->storage_desc_;
   size_t itemsize = storage_desc.data_type_.itemsize();
   at::DataPtr old_data = storage.set_data_ptr(std::move(new_data));
   ptrdiff_t old_size = static_cast<ptrdiff_t>(storage.nbytes());
@@ -45,7 +45,7 @@ static void storage_resize_npu(
   // It is necessary to properly refresh the storage according to sizes and
   // strides, not just new sizes.
   StorageDescHelper::UpdateDesc(
-      c10::backend::NPUBridge::GetNpuStorageImpl(&storage)->npu_desc_,
+      c10::backend::NPUBridge::GetNpuStorageImpl(&storage)->storage_desc_,
       resize_shape,
       new_size);
 

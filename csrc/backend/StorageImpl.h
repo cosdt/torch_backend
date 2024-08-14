@@ -40,11 +40,10 @@ struct DeviceStorageImpl : public c10::StorageImpl {
 
   void release_resources() override;
 
-  // not private
-  StorageDesc npu_desc_;
+  StorageDesc storage_desc_;
 
   StorageDesc get_device_desc() const {
-    return npu_desc_;
+    return storage_desc_;
   }
 };
 

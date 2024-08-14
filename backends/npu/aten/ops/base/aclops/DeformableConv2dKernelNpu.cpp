@@ -94,9 +94,9 @@ std::tuple<at::Tensor, at::Tensor> deformable_conv2d_nocheck(
   at::Tensor nhwc_offset = acl_op::npu_transpose(ori_offset, in_perm, true);
 
   auto& nhwc_input_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_input)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_input)->storage_desc_;
   auto& nhwc_offset_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_offset)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_offset)->storage_desc_;
 
   nhwc_input_desc.npu_format_ = ACL_FORMAT_NHWC;
   nhwc_input_desc.origin_format_ = ACL_FORMAT_NHWC;
@@ -129,7 +129,7 @@ std::tuple<at::Tensor, at::Tensor> deformable_conv2d_nocheck(
   nhwc_offset_desc.origin_format_ = ACL_FORMAT_NCHW;
   auto& nhwc_deformable_offsets_output_desc =
       c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_deformable_offsets_output)
-          ->npu_desc_;
+          ->storage_desc_;
   nhwc_deformable_offsets_output_desc.npu_format_ = ACL_FORMAT_NCHW;
   nhwc_deformable_offsets_output_desc.origin_format_ = ACL_FORMAT_NCHW;
   at::Tensor deformable_offsets_output =
@@ -249,11 +249,11 @@ npu_deformable_conv2dbk(
   auto& nhwc_deformable_offsets_backward_input_desc =
       c10::backend::NPUBridge::GetNpuStorageImpl(
           nhwc_deformable_offsets_backward_input)
-          ->npu_desc_;
+          ->storage_desc_;
   auto& nhwc_input_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_input)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_input)->storage_desc_;
   auto& nhwc_offset_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_offset)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_offset)->storage_desc_;
 
   nhwc_deformable_offsets_backward_input_desc.npu_format_ = ACL_FORMAT_NHWC;
   nhwc_deformable_offsets_backward_input_desc.origin_format_ = ACL_FORMAT_NHWC;
@@ -290,9 +290,11 @@ npu_deformable_conv2dbk(
   nhwc_offset_desc.npu_format_ = ACL_FORMAT_NCHW;
   nhwc_offset_desc.origin_format_ = ACL_FORMAT_NCHW;
   auto& nhwc_grad_input_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_grad_input)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_grad_input)
+          ->storage_desc_;
   auto& nhwc_grad_offset_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_grad_offset)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(nhwc_grad_offset)
+          ->storage_desc_;
   nhwc_grad_input_desc.npu_format_ = ACL_FORMAT_NCHW;
   nhwc_grad_input_desc.origin_format_ = ACL_FORMAT_NCHW;
   nhwc_grad_offset_desc.npu_format_ = ACL_FORMAT_NCHW;

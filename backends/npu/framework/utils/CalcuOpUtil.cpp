@@ -278,7 +278,7 @@ int64_t CalcuOpUtil::GetTensorNpuFormat(const at::Tensor& tensor) {
       OPS_ERROR(ErrCode::TYPE));
   if (NpuUtils::check_match(&tensor) || NpuUtils::check_5d_5d_match(tensor)) {
     const c10::backend::StorageDesc& tensor_desc =
-        c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+        c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->storage_desc_;
     return tensor_desc.npu_format_;
   } else if (tensor.data_ptr() == nullptr) {
     // transforming faketensor into realtensor and assigning format ND

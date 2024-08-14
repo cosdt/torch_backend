@@ -89,7 +89,7 @@ FormatShape StorageDescHelper::ComputeStrideFromShape(
 }
 
 void StorageDescHelper::SetDesc(at::Tensor& dst) {
-  c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_ =
+  c10::backend::NPUBridge::GetNpuStorageImpl(dst)->storage_desc_ =
       SetDesc(dst.dtype());
 }
 
@@ -97,7 +97,7 @@ void StorageDescHelper::SetDesc(
     at::Tensor& dst,
     const c10::IntArrayRef& size,
     const c10::IntArrayRef& strides) {
-  c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_ =
+  c10::backend::NPUBridge::GetNpuStorageImpl(dst)->storage_desc_ =
       SetDesc(dst.dtype(), size, strides);
 }
 
@@ -106,14 +106,14 @@ void StorageDescHelper::SetDesc(
     const c10::IntArrayRef& size,
     const c10::IntArrayRef& strides,
     aclFormat format) {
-  c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_ =
+  c10::backend::NPUBridge::GetNpuStorageImpl(dst)->storage_desc_ =
       SetDesc(dst.dtype(), size, strides, format);
 }
 
 bool StorageDescHelper::CheckDescInit(const c10::Storage& storage) {
   return ACL_FORMAT_UNDEFINED !=
       c10::backend::NPUBridge::GetNpuStorageImpl(storage.unsafeGetStorageImpl())
-          ->npu_desc_.origin_format_;
+          ->storage_desc_.origin_format_;
 }
 
 void StorageDescHelper::GetDescForSerialization(
@@ -226,18 +226,19 @@ void StorageDescHelper::CopyDesc(at::Tensor& dst, const c10::Storage& src) {
   CopyDesc(
       dst,
       c10::backend::NPUBridge::GetNpuStorageImpl(src.unsafeGetStorageImpl())
-          ->npu_desc_);
+          ->storage_desc_);
 }
 
 void StorageDescHelper::CopyDesc(
     const at::Tensor& dst,
     const c10::backend::StorageDesc& src_desc) {
-  auto& dstDesc = c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_;
+  auto& dstDesc =
+      c10::backend::NPUBridge::GetNpuStorageImpl(dst)->storage_desc_;
   dstDesc = src_desc;
 }
 
 void StorageDescHelper::ReflushDescBySelf(const at::Tensor& src) {
-  auto& desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto& desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->storage_desc_;
   desc.base_sizes_ = src.sizes();
   desc.storage_sizes_ = src.sizes();
   desc.base_strides_ = src.strides();
@@ -285,7 +286,7 @@ int64_t StorageDescHelper::GetMemorySize(
 }
 
 int64_t StorageDescHelper::GetMemorySize(const at::Tensor& dst) {
-  auto desc = c10::backend::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_;
+  auto desc = c10::backend::NPUBridge::GetNpuStorageImpl(dst)->storage_desc_;
   return GetMemorySize(desc);
 }
 

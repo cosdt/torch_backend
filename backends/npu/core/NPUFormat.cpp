@@ -14,8 +14,8 @@
 // limitations under the License.
 
 #include "core/NPUFormat.h"
-#include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "core/NPUBridge.h"
+#include "csrc/aten/generated/NPUNativeFunctions.h"
 #include "framework/utils/CalcuOpUtil.h"
 #include "framework/utils/OpPreparation.h"
 
@@ -28,8 +28,8 @@ int64_t get_npu_format(const at::Tensor& self) {
 
 std::vector<int64_t> get_npu_storage_sizes(const at::Tensor& self) {
   torch_backend::utils::torch_check_npu(self);
-  auto storage_sizes =
-      c10::backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_.storage_sizes_;
+  auto storage_sizes = c10::backend::NPUBridge::GetNpuStorageImpl(self)
+                           ->storage_desc_.storage_sizes_;
   std::vector<int64_t> vec_storage_sizes(
       storage_sizes.begin(), storage_sizes.end());
   return vec_storage_sizes;

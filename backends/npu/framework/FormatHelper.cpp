@@ -569,7 +569,7 @@ at::Tensor& FormatHelper::unsafe_format_cast(
     int64_t self_format,
     int64_t result_format) {
   c10::backend::StorageDesc& self_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(self)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(self)->storage_desc_;
   if (self_format == ACL_FORMAT_ND && result_format == ACL_FORMAT_NC1HWC0) {
     auto itemsize = self_desc.data_type_.itemsize();
     self_desc.storage_sizes_ = InferShape4To5(self.sizes(), itemsize);
