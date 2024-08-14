@@ -19,7 +19,7 @@
   - [ ] **CodeGen**: Enhance and refactor codegen module, providing general and reusable code generation capabilities that cover official operators, custom operators, routing code, forward and backward binding, etc.
   - [ ] **Operators**: Simplify operators, implement all factory class operators (as operator implementation reference), as well as functional operators (for testing the functionality of the third-party device integration mechanism).
   - [ ] **Tests & Docs**: Complete general test case suites, the full module integration and API documentation.
-  - [ ] **Live Demo**: Integrate CUDA/CPU into PyTorch based on this project and provide a full-process integration tutorial.
+  - [ ] **Live Demo**: Integrate CPU into PyTorch based on this project and provide a full-process integration tutorial.
 
 
 ------------------
