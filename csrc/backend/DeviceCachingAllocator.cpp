@@ -11,6 +11,8 @@
 #include "acl/include/acl/acl_base.h"
 #include "acl/include/acl/acl_rt.h"
 
+#include "csrc/adapter/device_adapter.h"
+
 namespace c10::backend::Allocator {
 
 class DefaultDeviceCachingAllocator final : public DeviceCachingAllocator {
@@ -87,7 +89,7 @@ class CachingAllocatorHelper
   void insertEventWrapper(c10::DeviceIndex device, std::function<void()> fn)
       override {
     aclrtContext compiler_ctx = aclrtContext();
-    aclError ret_ctx = aclrtGetCurrentContext(&compiler_ctx);
+    DeviceError ret_ctx = aclrtGetCurrentContext(&compiler_ctx);
     aclrtSetCurrentContext(c10::backend::GetDeviceContext(device));
     fn();
     if (ret_ctx == ACL_ERROR_NONE) {

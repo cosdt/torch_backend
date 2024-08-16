@@ -11,8 +11,9 @@
 // TODO(FFFrog):
 // Remove later
 #include "acl/include/acl/acl_rt.h"
-#include "adapter/acl_device_adapter.h"
+
 #include "core/NPUException.h"
+#include "csrc/adapter/device_adapter.h"
 
 #define C10_COMPILE_TIME_MAX_DEVICES 16
 
@@ -323,10 +324,11 @@ std::ostream& operator<<(std::ostream& stream, const Stream& s) {
   return stream << s.unwrap();
 }
 
-aclError DestroyUsedStreams() {
+DeviceError DestroyUsedStreams() {
   c10::DeviceIndex cur_device = 0;
   NPU_CHECK_ERROR(c10::backend::GetDevice(&cur_device));
-  std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
+  std::vector<c10::DeviceIndex> device_idx_vec =
+      DEVICE_NAMESPACE::GetUsedDevices();
   for (const auto deviceId : device_idx_vec) {
     NPU_CHECK_ERROR(c10::backend::SetDevice(deviceId));
     for (const auto i : c10::irange(kStreamsPerPool)) {
@@ -335,7 +337,7 @@ aclError DestroyUsedStreams() {
         if (stream == nullptr) {
           continue;
         }
-        aclError acl_ret = aclrtDestroyStreamForce(stream);
+        DeviceError acl_ret = aclrtDestroyStreamForce(stream);
         if (acl_ret != ACL_ERROR_NONE) {
           return acl_ret;
         }

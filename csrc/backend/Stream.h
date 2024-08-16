@@ -12,9 +12,10 @@
 
 // TODO(FFFrog):
 // Remove later
-#include "acl/include/acl/acl.h"
 #include "acl/include/acl/acl_op.h"
 #include "core/NPUException.h"
+
+#include "csrc/adapter/device_adapter.h"
 
 /*
  * Stream pool note.
@@ -229,7 +230,7 @@ C10_BACKEND_API void setCurrentStream(Stream stream);
 
 std::ostream& operator<<(std::ostream& stream, const Stream& s);
 
-aclError DestroyUsedStreams();
+DeviceError DestroyUsedStreams();
 } // namespace c10::backend
 
 namespace std {

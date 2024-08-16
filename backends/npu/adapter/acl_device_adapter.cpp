@@ -1,7 +1,7 @@
-#include "adapter/acl_device_adapter.h"
 #include <mutex>
 #include "core/NPUException.h"
 #include "core/npu_log.h"
+#include "csrc/adapter/device_adapter.h"
 
 namespace acl_adapter {
 
@@ -14,8 +14,8 @@ aclError aclrtGetDevice(int32_t* deviceId) {
     return ACL_ERROR_NONE;
   }
 
-  // If ::aclrtSetDevice() has never been called, then device is set to 0.
-  if (err == ACL_ERROR_RT_CONTEXT_NULL && aclrtSetDevice(0) == ACL_ERROR_NONE) {
+  // If ::setDevice() has never been called, then device is set to 0.
+  if (err == ACL_ERROR_RT_CONTEXT_NULL && setDevice(0) == ACL_ERROR_NONE) {
     *deviceId = 0;
     return ACL_ERROR_NONE;
   }
@@ -23,9 +23,9 @@ aclError aclrtGetDevice(int32_t* deviceId) {
   return err;
 }
 
-// ::aclrtSetDevice() will create a context implicitly. Save it when setting
+// ::setDevice() will create a context implicitly. Save it when setting
 // device.
-aclError aclrtSetDevice(int32_t deviceId) {
+aclError setDevice(int32_t deviceId) {
   aclError err = ::aclrtSetDevice(deviceId);
   if (err == ACL_ERROR_NONE) {
     auto device = static_cast<c10::DeviceIndex>(deviceId);
@@ -77,10 +77,10 @@ void synchronize_all_device() {
   NPU_CHECK_ERROR(aclrtGetDevice(&cur_device));
   std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
   for (const auto deviceId : device_idx_vec) {
-    NPU_CHECK_ERROR(aclrtSetDevice(deviceId));
+    NPU_CHECK_ERROR(setDevice(deviceId));
     NPU_CHECK_ERROR(aclrtSynchronizeDevice());
   }
-  NPU_CHECK_ERROR(aclrtSetDevice(cur_device));
+  NPU_CHECK_ERROR(setDevice(cur_device));
 }
 
 } // namespace acl_adapter

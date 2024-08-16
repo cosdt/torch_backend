@@ -18,8 +18,8 @@
 
 // TODO(FFFrog):
 // Remove later
-#include "acl/include/acl/acl.h"
 #include "core/NPUException.h"
+#include "csrc/adapter/device_adapter.h"
 
 namespace c10::backend {
 
@@ -39,17 +39,17 @@ C10_BACKEND_API void device_synchronize();
 C10_BACKEND_API void warn_or_error_on_sync();
 
 // Raw CUDA device management functions
-C10_BACKEND_API aclError GetDeviceCount(int* dev_count);
+C10_BACKEND_API DeviceError GetDeviceCount(int* dev_count);
 
-C10_BACKEND_API aclError InitDevice();
+C10_BACKEND_API DeviceError InitDevice();
 
 C10_BACKEND_API void FinalizeDevice();
 
-C10_BACKEND_API aclError GetDevice(c10::DeviceIndex* device);
+C10_BACKEND_API DeviceError GetDevice(c10::DeviceIndex* device);
 
-C10_BACKEND_API aclError SetDevice(c10::DeviceIndex device);
+C10_BACKEND_API DeviceError SetDevice(c10::DeviceIndex device);
 
-C10_BACKEND_API aclError MaybeSetDevice(c10::DeviceIndex device);
+C10_BACKEND_API DeviceError MaybeSetDevice(c10::DeviceIndex device);
 
 C10_BACKEND_API c10::DeviceIndex ExchangeDevice(c10::DeviceIndex device);
 
