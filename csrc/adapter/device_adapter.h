@@ -13,9 +13,9 @@ typedef void* DeviceContext;
 
 namespace DEVICE_NAMESPACE {
 
-DeviceError aclrtGetDevice(int32_t* deviceId);
+DeviceError GetDevice(int32_t* deviceId);
 
-DeviceError setDevice(int32_t deviceId);
+DeviceError SetDevice(int32_t deviceId);
 
 bool hasPrimaryContext(c10::DeviceIndex device_index);
 
@@ -25,8 +25,6 @@ DeviceError ResetUsedDevices();
 
 std::vector<c10::DeviceIndex> GetUsedDevices();
 
-void synchronize_all_device();
-
-void initSingleStream(int p, c10::DeviceIndex device_index, int i);
+void SynchronizeAllDevice();
 
 } // namespace DEVICE_NAMESPACE
