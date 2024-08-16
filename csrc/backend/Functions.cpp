@@ -52,7 +52,7 @@ void set_device(c10::DeviceIndex device) {
 }
 
 void device_synchronize() {
-  NPU_CHECK_ERROR(aclrtSynchronizeDevice());
+  DEVICE_NAMESPACE::SynchronizeDevice();
 }
 
 // this function has to be called from callers performing device synchronizing
@@ -92,24 +92,18 @@ bool hasPrimaryContext(c10::DeviceIndex device_index) {
 
 // Wrappers for raw CUDA device management functions
 DeviceError GetDeviceCount(int* dev_count) {
-  return aclrtGetDeviceCount(reinterpret_cast<uint32_t*>(dev_count));
+  return DEVICE_NAMESPACE::GetDeviceCount(
+      reinterpret_cast<uint32_t*>(dev_count));
 }
 
 thread_local c10::DeviceIndex targetDeviceIndex = -1;
 
 DeviceError InitDevice() {
-  auto init_ret = aclInit(nullptr);
-
-  if (init_ret == ACL_ERROR_REPEAT_INITIALIZE) {
-    // do nothing.
-  } else if (init_ret != ACL_ERROR_NONE) {
-    NPU_CHECK_ERROR(init_ret, "aclInit");
-  }
-  return init_ret;
+  return DEVICE_NAMESPACE::Init();
 }
 
 void FinalizeDevice() {
-  NPU_CHECK_WARN(aclFinalize());
+  DEVICE_NAMESPACE::Finalize();
 }
 
 DeviceError GetDevice(c10::DeviceIndex* device) {
@@ -195,7 +189,7 @@ void SetTargetDevice() {
   }
 }
 
-aclrtContext GetDeviceContext(c10::DeviceIndex device) {
+DeviceContext GetDeviceContext(c10::DeviceIndex device) {
   return DEVICE_NAMESPACE::GetDeviceContext(device);
 }
 

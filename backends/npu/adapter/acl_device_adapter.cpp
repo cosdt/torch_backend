@@ -1,4 +1,5 @@
 #include <mutex>
+#include "acl/include/acl/acl.h"
 #include "core/NPUException.h"
 #include "core/npu_log.h"
 #include "csrc/adapter/device_adapter.h"
@@ -7,6 +8,20 @@ namespace acl_adapter {
 
 static std::unordered_map<c10::DeviceIndex, aclrtContext> used_devices;
 std::mutex mtx;
+
+DeviceError Init() {
+  auto init_ret = aclInit(nullptr);
+  if (init_ret == ACL_ERROR_REPEAT_INITIALIZE) {
+    // do nothing.
+  } else if (init_ret != ACL_ERROR_NONE) {
+    NPU_CHECK_ERROR(init_ret, "aclInit");
+  }
+  return init_ret;
+}
+
+DeviceError Finalize() {
+  NPU_CHECK_WARN(aclFinalize());
+}
 
 aclError GetDevice(int32_t* deviceId) {
   auto err = ::aclrtGetDevice(deviceId);
@@ -81,6 +96,19 @@ void SynchronizeAllDevice() {
     NPU_CHECK_ERROR(aclrtSynchronizeDevice());
   }
   NPU_CHECK_ERROR(SetDevice(cur_device));
+}
+
+void CreateStream(aclrtStream* stream, uint32_t priority, uint32_t configFlag) {
+  NPU_CHECK_SUPPORTED_OR_ERROR(
+      aclrtCreateStreamWithConfig(stream, priority, configFlag));
+}
+
+DeviceError GetDeviceCount(uint32_t* dev_count) {
+  return aclrtGetDeviceCount(dev_count);
+}
+
+void SynchronizeDevice() {
+  NPU_CHECK_ERROR(aclrtSynchronizeDevice());
 }
 
 } // namespace acl_adapter

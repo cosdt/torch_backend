@@ -166,8 +166,8 @@ static void initSingleStream(int p, c10::DeviceIndex device_index, int i) {
   auto& stream = streams[p][device_index][i];
   auto pri = -p; // lower number is higher priority
 
-  NPU_CHECK_SUPPORTED_OR_ERROR(aclrtCreateStreamWithConfig(
-      &stream, 0, (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC)));
+  DEVICE_NAMESPACE::CreateStream(
+      &stream, 0, (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC));
   priority_counters[p][device_index] = 0;
 }
 
