@@ -27,7 +27,7 @@ namespace {
 bool AicoreValid(at::Tensor& self, const at::Tensor& src) {
   const auto& dst_storage_sizes =
       c10::backend::NPUBridge::GetNpuStorageImpl(self)
-          ->npu_desc_.storage_sizes_;
+          ->storage_desc_.storage_sizes_;
   auto self_size = self.sizes();
   auto self_stride = self.strides();
   auto dst_storage_size_len = dst_storage_sizes.size();
@@ -57,9 +57,8 @@ bool AicoreValid(at::Tensor& self, const at::Tensor& src) {
     return false;
   }
 
-  const auto& dst_base_stride =
-      c10::backend::NPUBridge::GetNpuStorageImpl(self)
-          ->npu_desc_.base_strides_;
+  const auto& dst_base_stride = c10::backend::NPUBridge::GetNpuStorageImpl(self)
+                                    ->storage_desc_.base_strides_;
   // dst_base_stride should be equal to dst_storage_stride except for diff_index
   if (self_stride.size() > dst_base_stride.size()) {
     return false;

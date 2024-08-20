@@ -9,7 +9,7 @@ at::Tensor NPUNativeFunctions::flatten_dense_tensors(at::TensorList tensors) {
     return custom_ops::npu_format_cast(
         t,
         c10::backend::NPUBridge::GetNpuStorageImpl(t)
-            ->npu_desc_.origin_format_);
+            ->storage_desc_.origin_format_);
   };
   static auto flatten = [](const at::Tensor& t) {
     return cast_back_to_ori_format(t).contiguous().view({-1});

@@ -261,7 +261,7 @@ at::Tensor empty_like_npu(
           self.sizes(), options.memory_format(memory_format), c10::nullopt);
     } else {
       auto npu_format = c10::backend::NPUBridge::GetNpuStorageImpl(self)
-                            ->npu_desc_.npu_format_;
+                            ->storage_desc_.npu_format_;
       result = OpPreparation::ApplyTensorWithFormat(
           self.sizes(), options, npu_format);
     }

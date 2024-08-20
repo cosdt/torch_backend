@@ -82,7 +82,7 @@ at::Tensor& max_pool2d_with_indices_backward_out_nocheck(
 
     at::Tensor indices_para = indices.view(at::kShort);
     c10::backend::StorageDesc& desc =
-        c10::backend::NPUBridge::GetNpuStorageImpl(indices_para)->npu_desc_;
+        c10::backend::NPUBridge::GetNpuStorageImpl(indices_para)->storage_desc_;
     desc.npu_format_ = ACL_FORMAT_NC1HWC0;
     desc.storage_sizes_ = shape;
     desc.data_type_ = at::ScalarType::Short;

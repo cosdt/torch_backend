@@ -13,7 +13,7 @@ aclFormat InferFormat::GuessFormatWhenContiguous(const at::Tensor& tensor) {
   if (tensor_storage_impl->data_ptr() == nullptr) {
     return ACL_FORMAT_ND;
   }
-  auto desc = tensor_storage_impl->npu_desc_;
+  auto desc = tensor_storage_impl->storage_desc_;
   // fix: NCDHW -> default format
   if ((desc.origin_format_ == ACL_FORMAT_NCDHW)) {
     if ((tensor.sizes().size() != desc.base_sizes_.size()) &&
@@ -94,10 +94,10 @@ aclFormat InferFormat::GuessStorageFormat(
 FormatShape InferFormat::GuessStorageSizeWhenConvertFormat(
     const at::Tensor& tensor) {
   auto format = FormatHelper::GetFormat(tensor);
-  auto size =
-      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_.base_sizes_;
-  auto dtype =
-      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_.data_type_;
+  auto size = c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
+                  ->storage_desc_.base_sizes_;
+  auto dtype = c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
+                   ->storage_desc_.data_type_;
   // TransData: ND->NZ, ND size < 2, we can expand dimension to 2, the storage
   // have no effect. now, only ND->NZ and NZ->ND will call transdata， so we no
   // need to check other format.

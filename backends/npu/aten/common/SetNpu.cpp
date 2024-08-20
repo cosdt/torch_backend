@@ -114,7 +114,7 @@ at::Tensor set_tensor_with_storage_format(c10::Storage src) {
     // and the tensor object self needs to be brushed to be the same
     auto desc =
         c10::backend::NPUBridge::GetNpuStorageImpl(src.unsafeGetStorageImpl())
-            ->npu_desc_;
+            ->storage_desc_;
     auto dist_tensor = NPUNativeFunctions::empty(
         {0},
         desc.data_type_.toScalarType(),

@@ -71,7 +71,7 @@ bool NpuUtils::check_5d_5d_match(const at::Tensor& tensor) {
   }
 
   if (c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
-          ->npu_desc_.npu_format_ != ACL_FORMAT_NC1HWC0) {
+          ->storage_desc_.npu_format_ != ACL_FORMAT_NC1HWC0) {
     return false;
   }
 
@@ -100,9 +100,9 @@ bool NpuUtils::check_5d_5d_match(const at::Tensor& tensor) {
   for (const auto i : c10::irange(
            2,
            c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
-               ->npu_desc_.base_sizes_.size())) {
+               ->storage_desc_.base_sizes_.size())) {
     contiguous_len *= c10::backend::NPUBridge::GetNpuStorageImpl(tensor)
-                          ->npu_desc_.base_sizes_[i];
+                          ->storage_desc_.base_sizes_[i];
   }
   bool is_offset_match = (tensor.storage_offset() % contiguous_len == 0);
   bool is_length_match = (tensor.size(1) % c0_len == 0);
@@ -112,7 +112,7 @@ bool NpuUtils::check_5d_5d_match(const at::Tensor& tensor) {
 
 void NpuUtils::RefreshFormat(const at::Tensor& tensor) {
   auto& tensor_desc =
-      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->npu_desc_;
+      c10::backend::NPUBridge::GetNpuStorageImpl(tensor)->storage_desc_;
   if (tensor_desc.storage_sizes_.size() == 4 &&
       tensor_desc.npu_format_ == ACL_FORMAT_ND) {
     tensor_desc.npu_format_ = ACL_FORMAT_NCHW;
@@ -151,7 +151,8 @@ at::Tensor metadata_convert_match_without_copy_optimize(const at::Tensor& src) {
       "Expected all tensors to be on the same device. "
       "Expected NPU tensor, please check whether the input tensor device is correct.",
       OPS_ERROR(ErrCode::TYPE));
-  auto& src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto& src_desc =
+      c10::backend::NPUBridge::GetNpuStorageImpl(src)->storage_desc_;
   bool numelEq = (src.numel() == c10::multiply_integers(src_desc.base_sizes_));
   return metadata_convert_match(src, numelEq);
 }
@@ -162,7 +163,8 @@ at::Tensor metadata_convert_match_with_copy_optimize(const at::Tensor& src) {
       "Expected all tensors to be on the same device. "
       "Expected NPU tensor, please check whether the input tensor device is correct.",
       OPS_ERROR(ErrCode::TYPE));
-  auto& src_desc = c10::backend::NPUBridge::GetNpuStorageImpl(src)->npu_desc_;
+  auto& src_desc =
+      c10::backend::NPUBridge::GetNpuStorageImpl(src)->storage_desc_;
   bool numelEq = (src.numel() == c10::multiply_integers(src_desc.base_sizes_));
 
   // For unmatched Tensors with base format, we can:

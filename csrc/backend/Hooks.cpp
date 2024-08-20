@@ -30,12 +30,12 @@ void Hooks::resizePrivateUse1Bytes(
     size_t new_bytes) const {
   auto storage_impl = static_cast<c10::backend::DeviceStorageImpl*>(
       storage.unsafeGetStorageImpl());
-  auto format = storage_impl->npu_desc_.npu_format_;
+  auto format = storage_impl->storage_desc_.npu_format_;
   if (!at_npu::native::FormatHelper::IsBaseFormatType(format)) {
     AT_ERROR("Try to resize a storage without base format");
   }
 
-  auto itemsize = storage_impl->npu_desc_.data_type_.itemsize();
+  auto itemsize = storage_impl->storage_desc_.data_type_.itemsize();
   std::vector<int64_t> new_size = {new_bytes / (ptrdiff_t)itemsize};
   at_npu::native::storage_resize_npu(*storage_impl, new_bytes, new_size);
 }
