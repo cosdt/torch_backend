@@ -1,21 +1,36 @@
-#include "adapter/acl_device_adapter.h"
 #include <mutex>
+#include "acl/include/acl/acl.h"
 #include "core/NPUException.h"
 #include "core/npu_log.h"
+#include "csrc/adapter/device_adapter.h"
 
 namespace acl_adapter {
 
 static std::unordered_map<c10::DeviceIndex, aclrtContext> used_devices;
 std::mutex mtx;
 
-aclError aclrtGetDevice(int32_t* deviceId) {
+deviceError_t Init() {
+  auto init_ret = aclInit(nullptr);
+  if (init_ret == ACL_ERROR_REPEAT_INITIALIZE) {
+    // do nothing.
+  } else if (init_ret != ACL_ERROR_NONE) {
+    NPU_CHECK_ERROR(init_ret, "aclInit");
+  }
+  return init_ret;
+}
+
+deviceError_t Finalize() {
+  NPU_CHECK_WARN(aclFinalize());
+}
+
+aclError GetDevice(int32_t* deviceId) {
   auto err = ::aclrtGetDevice(deviceId);
   if (err == ACL_ERROR_NONE) {
     return ACL_ERROR_NONE;
   }
 
-  // If ::aclrtSetDevice() has never been called, then device is set to 0.
-  if (err == ACL_ERROR_RT_CONTEXT_NULL && aclrtSetDevice(0) == ACL_ERROR_NONE) {
+  // If ::SetDevice() has never been called, then device is set to 0.
+  if (err == ACL_ERROR_RT_CONTEXT_NULL && SetDevice(0) == ACL_ERROR_NONE) {
     *deviceId = 0;
     return ACL_ERROR_NONE;
   }
@@ -23,9 +38,9 @@ aclError aclrtGetDevice(int32_t* deviceId) {
   return err;
 }
 
-// ::aclrtSetDevice() will create a context implicitly. Save it when setting
+// ::SetDevice() will create a context implicitly. Save it when setting
 // device.
-aclError aclrtSetDevice(int32_t deviceId) {
+aclError SetDevice(int32_t deviceId) {
   aclError err = ::aclrtSetDevice(deviceId);
   if (err == ACL_ERROR_NONE) {
     auto device = static_cast<c10::DeviceIndex>(deviceId);
@@ -72,15 +87,28 @@ std::vector<c10::DeviceIndex> GetUsedDevices() {
   return device_idx_vec;
 }
 
-void synchronize_all_device() {
+void SynchronizeAllDevice() {
   int32_t cur_device = 0;
-  NPU_CHECK_ERROR(aclrtGetDevice(&cur_device));
+  NPU_CHECK_ERROR(GetDevice(&cur_device));
   std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
   for (const auto deviceId : device_idx_vec) {
-    NPU_CHECK_ERROR(aclrtSetDevice(deviceId));
+    NPU_CHECK_ERROR(SetDevice(deviceId));
     NPU_CHECK_ERROR(aclrtSynchronizeDevice());
   }
-  NPU_CHECK_ERROR(aclrtSetDevice(cur_device));
+  NPU_CHECK_ERROR(SetDevice(cur_device));
+}
+
+void CreateStream(aclrtStream* stream, uint32_t priority, uint32_t configFlag) {
+  NPU_CHECK_SUPPORTED_OR_ERROR(
+      aclrtCreateStreamWithConfig(stream, priority, configFlag));
+}
+
+deviceError_t GetDeviceCount(uint32_t* dev_count) {
+  return aclrtGetDeviceCount(dev_count);
+}
+
+void SynchronizeDevice() {
+  NPU_CHECK_ERROR(aclrtSynchronizeDevice());
 }
 
 } // namespace acl_adapter

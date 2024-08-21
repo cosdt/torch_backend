@@ -3,10 +3,6 @@
 #include <unordered_map>
 #include "csrc/backend/Stream.h"
 
-// TODO(FFFrog):
-// Remove later
-#include "adapter/acl_device_adapter.h"
-
 namespace c10::backend {
 
 int device_count_impl() {
@@ -56,7 +52,7 @@ void set_device(c10::DeviceIndex device) {
 }
 
 void device_synchronize() {
-  NPU_CHECK_ERROR(aclrtSynchronizeDevice());
+  DEVICE_NAMESPACE::SynchronizeDevice();
 }
 
 // this function has to be called from callers performing device synchronizing
@@ -91,62 +87,56 @@ std::optional<c10::DeviceIndex> getDeviceIndexWithPrimaryContext() {
 }
 
 bool hasPrimaryContext(c10::DeviceIndex device_index) {
-  return acl_adapter::hasPrimaryContext(device_index);
+  return DEVICE_NAMESPACE::hasPrimaryContext(device_index);
 }
 
 // Wrappers for raw CUDA device management functions
-aclError GetDeviceCount(int* dev_count) {
-  return aclrtGetDeviceCount(reinterpret_cast<uint32_t*>(dev_count));
+deviceError_t GetDeviceCount(int* dev_count) {
+  return DEVICE_NAMESPACE::GetDeviceCount(
+      reinterpret_cast<uint32_t*>(dev_count));
 }
 
 thread_local c10::DeviceIndex targetDeviceIndex = -1;
 
-aclError InitDevice() {
-  auto init_ret = aclInit(nullptr);
-
-  if (init_ret == ACL_ERROR_REPEAT_INITIALIZE) {
-    // do nothing.
-  } else if (init_ret != ACL_ERROR_NONE) {
-    NPU_CHECK_ERROR(init_ret, "aclInit");
-  }
-  return init_ret;
+deviceError_t InitDevice() {
+  return DEVICE_NAMESPACE::Init();
 }
 
 void FinalizeDevice() {
-  NPU_CHECK_WARN(aclFinalize());
+  DEVICE_NAMESPACE::Finalize();
 }
 
-aclError GetDevice(c10::DeviceIndex* device) {
+deviceError_t GetDevice(c10::DeviceIndex* device) {
   if (targetDeviceIndex >= 0) {
     *device = targetDeviceIndex;
     return ACL_ERROR_NONE;
   }
   int tmp_device = -1;
-  auto err = acl_adapter::aclrtGetDevice(&tmp_device);
+  auto err = DEVICE_NAMESPACE::GetDevice(&tmp_device);
   if (err == ACL_ERROR_NONE) {
     TORCH_INTERNAL_ASSERT(
         tmp_device >= 0 &&
             tmp_device <= std::numeric_limits<c10::DeviceIndex>::max(),
-        "aclrtGetDevice returns invalid device ",
+        "GetDevice returns invalid device ",
         tmp_device);
     *device = static_cast<c10::DeviceIndex>(tmp_device);
   }
   return err;
 }
 
-aclError SetDevice(c10::DeviceIndex device) {
+deviceError_t SetDevice(c10::DeviceIndex device) {
   TORCH_CHECK(
       device >= 0, "device id must be positive!", PTA_ERROR(ErrCode::VALUE));
   targetDeviceIndex = -1;
   int cur_device = -1;
-  NPU_CHECK_ERROR(acl_adapter::aclrtGetDevice(&cur_device));
+  NPU_CHECK_ERROR(DEVICE_NAMESPACE::GetDevice(&cur_device));
   if (device == cur_device) {
     return ACL_ERROR_NONE;
   }
-  return acl_adapter::aclrtSetDevice(device);
+  return DEVICE_NAMESPACE::SetDevice(device);
 }
 
-aclError MaybeSetDevice(c10::DeviceIndex device) {
+deviceError_t MaybeSetDevice(c10::DeviceIndex device) {
   if (hasPrimaryContext(device)) {
     return c10::backend::SetDevice(device);
   }
@@ -161,13 +151,13 @@ c10::DeviceIndex ExchangeDevice(c10::DeviceIndex to_device) {
   targetDeviceIndex = -1;
   if (cur_device < 0) {
     int tmp_device = -1;
-    NPU_CHECK_ERROR(acl_adapter::aclrtGetDevice(&tmp_device));
+    NPU_CHECK_ERROR(DEVICE_NAMESPACE::GetDevice(&tmp_device));
     cur_device = static_cast<c10::DeviceIndex>(tmp_device);
     if (to_device == cur_device) {
       return cur_device;
     }
   }
-  NPU_CHECK_ERROR(acl_adapter::aclrtSetDevice(to_device));
+  NPU_CHECK_ERROR(DEVICE_NAMESPACE::SetDevice(to_device));
   return cur_device;
 }
 
@@ -175,18 +165,18 @@ c10::DeviceIndex ExchangeDevice(c10::DeviceIndex to_device) {
 // on to_device if it does not already exist
 c10::DeviceIndex MaybeExchangeDevice(c10::DeviceIndex to_device) {
   int tmp_cur_device = -1;
-  NPU_CHECK_ERROR(acl_adapter::aclrtGetDevice(&tmp_cur_device));
+  NPU_CHECK_ERROR(DEVICE_NAMESPACE::GetDevice(&tmp_cur_device));
   TORCH_INTERNAL_ASSERT(
       tmp_cur_device >= 0 &&
           tmp_cur_device <= std::numeric_limits<c10::DeviceIndex>::max(),
-      "aclrtGetDevice returns invalid device ",
+      "GetDevice returns invalid device ",
       tmp_cur_device);
   auto cur_device = static_cast<c10::DeviceIndex>(tmp_cur_device);
   if (to_device == tmp_cur_device) {
     return cur_device;
   }
   if (hasPrimaryContext(to_device)) {
-    NPU_CHECK_ERROR(acl_adapter::aclrtSetDevice(to_device));
+    NPU_CHECK_ERROR(DEVICE_NAMESPACE::SetDevice(to_device));
   } else {
     targetDeviceIndex = to_device;
   }
@@ -199,8 +189,8 @@ void SetTargetDevice() {
   }
 }
 
-aclrtContext GetDeviceContext(c10::DeviceIndex device) {
-  return acl_adapter::GetDeviceContext(device);
+DeviceContext GetDeviceContext(c10::DeviceIndex device) {
+  return DEVICE_NAMESPACE::GetDeviceContext(device);
 }
 
 std::mutex* getFreeMutex() {

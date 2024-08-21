@@ -2,14 +2,11 @@
 
 #include <cstdint>
 #include <utility>
+#include "core/NPUException.h"
+#include "csrc/adapter/device_adapter.h"
 #include "csrc/backend/DeviceGuard.h"
 #include "csrc/backend/Stream.h"
 #include "csrc/core/Macros.h"
-
-// TODO(FFFrog):
-// Remove later
-#include "acl/include/acl/acl.h"
-#include "core/NPUException.h"
 
 namespace c10::backend {
 /*

@@ -1,4 +1,5 @@
 #include "core/NPUException.h"
+#include "acl/include/acl/acl.h"
 #include "core/register/OptionsManager.h"
 #include "csrc/backend/Functions.h"
 

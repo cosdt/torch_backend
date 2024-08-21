@@ -11,8 +11,9 @@
 // TODO(FFFrog):
 // Remove later
 #include "acl/include/acl/acl_rt.h"
-#include "adapter/acl_device_adapter.h"
+
 #include "core/NPUException.h"
+#include "csrc/adapter/device_adapter.h"
 
 #define C10_COMPILE_TIME_MAX_DEVICES 16
 
@@ -165,8 +166,8 @@ static void initSingleStream(int p, c10::DeviceIndex device_index, int i) {
   auto& stream = streams[p][device_index][i];
   auto pri = -p; // lower number is higher priority
 
-  NPU_CHECK_SUPPORTED_OR_ERROR(aclrtCreateStreamWithConfig(
-      &stream, 0, (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC)));
+  DEVICE_NAMESPACE::CreateStream(
+      &stream, 0, (ACL_STREAM_FAST_LAUNCH | ACL_STREAM_FAST_SYNC));
   priority_counters[p][device_index] = 0;
 }
 
@@ -323,10 +324,11 @@ std::ostream& operator<<(std::ostream& stream, const Stream& s) {
   return stream << s.unwrap();
 }
 
-aclError DestroyUsedStreams() {
+deviceError_t DestroyUsedStreams() {
   c10::DeviceIndex cur_device = 0;
   NPU_CHECK_ERROR(c10::backend::GetDevice(&cur_device));
-  std::vector<c10::DeviceIndex> device_idx_vec = acl_adapter::GetUsedDevices();
+  std::vector<c10::DeviceIndex> device_idx_vec =
+      DEVICE_NAMESPACE::GetUsedDevices();
   for (const auto deviceId : device_idx_vec) {
     NPU_CHECK_ERROR(c10::backend::SetDevice(deviceId));
     for (const auto i : c10::irange(kStreamsPerPool)) {
@@ -335,7 +337,7 @@ aclError DestroyUsedStreams() {
         if (stream == nullptr) {
           continue;
         }
-        aclError acl_ret = aclrtDestroyStreamForce(stream);
+        deviceError_t acl_ret = aclrtDestroyStreamForce(stream);
         if (acl_ret != ACL_ERROR_NONE) {
           return acl_ret;
         }
