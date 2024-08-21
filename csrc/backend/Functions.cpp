@@ -91,14 +91,14 @@ bool hasPrimaryContext(c10::DeviceIndex device_index) {
 }
 
 // Wrappers for raw CUDA device management functions
-DeviceError GetDeviceCount(int* dev_count) {
+deviceError_t GetDeviceCount(int* dev_count) {
   return DEVICE_NAMESPACE::GetDeviceCount(
       reinterpret_cast<uint32_t*>(dev_count));
 }
 
 thread_local c10::DeviceIndex targetDeviceIndex = -1;
 
-DeviceError InitDevice() {
+deviceError_t InitDevice() {
   return DEVICE_NAMESPACE::Init();
 }
 
@@ -106,7 +106,7 @@ void FinalizeDevice() {
   DEVICE_NAMESPACE::Finalize();
 }
 
-DeviceError GetDevice(c10::DeviceIndex* device) {
+deviceError_t GetDevice(c10::DeviceIndex* device) {
   if (targetDeviceIndex >= 0) {
     *device = targetDeviceIndex;
     return ACL_ERROR_NONE;
@@ -124,7 +124,7 @@ DeviceError GetDevice(c10::DeviceIndex* device) {
   return err;
 }
 
-DeviceError SetDevice(c10::DeviceIndex device) {
+deviceError_t SetDevice(c10::DeviceIndex device) {
   TORCH_CHECK(
       device >= 0, "device id must be positive!", PTA_ERROR(ErrCode::VALUE));
   targetDeviceIndex = -1;
@@ -136,7 +136,7 @@ DeviceError SetDevice(c10::DeviceIndex device) {
   return DEVICE_NAMESPACE::SetDevice(device);
 }
 
-DeviceError MaybeSetDevice(c10::DeviceIndex device) {
+deviceError_t MaybeSetDevice(c10::DeviceIndex device) {
   if (hasPrimaryContext(device)) {
     return c10::backend::SetDevice(device);
   }

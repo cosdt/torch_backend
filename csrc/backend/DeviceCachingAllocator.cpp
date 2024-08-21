@@ -89,7 +89,7 @@ class CachingAllocatorHelper
   void insertEventWrapper(c10::DeviceIndex device, std::function<void()> fn)
       override {
     aclrtContext compiler_ctx = aclrtContext();
-    DeviceError ret_ctx = aclrtGetCurrentContext(&compiler_ctx);
+    deviceError_t ret_ctx = aclrtGetCurrentContext(&compiler_ctx);
     aclrtSetCurrentContext(c10::backend::GetDeviceContext(device));
     fn();
     if (ret_ctx == ACL_ERROR_NONE) {

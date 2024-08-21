@@ -230,7 +230,7 @@ C10_BACKEND_API void setCurrentStream(Stream stream);
 
 std::ostream& operator<<(std::ostream& stream, const Stream& s);
 
-DeviceError DestroyUsedStreams();
+deviceError_t DestroyUsedStreams();
 } // namespace c10::backend
 
 namespace std {

@@ -324,7 +324,7 @@ std::ostream& operator<<(std::ostream& stream, const Stream& s) {
   return stream << s.unwrap();
 }
 
-DeviceError DestroyUsedStreams() {
+deviceError_t DestroyUsedStreams() {
   c10::DeviceIndex cur_device = 0;
   NPU_CHECK_ERROR(c10::backend::GetDevice(&cur_device));
   std::vector<c10::DeviceIndex> device_idx_vec =
@@ -337,7 +337,7 @@ DeviceError DestroyUsedStreams() {
         if (stream == nullptr) {
           continue;
         }
-        DeviceError acl_ret = aclrtDestroyStreamForce(stream);
+        deviceError_t acl_ret = aclrtDestroyStreamForce(stream);
         if (acl_ret != ACL_ERROR_NONE) {
           return acl_ret;
         }

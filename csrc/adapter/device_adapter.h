@@ -25,24 +25,24 @@
 #define DEVICE_NAMESPACE
 #endif
 
-typedef int DeviceError;
+typedef int deviceError_t;
 typedef void* DeviceContext;
 
 namespace DEVICE_NAMESPACE {
 
-DeviceError Init();
+deviceError_t Init();
 
-DeviceError Finalize();
+deviceError_t Finalize();
 
-DeviceError GetDevice(int32_t* deviceId);
+deviceError_t GetDevice(int32_t* deviceId);
 
-DeviceError SetDevice(int32_t deviceId);
+deviceError_t SetDevice(int32_t deviceId);
 
 bool hasPrimaryContext(c10::DeviceIndex device_index);
 
 DeviceContext GetDeviceContext(c10::DeviceIndex device);
 
-DeviceError ResetUsedDevices();
+deviceError_t ResetUsedDevices();
 
 std::vector<c10::DeviceIndex> GetUsedDevices();
 
@@ -52,6 +52,6 @@ void SynchronizeDevice();
 
 void CreateStream(aclrtStream* stream, uint32_t priority, uint32_t configFlag);
 
-DeviceError GetDeviceCount(uint32_t* dev_count);
+deviceError_t GetDeviceCount(uint32_t* dev_count);
 
 } // namespace DEVICE_NAMESPACE

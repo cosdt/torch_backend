@@ -9,7 +9,7 @@ namespace acl_adapter {
 static std::unordered_map<c10::DeviceIndex, aclrtContext> used_devices;
 std::mutex mtx;
 
-DeviceError Init() {
+deviceError_t Init() {
   auto init_ret = aclInit(nullptr);
   if (init_ret == ACL_ERROR_REPEAT_INITIALIZE) {
     // do nothing.
@@ -19,7 +19,7 @@ DeviceError Init() {
   return init_ret;
 }
 
-DeviceError Finalize() {
+deviceError_t Finalize() {
   NPU_CHECK_WARN(aclFinalize());
 }
 
@@ -103,7 +103,7 @@ void CreateStream(aclrtStream* stream, uint32_t priority, uint32_t configFlag) {
       aclrtCreateStreamWithConfig(stream, priority, configFlag));
 }
 
-DeviceError GetDeviceCount(uint32_t* dev_count) {
+deviceError_t GetDeviceCount(uint32_t* dev_count) {
   return aclrtGetDeviceCount(dev_count);
 }
 
